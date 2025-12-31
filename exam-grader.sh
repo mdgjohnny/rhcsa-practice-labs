@@ -25,6 +25,7 @@ NODE2="${NODE2:-rhcsa2}"
 SCORE=0
 TOTAL=0
 DRY_RUN=false
+SKIP_REBOOT=false
 #-----------------------------------------
 
 # SSH options for non-interactive remote checks
@@ -49,8 +50,9 @@ usage() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --dry-run    Show configuration and task list without running checks"
-    echo "  -h, --help   Show this help message"
+    echo "  --dry-run       Show configuration and task list without running checks"
+    echo "  --skip-reboot   Skip the reboot check (for API/automation use)"
+    echo "  -h, --help      Show this help message"
     exit 0
 }
 
@@ -59,6 +61,10 @@ parse_args() {
         case "$1" in
             --dry-run)
                 DRY_RUN=true
+                shift
+                ;;
+            --skip-reboot)
+                SKIP_REBOOT=true
                 shift
                 ;;
             -h|--help)
@@ -239,7 +245,7 @@ main() {
 	fi
 
 	check_sudo
-	check_reboot
+	[[ "$SKIP_REBOOT" == false ]] && check_reboot
 	load_config
 	[[ ${#TASKS[@]} -eq 0 ]] && error_exit "No tasks found in checks/"
 	check_violations
