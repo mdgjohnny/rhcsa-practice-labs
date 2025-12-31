@@ -12,6 +12,7 @@ shopt -s nullglob
 # ----------------------------------------
 readonly BASE_DIR=$(dirname "$0")
 readonly LOG_FILE="${BASE_DIR}/exam-grader.log"
+readonly CONFIG_FILE="${BASE_DIR}/config"
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
 readonly YELLOW='\033[1;33m'
@@ -30,6 +31,23 @@ log() {
 error_exit() {
 	log "${RED}ERROR${NC}" "$1"
 	exit 1
+}
+
+load_config() {
+	if [[ ! -f "$CONFIG_FILE" ]]; then
+		log "${GREEN}INFO${NC}" "First run - setting up your nodes..."
+		read -p "Node1 IP: " NODE1_IP
+		read -p "Node2 IP: " NODE2_IP
+		cat <<EOF
+		NODE1_IP="$NODE1_IP"
+		NODE2_IP="$NODE2_IP"
+EOF
+
+	fi
+	source "$CONFIG_FILE"
+	[[ -z "$NODE1_IP" ]] && error_exit "NODE1_IP not set in config"
+	[[ -z "$NODE2_IP" ]] && error_exit "NODE2_IP not set in config"
+
 }
 
 check_sudo() {
@@ -69,6 +87,12 @@ evaluate_task() {
 	TOTAL=$TOTAL
 }
 
+check_prereqs() {
+	# Are we in a RHEL environment
+	RHEL_COMPATIBLE=$(grep -E "rhel|rocky|alma" /etc/os-release)
+
+
+}
 
 apply_penalty() {
 	log_error "[VIOLATION]" "$1"
@@ -100,8 +124,9 @@ check_outcome() {
 main() {
 	check_sudo
 	check_reboot
-	check_violations
+	load_config
 	[[ ${#TASKS[@]} -eq 0 ]] && error_exit "No tasks found in checks/"
+	check_violations
 	for task in "${TASKS[@]}"; do
 		evaluate_task "$task"
 	done
