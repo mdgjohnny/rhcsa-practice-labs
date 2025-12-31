@@ -8,7 +8,7 @@
 shopt -s nullglob
 
 # ----------------------------------------
-# Variables
+# Constants
 # ----------------------------------------
 readonly BASE_DIR=$(dirname "$0")
 readonly LOG_FILE="${BASE_DIR}/exam-grader.log"
@@ -18,6 +18,13 @@ readonly GREEN='\033[0;32m'
 readonly YELLOW='\033[1;33m'
 readonly NC='\033[0m'
 readonly -a TASKS=("${BASE_DIR}"/checks/*.sh)
+#-----------------------------------------
+# Variables
+NODE1="${NODE1:-rhcsa1}"
+NODE2="${NODE2:-rhcsa2}"
+#-----------------------------------------
+
+
 # ----------------------------------------
 # Helper functions
 # ----------------------------------------
@@ -77,6 +84,22 @@ check_reboot() {
 # Exam grading
 #----------------------------------
 
+# Helper for task checks - use this in task scripts
+# Usage: check 'condition' 'ok message' 'fail message' [points]
+check() {
+    local condition="$1"
+    local ok_msg="$2"
+    local fail_msg="$3"
+    local points="${4:-10}"
+
+    TOTAL=$(( TOTAL + points ))
+    if eval "$condition"; then
+        echo -e "${GREEN}[OK]${NC} $ok_msg"
+        SCORE=$(( SCORE + points ))
+    else
+        echo -e "${RED}[FAIL]${NC} $fail_msg"
+    fi
+}
 
 # Sources task script and compound each score
 evaluate_task() {
