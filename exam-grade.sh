@@ -53,17 +53,15 @@ check_for_user() {
 }
 
 
-# Sources task scripts and compounds each score to obtain the total score
-evaluate_tasks() {
-	[[ ! -d $TASKS_DIR ]] && error_exit "Tasks directories ${TASKS_DIR} not found."
-	tasks=($TASKS_DIR/*.sh)
-	for task in "${tasks[@]}"; do
-		source $task
-		echo "The score is $SCORE"
-		TOTALSCORE=$SCORE
-		TOTAL=$TOTAL
-	done
+# Sources task script and compound each score
+evaluate_task() {
+	local task="$1"		
+	source $task
+	echo "The score is $SCORE"
+	TOTALSCORE=$SCORE
+	TOTAL=$TOTAL
 }
+
 
 check_outcome() {
 	echo -e "\n"
@@ -77,3 +75,6 @@ check_outcome() {
 	fi
 }
 
+main() {
+
+}
