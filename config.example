@@ -12,3 +12,6 @@ NODE1="rhcsa1"
 # Node 2 (remote node)
 NODE2_IP="192.168.122.11"
 NODE2="rhcsa2"
+
+# Root password for SSH (used with sshpass)
+ROOT_PASSWORD="redhat"

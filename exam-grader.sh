@@ -28,7 +28,19 @@ DRY_RUN=false
 #-----------------------------------------
 
 # SSH options for non-interactive remote checks
-SSH_OPTS="-o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=no"
+SSH_OPTS="-o ConnectTimeout=5"
+
+# SSH wrapper - uses sshpass with ROOT_PASSWORD when set
+# Usage: run_ssh <host> <command>
+run_ssh() {
+    local host="$1"
+    shift
+    if [[ -n "$ROOT_PASSWORD" ]]; then
+        sshpass -p "$ROOT_PASSWORD" ssh $SSH_OPTS root@"$host" "$@"
+    else
+        ssh $SSH_OPTS root@"$host" "$@"
+    fi
+}
 
 # ----------------------------------------
 # Argument parsing
@@ -188,15 +200,20 @@ dry_run() {
 
 	# SSH connectivity (quick test)
 	echo -e "\n${YELLOW}--- SSH Connectivity ---${NC}"
+	if [[ -n "$ROOT_PASSWORD" ]]; then
+		echo "     Using sshpass with ROOT_PASSWORD"
+	else
+		echo "     Using key-based authentication"
+	fi
 	if [[ -n "$NODE1_IP" ]]; then
-		if ssh $SSH_OPTS root@"$NODE1" exit &>/dev/null || ssh $SSH_OPTS root@"$NODE1_IP" exit &>/dev/null; then
+		if run_ssh "$NODE1" exit &>/dev/null || run_ssh "$NODE1_IP" exit &>/dev/null; then
 			echo -e "${GREEN}[OK]${NC} Can SSH to node1"
 		else
 			echo -e "${RED}[FAIL]${NC} Cannot SSH to node1 ($NODE1 / $NODE1_IP)"
 		fi
 	fi
 	if [[ -n "$NODE2_IP" ]]; then
-		if ssh $SSH_OPTS root@"$NODE2" exit &>/dev/null || ssh $SSH_OPTS root@"$NODE2_IP" exit &>/dev/null; then
+		if run_ssh "$NODE2" exit &>/dev/null || run_ssh "$NODE2_IP" exit &>/dev/null; then
 			echo -e "${GREEN}[OK]${NC} Can SSH to node2"
 		else
 			echo -e "${RED}[FAIL]${NC} Cannot SSH to node2 ($NODE2 / $NODE2_IP)"

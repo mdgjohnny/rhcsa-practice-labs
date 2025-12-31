@@ -2,10 +2,10 @@
 # Task: Verify root SSH access to node2
 
 # Try hostname first, fall back to IP
-if ssh $SSH_OPTS root@"$NODE2" exit &>/dev/null; then
+if run_ssh "$NODE2" exit &>/dev/null; then
     RETURN_STATUS=0
     SSH_TARGET="$NODE2"
-elif ssh $SSH_OPTS root@"$NODE2_IP" exit &>/dev/null; then
+elif run_ssh "$NODE2_IP" exit &>/dev/null; then
     RETURN_STATUS=0
     SSH_TARGET="$NODE2_IP"
 else
