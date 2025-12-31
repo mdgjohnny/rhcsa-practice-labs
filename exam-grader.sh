@@ -24,11 +24,41 @@ NODE1="${NODE1:-rhcsa1}"
 NODE2="${NODE2:-rhcsa2}"
 SCORE=0
 TOTAL=0
+DRY_RUN=false
 #-----------------------------------------
 
 # SSH options for non-interactive remote checks
 SSH_OPTS="-o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=no"
 
+# ----------------------------------------
+# Argument parsing
+# ----------------------------------------
+usage() {
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --dry-run    Show configuration and task list without running checks"
+    echo "  -h, --help   Show this help message"
+    exit 0
+}
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run)
+                DRY_RUN=true
+                shift
+                ;;
+            -h|--help)
+                usage
+                ;;
+            *)
+                echo "Unknown option: $1"
+                usage
+                ;;
+        esac
+    done
+}
 
 # ----------------------------------------
 # Helper functions
@@ -140,7 +170,57 @@ check_outcome() {
 	fi
 }
 
+dry_run() {
+	echo -e "${YELLOW}=== DRY RUN MODE ===${NC}\n"
+
+	echo -e "${GREEN}[OK]${NC} Script is executable"
+
+	# Config check
+	if [[ -f "$CONFIG_FILE" ]]; then
+		source "$CONFIG_FILE"
+		echo -e "${GREEN}[OK]${NC} Config file found: $CONFIG_FILE"
+		echo "     NODE1=$NODE1 (IP: ${NODE1_IP:-not set})"
+		echo "     NODE2=$NODE2 (IP: ${NODE2_IP:-not set})"
+	else
+		echo -e "${RED}[FAIL]${NC} Config file not found: $CONFIG_FILE"
+		echo "     Run: cp config.example config && vim config"
+	fi
+
+	# SSH connectivity (quick test)
+	echo -e "\n${YELLOW}--- SSH Connectivity ---${NC}"
+	if [[ -n "$NODE1_IP" ]]; then
+		if ssh $SSH_OPTS root@"$NODE1" exit &>/dev/null || ssh $SSH_OPTS root@"$NODE1_IP" exit &>/dev/null; then
+			echo -e "${GREEN}[OK]${NC} Can SSH to node1"
+		else
+			echo -e "${RED}[FAIL]${NC} Cannot SSH to node1 ($NODE1 / $NODE1_IP)"
+		fi
+	fi
+	if [[ -n "$NODE2_IP" ]]; then
+		if ssh $SSH_OPTS root@"$NODE2" exit &>/dev/null || ssh $SSH_OPTS root@"$NODE2_IP" exit &>/dev/null; then
+			echo -e "${GREEN}[OK]${NC} Can SSH to node2"
+		else
+			echo -e "${RED}[FAIL]${NC} Cannot SSH to node2 ($NODE2 / $NODE2_IP)"
+		fi
+	fi
+
+	# Task files
+	echo -e "\n${YELLOW}--- Task Files ---${NC}"
+	echo "Found ${#TASKS[@]} task files in checks/"
+	for task in "${TASKS[@]}"; do
+		echo "  - $(basename "$task")"
+	done
+
+	echo -e "\n${GREEN}Dry run complete.${NC} Run without --dry-run to execute checks."
+}
+
 main() {
+	parse_args "$@"
+
+	if [[ "$DRY_RUN" == true ]]; then
+		dry_run
+		exit 0
+	fi
+
 	check_sudo
 	check_reboot
 	load_config
