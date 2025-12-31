@@ -4,6 +4,8 @@
 # Credit goes to Sander for his excellent course material, & for being a source
 # of learning and inspiration to many students around the world. :)
 
+# Setting up nullglob
+shopt -s nullglob
 
 # ----------------------------------------
 # Variables
@@ -14,7 +16,7 @@ readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
 readonly YELLOW='\033[1;33m'
 readonly NC='\033[0m'
-
+readonly -a TASKS=("${BASE_DIR}"/checks/*.sh)
 # ----------------------------------------
 # Helper functions
 # ----------------------------------------
@@ -22,17 +24,17 @@ readonly NC='\033[0m'
 log() {
 	local level=$1
 	shift
-	echo "$(date '+%Y-%m-%d %H:%M:%S') [$level] $*" | tee -a "$LOG_FILE"
+	echo -e "[$level] $*" | tee -a "$LOG_FILE"
 }
 
 error_exit() {
-	log "ERROR" "$1"
+	log "${RED}ERROR${NC}" "$1"
 	exit 1
 }
 
 check_sudo() {
 	clear
-	ls /root &>/dev/null || (log "FAIL" "Script must be run as root" && exit 2)
+	ls /root &>/dev/null || error_exit "Script must be run as root"
 }
 
 check_reboot() {
@@ -40,18 +42,17 @@ check_reboot() {
 	if [[ "$uptime_minutes" -gt 5 ]]; then
 		echo -e "${RED}WARNING${NC} System has been up for more than 5 minutes."
 		echo -e "${RED}WARNING${NC} You must reboot it before running this script."
-		echo -e "Do you want to reboot now? Answer ${GREEN}yes${NC} to reboot immediately and continue"
+		echo -e "Do you want to reboot now? Answer ${GREEN}yes${NC} to reboot immediately and continue, or ${RED}no${NC} to quit."
 		read REBOOT
-		[[ $REBOOT = yes ]] && reboot
+		case "$REBOOT" in
+			y|yes|YES)
+				reboot
+				;;
+			n|no|NO)
+				exit 1
+				;;
+		esac
 	fi
-}
-
-check_tasks() {
-	readonly -a TASKS=("${BASE_DIR}"/checks/*.sh) || (echo "No tasks found in the checks directory" & exit 1)
-}
-
-check_for_user() {
-	# handle user student - yet to see
 }
 
 
@@ -80,9 +81,11 @@ check_outcome() {
 main() {
 	check_sudo
 	check_reboot
-	check_tasks
-	for task in "${TASKS_DIR[@]}"; do
-		evalue_task "$task"
+	[[ ${#TASKS[@]} -eq 0 ]] && error_exit "No tasks found in checks/"
+	for task in "${TASKS[@]}"; do
+		evaluate_task "$task"
 	done
 	check_outcome
 }
+
+main "$@"
