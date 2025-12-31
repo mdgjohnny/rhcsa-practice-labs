@@ -100,6 +100,7 @@ check_outcome() {
 main() {
 	check_sudo
 	check_reboot
+	check_violations
 	[[ ${#TASKS[@]} -eq 0 ]] && error_exit "No tasks found in checks/"
 	for task in "${TASKS[@]}"; do
 		evaluate_task "$task"
