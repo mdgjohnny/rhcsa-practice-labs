@@ -2,7 +2,7 @@
 
 NODE_NAME="{$NODE_NAME:-rhcsa2}"
 
-ssh root@"$NODENAME" exit
+ssh root@"$NODE_NAME" exit
 
 RETURN_STATUS=$?
 
@@ -11,4 +11,6 @@ if [[ "$RETURN_STATUS" -ne 0 ]]; then
     exit 1
 else
     echo "Logged successfully as root into $NODENAME"
+    SCORE=$(( SCORE + 10 ))
 fi
+TOTAL=$(( TOTAL + 10 ))
