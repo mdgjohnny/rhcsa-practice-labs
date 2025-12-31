@@ -42,19 +42,11 @@ error_exit() {
 
 load_config() {
 	if [[ ! -f "$CONFIG_FILE" ]]; then
-		log "${GREEN}INFO${NC}" "First run - setting up your nodes..."
-		read -p "Node1 IP: " NODE1_IP
-		read -p "Node2 IP: " NODE2_IP
-		cat <<EOF
-		NODE1_IP="$NODE1_IP"
-		NODE2_IP="$NODE2_IP"
-EOF
-
+		error_exit "Config file not found. Run: cp config.example config && vim config"
 	fi
 	source "$CONFIG_FILE"
 	[[ -z "$NODE1_IP" ]] && error_exit "NODE1_IP not set in config"
 	[[ -z "$NODE2_IP" ]] && error_exit "NODE2_IP not set in config"
-
 }
 
 check_sudo() {

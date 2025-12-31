@@ -1,0 +1,14 @@
+# RHCSA Practice Labs Configuration
+# Copy this file to 'config' and edit with your node IPs
+#
+# Example:
+#   cp config.example config
+#   vim config
+
+# Node 1 (where you run the grader)
+NODE1_IP="192.168.122.10"
+NODE1="rhcsa1"
+
+# Node 2 (remote node)
+NODE2_IP="192.168.122.11"
+NODE2="rhcsa2"
