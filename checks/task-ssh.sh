@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
 # Task: Verify root SSH access to node2
 
-ssh -o BatchMode=yes -o ConnectTimeout=5 root@"$NODE2_IP" exit &>/dev/null
-RETURN_STATUS=$?
+# Try hostname first, fall back to IP
+if ssh $SSH_OPTS root@"$NODE2" exit &>/dev/null; then
+    RETURN_STATUS=0
+    SSH_TARGET="$NODE2"
+elif ssh $SSH_OPTS root@"$NODE2_IP" exit &>/dev/null; then
+    RETURN_STATUS=0
+    SSH_TARGET="$NODE2_IP"
+else
+    RETURN_STATUS=1
+    SSH_TARGET="$NODE2 / $NODE2_IP"
+fi
 
 check '[[ "$RETURN_STATUS" -eq 0 ]]' \
-    "Can SSH as root into node2 ($NODE2_IP)" \
-    "Cannot SSH as root into node2 ($NODE2_IP)"
+    "Can SSH as root into node2 ($SSH_TARGET)" \
+    "Cannot SSH as root into node2 ($SSH_TARGET)"

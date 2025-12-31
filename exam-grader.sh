@@ -22,7 +22,12 @@ readonly -a TASKS=("${BASE_DIR}"/checks/*.sh)
 # Variables
 NODE1="${NODE1:-rhcsa1}"
 NODE2="${NODE2:-rhcsa2}"
+SCORE=0
+TOTAL=0
 #-----------------------------------------
+
+# SSH options for non-interactive remote checks
+SSH_OPTS="-o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=no"
 
 
 # ----------------------------------------
@@ -95,11 +100,10 @@ check() {
 
 # Sources task script and compound each score
 evaluate_task() {
-	local task="$1"		
-	source $task
-	echo "The score is $SCORE"
-	TOTALSCORE=$SCORE
-	TOTAL=$TOTAL
+	local task="$1"
+	local task_name=$(basename "$task" .sh)
+	echo -e "\n${YELLOW}=== Checking: ${task_name} ===${NC}"
+	source "$task"
 }
 
 check_prereqs() {
@@ -132,7 +136,7 @@ check_outcome() {
 		echo -e "This outcome is no guarantee for the real exam."
 	else
 		echo -e "${RED}FAIL${NC} You did not pass this sample exam."
-		echo -e "Don't give up and keep trying! ${GREEN}:)"
+		echo -e "Don't give up and keep trying! ${GREEN}:)${NC}"
 	fi
 }
 
