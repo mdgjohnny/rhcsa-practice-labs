@@ -55,6 +55,10 @@ check_reboot() {
 	fi
 }
 
+#----------------------------------
+# Exam grading
+#----------------------------------
+
 
 # Sources task script and compound each score
 evaluate_task() {
@@ -65,6 +69,21 @@ evaluate_task() {
 	TOTAL=$TOTAL
 }
 
+
+apply_penalty() {
+	log_error "[VIOLATION]" "$1"
+	SCORE=$(( SCORE - 50 ))
+}
+
+# Check for violations
+check_violations() {
+	SELINUX_DISABLED=$(getenforce | grep -qi disabled)
+	FIREWALLD_DISABLED=$(systemctl is-active firewalld | grep -qi inactive)
+	EXTERNAL_REPOS=$(grep -l "http://" /etc/yum.repos.d/* 2>/dev/null | grep -v redhat.repo)
+	[[ -n "$SELINUX_DISABLED" ]] && apply_penalty "SELinux is disabled"
+	[[ -n "$FIREWALLD_DISABLED" ]] && apply_penalty "FirewallD is disabled"
+	[[ -n "$EXTERNAL_REPOS" ]] && apply_penalty "External repos detected"
+}
 
 check_outcome() {
 	echo -e "\n"
