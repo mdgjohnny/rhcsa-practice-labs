@@ -10,8 +10,6 @@
 # ----------------------------------------
 readonly BASE_DIR=$(dirname "$0")
 readonly LOG_FILE="${BASE_DIR}/exam-grader.log"
-readonly TASKS_DIR="${BASE_DIR}/checks"
-
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
 readonly YELLOW='\033[1;33m'
@@ -48,6 +46,10 @@ check_reboot() {
 	fi
 }
 
+check_tasks() {
+	readonly -a TASKS=("${BASE_DIR}"/checks/*.sh) || (echo "No tasks found in the checks directory" & exit 1)
+}
+
 check_for_user() {
 	# handle user student - yet to see
 }
@@ -76,5 +78,11 @@ check_outcome() {
 }
 
 main() {
-
+	check_sudo
+	check_reboot
+	check_tasks
+	for task in "${TASKS_DIR[@]}"; do
+		evalue_task "$task"
+	done
+	check_outcome
 }
