@@ -419,6 +419,45 @@
             margin-bottom: 1rem;
         }
 
+        /* Category Grid */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .category-card {
+            background: var(--rh-gray-dark);
+            border: 2px solid var(--rh-gray);
+            border-radius: 8px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .category-card:hover {
+            border-color: var(--rh-gray-light);
+            background: var(--rh-gray);
+        }
+
+        .category-card h4 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            text-transform: capitalize;
+        }
+
+        .category-card .task-count {
+            color: var(--rh-gray-light);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .category-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         /* Results */
         .results-summary {
             display: grid;
@@ -803,7 +842,7 @@
             <div class="content-body hidden" id="view-mode-select">
                 <h1 class="mb-2">Select Mode</h1>
                 <div class="mode-cards">
-                    <div class="mode-card" onclick="selectMode('practice')">
+                    <div class="mode-card" onclick="showView('practice-choice')">
                         <div class="icon">📚</div>
                         <h3>Practice Mode</h3>
                         <p>Select specific tasks and topics.<br>No time limit.</p>
@@ -814,6 +853,35 @@
                         <p>Random selection of 13-20 tasks.<br>3 hour time limit.</p>
                     </div>
                 </div>
+            </div>
+
+            <!-- Practice Choice View (All or Category) -->
+            <div class="content-body hidden" id="view-practice-choice">
+                <h1 class="mb-2">Practice Mode</h1>
+                <p style="color: var(--rh-gray-light); margin-bottom: 1.5rem;">Choose how you want to practice:</p>
+                <div class="mode-cards">
+                    <div class="mode-card" onclick="selectMode('practice')">
+                        <div class="icon">📋</div>
+                        <h3>Select Tasks</h3>
+                        <p>Choose specific tasks from a list.<br>Full control over what to practice.</p>
+                    </div>
+                    <div class="mode-card" onclick="showView('practice-category')">
+                        <div class="icon">📂</div>
+                        <h3>Practice by Category</h3>
+                        <p>Focus on a specific RHCSA objective.<br>Great for targeted study.</p>
+                    </div>
+                </div>
+                <button class="btn btn-secondary mt-2" onclick="showView('mode-select')">Back</button>
+            </div>
+
+            <!-- Practice by Category View -->
+            <div class="content-body hidden" id="view-practice-category">
+                <h1 class="mb-2">Select Category</h1>
+                <p style="color: var(--rh-gray-light); margin-bottom: 1.5rem;">Choose an RHCSA objective to practice:</p>
+                <div class="category-grid" id="category-grid">
+                    <div class="loading">Loading categories...</div>
+                </div>
+                <button class="btn btn-secondary mt-2" onclick="showView('practice-choice')">Back</button>
             </div>
 
             <!-- Practice Setup View -->
@@ -832,7 +900,7 @@
                     </div>
                 </div>
                 <button class="btn btn-success" onclick="startPractice()">Start Practice</button>
-                <button class="btn btn-secondary" onclick="showView('mode-select')">Back</button>
+                <button class="btn btn-secondary" onclick="showView('practice-choice')">Back</button>
             </div>
 
             <!-- Exam Setup View -->
@@ -854,6 +922,12 @@
 
             <!-- Exam Running View -->
             <div class="content-body hidden" id="view-exam-running">
+                <!-- Breadcrumb -->
+                <div class="breadcrumb" style="margin-bottom: 1rem; font-size: 0.9rem;">
+                    <a href="#" onclick="confirmAbandon(); return false;" style="color: var(--rh-gray-light);">Home</a>
+                    <span style="color: var(--rh-gray-light); margin: 0 0.5rem;">/</span>
+                    <span id="breadcrumb-mode">Practice</span>
+                </div>
                 <div class="exam-instructions">
                     <h3>Instructions</h3>
                     <ul>
@@ -865,6 +939,12 @@
                 </div>
                 <div id="current-task-detail">
                     <p style="color: var(--rh-gray-light);">Select a task from the sidebar to view details.</p>
+                </div>
+                <!-- Task Navigation -->
+                <div class="task-nav" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="btn btn-secondary" id="prev-task-btn" onclick="navigateTask(-1)" disabled>Previous</button>
+                    <button class="btn btn-primary" id="next-task-btn" onclick="navigateTask(1)">Next</button>
+                    <span id="task-nav-indicator" style="margin-left: auto; color: var(--rh-gray-light); align-self: center;">Task 1 of 1</span>
                 </div>
             </div>
 
@@ -900,6 +980,12 @@
             <!-- Statistics View -->
             <div class="content-body hidden" id="view-stats">
                 <h1 class="mb-2">Performance Statistics</h1>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--rh-gray-light);">
+                        <input type="checkbox" id="use-mock-stats" onchange="loadStats()">
+                        Use mock data (for testing)
+                    </label>
+                </div>
                 <div class="results-summary" id="stats-summary">
                     <div class="loading">Loading statistics...</div>
                 </div>
@@ -929,6 +1015,7 @@
         let currentMode = null;
         let timerInterval = null;
         let examStartTime = null;
+        let currentTaskIndex = 0;
         const EXAM_DURATION = 3 * 60 * 60 * 1000; // 3 hours
 
         // View Management
@@ -945,7 +1032,85 @@
 
             // Load data for specific views
             if (viewId === 'practice-setup') loadTasks();
+            if (viewId === 'practice-category') populateCategoryGrid();
             if (viewId === 'stats') loadStats();
+        }
+
+        // Task Navigation
+        function navigateTask(direction) {
+            const newIndex = currentTaskIndex + direction;
+            if (newIndex >= 0 && newIndex < selectedTasks.length) {
+                currentTaskIndex = newIndex;
+                showTaskDetail(selectedTasks[currentTaskIndex].id);
+                updateTaskNavigation();
+
+                // Update sidebar highlight
+                document.querySelectorAll('.task-list-item').forEach((el, i) => {
+                    el.classList.toggle('active', i === currentTaskIndex);
+                });
+            }
+        }
+
+        function updateTaskNavigation() {
+            const prevBtn = document.getElementById('prev-task-btn');
+            const nextBtn = document.getElementById('next-task-btn');
+            const indicator = document.getElementById('task-nav-indicator');
+
+            prevBtn.disabled = currentTaskIndex === 0;
+            nextBtn.disabled = currentTaskIndex === selectedTasks.length - 1;
+            indicator.textContent = `Task ${currentTaskIndex + 1} of ${selectedTasks.length}`;
+        }
+
+        // Category Grid
+        function populateCategoryGrid() {
+            const grid = document.getElementById('category-grid');
+            if (!allTasks.length) {
+                fetch('/api/tasks')
+                    .then(res => res.json())
+                    .then(tasks => {
+                        allTasks = tasks;
+                        renderCategoryGrid();
+                    });
+            } else {
+                renderCategoryGrid();
+            }
+        }
+
+        function renderCategoryGrid() {
+            const grid = document.getElementById('category-grid');
+            const categories = {};
+            allTasks.forEach(t => {
+                if (!categories[t.category]) categories[t.category] = 0;
+                categories[t.category]++;
+            });
+
+            grid.innerHTML = Object.entries(categories)
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .map(([cat, count]) => `
+                    <div class="category-card" onclick="startCategoryPractice('${cat}')">
+                        <h4>${cat.replace(/-/g, ' ')}</h4>
+                        <span class="task-count">${count} task${count !== 1 ? 's' : ''}</span>
+                    </div>
+                `).join('');
+        }
+
+        function startCategoryPractice(category) {
+            selectedTasks = allTasks.filter(t => t.category === category);
+            currentMode = 'practice';
+            currentTaskIndex = 0;
+
+            document.getElementById('breadcrumb-mode').textContent = `Practice: ${category.replace(/-/g, ' ')}`;
+
+            renderTaskSidebar();
+            showView('exam-running');
+            document.getElementById('exam-sidebar').classList.remove('hidden');
+            document.getElementById('exam-actions').classList.remove('hidden');
+
+            // Auto-select first task
+            if (selectedTasks.length > 0) {
+                showTaskDetail(selectedTasks[0].id);
+                updateTaskNavigation();
+            }
         }
 
         // Config
@@ -1070,8 +1235,9 @@
                 alert('Please select at least one task.');
                 return;
             }
-            selectedTasks = ids;
-            startExamView(allTasks.filter(t => ids.includes(t.id)), false);
+            selectedTasks = allTasks.filter(t => ids.includes(t.id));
+            document.getElementById('breadcrumb-mode').textContent = 'Practice';
+            startExamView(selectedTasks, false);
         }
 
         // Start Exam
@@ -1081,7 +1247,8 @@
             try {
                 const res = await fetch(`/api/random-tasks?count=${count}`);
                 const tasks = await res.json();
-                selectedTasks = tasks.map(t => t.id);
+                selectedTasks = tasks;
+                document.getElementById('breadcrumb-mode').textContent = 'Exam';
                 startExamView(tasks, true);
             } catch (e) {
                 alert('Failed to generate exam tasks.');
@@ -1089,6 +1256,9 @@
         }
 
         function startExamView(tasks, timed) {
+            // Reset task index
+            currentTaskIndex = 0;
+
             // Show exam UI
             showView('exam-running');
             document.getElementById('exam-sidebar').classList.remove('hidden');
@@ -1100,9 +1270,21 @@
             }
 
             // Populate sidebar
+            renderTaskSidebar();
+
+            document.getElementById('task-count').textContent = `0/${tasks.length}`;
+
+            // Show first task and init navigation
+            if (tasks.length > 0) {
+                showTaskDetail(tasks[0].id);
+                updateTaskNavigation();
+            }
+        }
+
+        function renderTaskSidebar() {
             const sidebar = document.getElementById('sidebar-task-list');
-            sidebar.innerHTML = tasks.map((t, i) => `
-                <div class="task-item" data-id="${t.id}" onclick="showTaskDetail('${t.id}')">
+            sidebar.innerHTML = selectedTasks.map((t, i) => `
+                <div class="task-item task-list-item" data-id="${t.id}" onclick="selectTaskFromSidebar(${i})">
                     <div class="task-number">${i + 1}</div>
                     <div class="task-info">
                         <div class="task-title">${t.description}</div>
@@ -1110,11 +1292,15 @@
                     </div>
                 </div>
             `).join('');
+        }
 
-            document.getElementById('task-count').textContent = `0/${tasks.length}`;
-
-            // Show first task
-            if (tasks.length > 0) showTaskDetail(tasks[0].id);
+        function selectTaskFromSidebar(index) {
+            currentTaskIndex = index;
+            showTaskDetail(selectedTasks[index].id);
+            updateTaskNavigation();
+            document.querySelectorAll('.task-list-item').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
         }
 
         function showTaskDetail(taskId) {
@@ -1177,10 +1363,12 @@
             document.getElementById('view-exam-running').innerHTML = '<div class="loading">Grading your work...</div>';
 
             try {
+                // Send task IDs to the API
+                const taskIds = selectedTasks.map(t => typeof t === 'string' ? t : t.id);
                 const res = await fetch('/api/run', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mode: currentMode, tasks: selectedTasks })
+                    body: JSON.stringify({ mode: currentMode, tasks: taskIds })
                 });
 
                 const result = await res.json();
@@ -1245,8 +1433,11 @@
             const weakAreasEl = document.getElementById('weak-areas');
             const categoryStatsEl = document.getElementById('category-stats');
 
+            const useMock = document.getElementById('use-mock-stats')?.checked;
+
             try {
-                const res = await fetch('/api/stats');
+                const endpoint = useMock ? '/api/mock-stats' : '/api/stats';
+                const res = await fetch(endpoint);
                 const stats = await res.json();
 
                 // Check if database is empty

@@ -351,6 +351,35 @@ def get_stats():
     })
 
 
+@app.route('/api/mock-stats', methods=['GET'])
+def mock_stats():
+    """Generate mock stats data for UI testing."""
+    # Simulate varied performance across categories
+    mock_categories = {
+        'essential-tools': {'earned': 45, 'possible': 60, 'percentage': 75.0, 'tested': True},
+        'file-systems': {'earned': 30, 'possible': 50, 'percentage': 60.0, 'tested': True},
+        'users-groups': {'earned': 70, 'possible': 80, 'percentage': 87.5, 'tested': True},
+        'networking': {'earned': 25, 'possible': 40, 'percentage': 62.5, 'tested': True},
+        'security': {'earned': 15, 'possible': 40, 'percentage': 37.5, 'tested': True},
+        'containers': {'earned': 10, 'possible': 30, 'percentage': 33.3, 'tested': True},
+        'local-storage': {'earned': 35, 'possible': 50, 'percentage': 70.0, 'tested': True},
+        'deploy-maintain': {'earned': 40, 'possible': 60, 'percentage': 66.7, 'tested': True},
+        'operate-systems': {'earned': 0, 'possible': 0, 'percentage': 0, 'tested': False},
+    }
+
+    # Calculate weak areas (lowest percentages among tested)
+    tested = {k: v for k, v in mock_categories.items() if v['tested']}
+    weak_areas = sorted(tested.items(), key=lambda x: x[1]['percentage'])[:3]
+
+    return jsonify({
+        'total_attempts': 12,
+        'passed': 7,
+        'pass_rate': 58.3,
+        'categories': mock_categories,
+        'weak_areas': [{'category': k, **v} for k, v in weak_areas]
+    })
+
+
 @app.route('/api/random-tasks', methods=['GET'])
 def random_tasks():
     """Get random task selection for exam mode."""
