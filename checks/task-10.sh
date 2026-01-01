@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Task: All user passwords should expire after 90 days and be at least 9
+# Task: All user passwords should expire after 90 days and be at least 9 characters
 # Category: users-groups
-# characters in length
 
 
 check ' [[ grep PASS_MAX_DAYS.*90 /etc/login.defs &>/dev/null ]] ' \

@@ -291,7 +291,7 @@ def get_stats():
     c.execute('SELECT COUNT(*) as total, SUM(passed) as passed FROM results')
     overall = c.fetchone()
 
-    # Category performance
+    # Category performance from results
     c.execute('SELECT categories FROM results')
     rows = c.fetchall()
     conn.close()
@@ -305,18 +305,42 @@ def get_stats():
             category_totals[cat]['earned'] += stats.get('earned', 0)
             category_totals[cat]['possible'] += stats.get('possible', 0)
 
-    # Calculate percentages
+    # Get all available categories from tasks
+    all_categories = set()
+    result = subprocess.run(
+        [str(GRADER_SCRIPT), '--list-tasks', '--json'],
+        capture_output=True,
+        text=True,
+        cwd=str(BASE_DIR)
+    )
+    try:
+        tasks = json.loads(result.stdout)
+        all_categories = {t['category'] for t in tasks if t.get('category')}
+    except (json.JSONDecodeError, KeyError):
+        pass
+
+    # Calculate percentages for all categories
     category_stats = {}
-    for cat, stats in category_totals.items():
-        if stats['possible'] > 0:
+    for cat in all_categories:
+        if cat in category_totals and category_totals[cat]['possible'] > 0:
+            stats = category_totals[cat]
             category_stats[cat] = {
                 'earned': stats['earned'],
                 'possible': stats['possible'],
-                'percentage': round(stats['earned'] / stats['possible'] * 100, 1)
+                'percentage': round(stats['earned'] / stats['possible'] * 100, 1),
+                'tested': True
+            }
+        else:
+            category_stats[cat] = {
+                'earned': 0,
+                'possible': 0,
+                'percentage': 0,
+                'tested': False
             }
 
-    # Sort by percentage (weakest first)
-    weak_areas = sorted(category_stats.items(), key=lambda x: x[1]['percentage'])
+    # Sort by percentage (weakest first), but only include tested categories in weak_areas
+    tested_cats = {k: v for k, v in category_stats.items() if v['tested']}
+    weak_areas = sorted(tested_cats.items(), key=lambda x: x[1]['percentage'])
 
     return jsonify({
         'total_attempts': overall['total'] or 0,

@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create user10, user20, user30 with password Temp1234
+# Task: Create user10, user20, user30 with password Temp1234. user10/user30 expire Dec 31, 2025
 # Category: users-groups
-# user10 and user30 should expire on December 31, 2025
 
 check 'id user10 &>/dev/null' \
     "User user10 exists" \

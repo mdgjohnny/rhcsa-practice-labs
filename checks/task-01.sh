@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Configure network on node1 with IP, gateway, and DNS
+# Task: Configure network on node1 with IP 192.168.0.241/24, gateway 192.168.0.1, DNS 192.168.0.1
 # Category: networking
 
 IPV4_ADDR="${IPV4_ADDR:-192.168.0.241/24}"

@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Task: NFS export home directories for user100, user200, user300
+# Task: NFS export homes for user100/200/300, auto-mount under /home1 on rhcsa1
 # Category: file-systems
-# Auto-mount under /home1 on rhcsa1 when they log in
 
 check 'id user100 &>/dev/null' \
     "User user100 exists" \

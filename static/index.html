@@ -1293,9 +1293,27 @@
                         `;
                     }).join('') : '<p style="color: var(--rh-gray-light)">Complete some practice sessions to see weak areas.</p>';
 
-                const sortedCats = Object.entries(stats.categories).sort((a, b) => b[1].percentage - a[1].percentage);
+                // Sort: tested categories first (by percentage desc), then untested
+                const sortedCats = Object.entries(stats.categories).sort((a, b) => {
+                    if (a[1].tested && !b[1].tested) return -1;
+                    if (!a[1].tested && b[1].tested) return 1;
+                    return b[1].percentage - a[1].percentage;
+                });
                 categoryStatsEl.innerHTML = sortedCats.length ?
                     sortedCats.map(([cat, s]) => {
+                        if (!s.tested) {
+                            return `
+                                <div class="category-bar" style="opacity: 0.5;">
+                                    <div class="header">
+                                        <span class="name">${cat.replace(/-/g, ' ')}</span>
+                                        <span class="pct" style="color: var(--rh-gray-light);">Not tested</span>
+                                    </div>
+                                    <div class="progress-track">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }
                         const cls = s.percentage >= 70 ? 'good' : s.percentage >= 50 ? 'ok' : 'bad';
                         return `
                             <div class="category-bar">

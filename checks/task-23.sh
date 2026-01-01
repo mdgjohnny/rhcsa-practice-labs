@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Task: Members of group100 (user100, user200) can collaborate on /shared
+# Task: group100 (user100, user200) collaborates on /shared with sticky bit (no delete others' files)
 # Category: file-systems
-# but cannot delete each other's files (sticky bit)
 
 check '[[ -d /shared ]]' \
     "Directory /shared exists" \
