@@ -1241,11 +1241,28 @@
 
         // Stats
         async function loadStats() {
+            const summaryEl = document.getElementById('stats-summary');
+            const weakAreasEl = document.getElementById('weak-areas');
+            const categoryStatsEl = document.getElementById('category-stats');
+
             try {
                 const res = await fetch('/api/stats');
                 const stats = await res.json();
 
-                document.getElementById('stats-summary').innerHTML = `
+                // Check if database is empty
+                if (!stats.total_attempts || stats.total_attempts === 0) {
+                    summaryEl.innerHTML = `
+                        <div class="alert alert-info" style="grid-column: 1 / -1; text-align: center;">
+                            <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">No practice sessions yet</p>
+                            <p style="color: var(--rh-gray-light);">Complete a practice or exam session to start tracking your progress.</p>
+                        </div>
+                    `;
+                    weakAreasEl.innerHTML = '<p style="color: var(--rh-gray-light)">Complete some practice sessions to see weak areas.</p>';
+                    categoryStatsEl.innerHTML = '<p style="color: var(--rh-gray-light)">No data yet.</p>';
+                    return;
+                }
+
+                summaryEl.innerHTML = `
                     <div class="result-box">
                         <div class="value">${stats.total_attempts}</div>
                         <div class="label">Attempts</div>
@@ -1260,7 +1277,7 @@
                     </div>
                 `;
 
-                document.getElementById('weak-areas').innerHTML = stats.weak_areas.length ?
+                weakAreasEl.innerHTML = stats.weak_areas.length ?
                     stats.weak_areas.map(w => {
                         const cls = w.percentage >= 70 ? 'good' : w.percentage >= 50 ? 'ok' : 'bad';
                         return `
@@ -1277,7 +1294,7 @@
                     }).join('') : '<p style="color: var(--rh-gray-light)">Complete some practice sessions to see weak areas.</p>';
 
                 const sortedCats = Object.entries(stats.categories).sort((a, b) => b[1].percentage - a[1].percentage);
-                document.getElementById('category-stats').innerHTML = sortedCats.length ?
+                categoryStatsEl.innerHTML = sortedCats.length ?
                     sortedCats.map(([cat, s]) => {
                         const cls = s.percentage >= 70 ? 'good' : s.percentage >= 50 ? 'ok' : 'bad';
                         return `
@@ -1294,6 +1311,13 @@
                     }).join('') : '<p style="color: var(--rh-gray-light)">No data yet.</p>';
             } catch (e) {
                 console.error('Failed to load stats:', e);
+                summaryEl.innerHTML = `
+                    <div class="alert alert-warning" style="grid-column: 1 / -1;">
+                        Failed to load statistics. Please try again later.
+                    </div>
+                `;
+                weakAreasEl.innerHTML = '';
+                categoryStatsEl.innerHTML = '';
             }
         }
 

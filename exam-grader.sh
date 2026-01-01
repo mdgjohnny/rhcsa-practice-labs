@@ -52,9 +52,30 @@ run_ssh() {
     fi
 }
 
-# SSH to node2 - tries hostname first, falls back to IP
-ssh_node2() {
-    run_ssh "$NODE2" "$@" 2>/dev/null || run_ssh "$NODE2_IP" "$@"
+# Low-level SSH probe - tests if we can connect to a target
+# Returns 0 on success, 1 on failure
+# Usage: ssh_probe <target>
+ssh_probe() {
+    local target="$1"
+    run_ssh "$target" exit &>/dev/null
+    return $?
+}
+
+# Probe a node trying hostname first, then IP
+# Outputs the successful target or empty string
+# Usage: ssh_probe_node <hostname> <ip>
+ssh_probe_node() {
+    local hostname="$1"
+    local ip="$2"
+
+    if [[ -n "$hostname" ]] && ssh_probe "$hostname"; then
+        echo "$hostname"
+        return 0
+    elif [[ -n "$ip" ]] && ssh_probe "$ip"; then
+        echo "$ip"
+        return 0
+    fi
+    return 1
 }
 
 # ----------------------------------------
@@ -332,61 +353,171 @@ get_filtered_tasks() {
 	fi
 }
 
-check_ssh() {
-    local TARGET_ONE_HOSTNAME="${TARGET_ONE_HOSTNAME:-$NODE1}"
-    local TARGET_ONE_IP="${TARGET_ONE_IP:-$NODE1_IP}"
-    local TARGET_TWO_HOSTNAME="${TARGET_TWO_HOSTNAME:-$NODE2}"
-    local TARGET_TWO_IP="${TARGET_TWO_IP:-$NODE2_IP}"
-	echo -e "\n${YELLOW}--- SSH Connectivity ---${NC}"
-	if [[ -n "$ROOT_PASSWORD" ]]; then
-		echo "     Using sshpass with ROOT_PASSWORD"
-	else
-		echo "     Using key-based authentication"
-	fi
-	if [[ -n "$TARGET_ONE_HOSTNAME" ]]; then
-		if run_ssh "$TARGET_ONE_HOSTNAME" exit &>/dev/null || run_ssh "$TARGET_ONE_IP" exit &>/dev/null; then
-			echo -e "${GREEN}[OK]${NC} Can SSH to node1"
-		else
-			echo -e "${RED}[FAIL]${NC} Cannot SSH to node1 ($TARGET_ONE_HOSTNAME / $TARGET_ONE_IP)"
-		fi
-	fi
-	if [[ -n "$TARGET_TWO_IP" ]]; then
-		if run_ssh "$TARGET_TWO_HOSTNAME" exit &>/dev/null || run_ssh "$TARGET_TWO_IP" exit &>/dev/null; then
-			echo -e "${GREEN}[OK]${NC} Can SSH to node2"
-		else
-			echo -e "${RED}[FAIL]${NC} Cannot SSH to node2 ($TARGET_TWO_HOSTNAME / $TARGET_TWO_IP)"
-		fi
-	fi
+# Check if config file exists and has required values
+# Returns JSON object with config status
+# Exit code: 0 = valid, 1 = missing file, 2 = missing values
+check_config() {
+    local config_file="${1:-$CONFIG_FILE}"
+    local missing=()
 
+    if [[ ! -f "$config_file" ]]; then
+        echo '{"ok":false,"error":"config_not_found","file":"'"$config_file"'"}'
+        return 1
+    fi
+
+    source "$config_file"
+
+    [[ -z "$NODE1_IP" ]] && missing+=("NODE1_IP")
+    [[ -z "$NODE2_IP" ]] && missing+=("NODE2_IP")
+
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        local missing_json=$(printf ',"%s"' "${missing[@]}")
+        missing_json="[${missing_json:1}]"
+        echo '{"ok":false,"error":"missing_values","missing":'"$missing_json"'}'
+        return 2
+    fi
+
+    echo '{"ok":true,"node1":"'"$NODE1"'","node1_ip":"'"$NODE1_IP"'","node2":"'"$NODE2"'","node2_ip":"'"$NODE2_IP"'"}'
+    return 0
 }
 
+# Check SSH connectivity and output JSON
+# Returns JSON array with connection status for each node
+# Exit code = number of failed connections
+check_ssh() {
+    local node1_hostname="${1:-$NODE1}"
+    local node1_ip="${2:-$NODE1_IP}"
+    local node2_hostname="${3:-$NODE2}"
+    local node2_ip="${4:-$NODE2_IP}"
+
+    local failures=0
+    local results=()
+
+    # Check node1
+    local node1_target=""
+    local node1_ok=false
+    node1_target=$(ssh_probe_node "$node1_hostname" "$node1_ip")
+    if [[ -n "$node1_target" ]]; then
+        node1_ok=true
+    else
+        ((failures++))
+        node1_target="${node1_hostname:-$node1_ip}"
+    fi
+    results+=("{\"node\":\"node1\",\"ok\":$node1_ok,\"target\":\"$node1_target\"}")
+
+    # Check node2
+    local node2_target=""
+    local node2_ok=false
+    node2_target=$(ssh_probe_node "$node2_hostname" "$node2_ip")
+    if [[ -n "$node2_target" ]]; then
+        node2_ok=true
+    else
+        ((failures++))
+        node2_target="${node2_hostname:-$node2_ip}"
+    fi
+    results+=("{\"node\":\"node2\",\"ok\":$node2_ok,\"target\":\"$node2_target\"}")
+
+    # Output JSON array
+    echo "[${results[0]},${results[1]}]"
+
+    return $failures
+}
+
+# Orchestrate dry run checks
+# In JSON mode: outputs structured JSON object
+# In human mode: outputs human-readable results
 dry_run() {
-	echo -e "${YELLOW}=== DRY RUN MODE ===${NC}\n"
+    local config_result
+    local ssh_result
+    local config_ok=false
+    local ssh_failures=0
 
-	echo -e "${GREEN}[OK]${NC} Script is executable"
+    # Check config
+    config_result=$(check_config)
+    local config_rc=$?
+    [[ $config_rc -eq 0 ]] && config_ok=true
 
-	# Config check
-	if [[ -f "$CONFIG_FILE" ]]; then
-		source "$CONFIG_FILE"
-		echo -e "${GREEN}[OK]${NC} Config file found: $CONFIG_FILE"
-		echo "     NODE1=$NODE1 (IP: ${NODE1_IP:-not set})"
-		echo "     NODE2=$NODE2 (IP: ${NODE2_IP:-not set})"
-	else
-		echo -e "${RED}[FAIL]${NC} Config file not found: $CONFIG_FILE"
-		echo "     Run: cp config.example config && vim config"
-	fi
+    # Load config for SSH check if valid
+    if [[ "$config_ok" == true ]]; then
+        source "$CONFIG_FILE"
+        ssh_result=$(check_ssh)
+        ssh_failures=$?
+    fi
 
-	# SSH connectivity (quick test)
-	check_ssh "$NODE1 $NODE1_IP $NODE2 $NODE2_IP"
+    if [[ "$JSON_OUTPUT" == true ]]; then
+        # JSON output mode
+        local tasks_json="["
+        local first=true
+        for task in "${TASKS[@]}"; do
+            local name=$(basename "$task" .sh)
+            [[ "$first" == false ]] && tasks_json+=","
+            tasks_json+="\"$name\""
+            first=false
+        done
+        tasks_json+="]"
 
-    # Task files
-	echo -e "\n${YELLOW}--- Task Files ---${NC}"
-	echo "Found ${#TASKS[@]} task files in checks/"
-	for task in "${TASKS[@]}"; do
-		echo "  - $(basename "$task")"
-	done
+        cat <<EOF
+{
+  "config": $config_result,
+  "ssh": ${ssh_result:-null},
+  "tasks": $tasks_json,
+  "task_count": ${#TASKS[@]},
+  "ready": $([ "$config_ok" == true ] && [ "$ssh_failures" -eq 0 ] && echo true || echo false)
+}
+EOF
+    else
+        # Human-readable output mode
+        echo -e "${YELLOW}=== DRY RUN MODE ===${NC}\n"
 
-	echo -e "\n${GREEN}Dry run complete.${NC} Run without --dry-run to execute checks."
+        echo -e "${GREEN}[OK]${NC} Script is executable"
+
+        # Config status
+        if [[ "$config_ok" == true ]]; then
+            echo -e "${GREEN}[OK]${NC} Config file found: $CONFIG_FILE"
+            echo "     NODE1=$NODE1 (IP: ${NODE1_IP:-not set})"
+            echo "     NODE2=$NODE2 (IP: ${NODE2_IP:-not set})"
+        else
+            echo -e "${RED}[FAIL]${NC} Config issue: $config_result"
+            echo "     Run: cp config.example config && vim config"
+        fi
+
+        # SSH status
+        if [[ -n "$ssh_result" ]]; then
+            echo -e "\n${YELLOW}--- SSH Connectivity ---${NC}"
+            if [[ -n "$ROOT_PASSWORD" ]]; then
+                echo "     Using sshpass with ROOT_PASSWORD"
+            else
+                echo "     Using key-based authentication"
+            fi
+
+            # Parse JSON results for human display
+            local node1_ok=$(echo "$ssh_result" | grep -oP '"node":"node1"[^}]*"ok":\K(true|false)')
+            local node1_target=$(echo "$ssh_result" | grep -oP '"node":"node1"[^}]*"target":"\K[^"]+')
+            local node2_ok=$(echo "$ssh_result" | grep -oP '"node":"node2"[^}]*"ok":\K(true|false)')
+            local node2_target=$(echo "$ssh_result" | grep -oP '"node":"node2"[^}]*"target":"\K[^"]+')
+
+            if [[ "$node1_ok" == "true" ]]; then
+                echo -e "${GREEN}[OK]${NC} Can SSH to node1 ($node1_target)"
+            else
+                echo -e "${RED}[FAIL]${NC} Cannot SSH to node1 ($node1_target)"
+            fi
+
+            if [[ "$node2_ok" == "true" ]]; then
+                echo -e "${GREEN}[OK]${NC} Can SSH to node2 ($node2_target)"
+            else
+                echo -e "${RED}[FAIL]${NC} Cannot SSH to node2 ($node2_target)"
+            fi
+        fi
+
+        # Task files
+        echo -e "\n${YELLOW}--- Task Files ---${NC}"
+        echo "Found ${#TASKS[@]} task files in checks/"
+        for task in "${TASKS[@]}"; do
+            echo "  - $(basename "$task")"
+        done
+
+        echo -e "\n${GREEN}Dry run complete.${NC} Run without --dry-run to execute checks."
+    fi
 }
 
 main() {
@@ -402,21 +533,14 @@ main() {
 		exit 0
 	fi
 
-    if [[ "$CHECK_SSH" == true ]]; then 
-        if [[ $# -ne 4 && $# -ne 0 ]]; then
-                        echo "check_ssh needs four arguments: <node1-hostname> <node1-ip> <node2-hostname> <node2-ip>" >&2
-                        exit 1
-        else
-            shift
-            local TARGET_ONE_HOSTNAME="$1"
-            local TARGET_ONE_IP="$2"
-            local TARGE_TWO_HOSTNAME="$3"
-            local TARGET_TWO_IP="$4"
-            check_ssh "$TARGET_ONE_HOSTNAME" "$TARGET_ONE_IP" "$TARGET_TWO_HOSTNAME" "$TARGET_TWO_IP"
+    if [[ "$CHECK_SSH" == true ]]; then
+        # Load config to get node defaults
+        if [[ -f "$CONFIG_FILE" ]]; then
+            source "$CONFIG_FILE"
         fi
-        # Defaults to calling check_ssh with global variables
+        # check_ssh uses defaults from config or environment
         check_ssh
-            exit 0
+        exit $?
     fi
 
 	check_sudo

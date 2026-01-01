@@ -141,21 +141,53 @@ ROOT_PASSWORD="{data.get('root_password', '')}"
 def test_connection():
     """Test SSH connectivity to nodes."""
     result = subprocess.run(
-        [str(GRADER_SCRIPT), '--dry-run'],
+        [str(GRADER_SCRIPT), '--check-ssh'],
         capture_output=True,
         text=True,
         cwd=str(BASE_DIR)
     )
 
-    output = result.stdout
-    node1_ok = '[OK] Can SSH to node1' in output
-    node2_ok = '[OK] Can SSH to node2' in output
+    try:
+        ssh_results = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return jsonify({
+            'node1': False,
+            'node2': False,
+            'ok': False,
+            'error': 'Failed to parse SSH check output'
+        }), 500
+
+    node1_ok = next((n['ok'] for n in ssh_results if n['node'] == 'node1'), False)
+    node2_ok = next((n['ok'] for n in ssh_results if n['node'] == 'node2'), False)
 
     return jsonify({
         'node1': node1_ok,
         'node2': node2_ok,
-        'details': output
+        'ok': node1_ok and node2_ok,
+        'details': ssh_results
     })
+
+
+@app.route('/api/healthcheck', methods=['GET'])
+def healthcheck():
+    """Comprehensive system health check."""
+    result = subprocess.run(
+        [str(GRADER_SCRIPT), '--dry-run', '--json'],
+        capture_output=True,
+        text=True,
+        cwd=str(BASE_DIR)
+    )
+
+    try:
+        health = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return jsonify({
+            'ok': False,
+            'error': 'Failed to parse healthcheck output',
+            'raw': result.stdout
+        }), 500
+
+    return jsonify(health)
 
 
 @app.route('/api/run', methods=['POST'])
@@ -169,8 +201,12 @@ def run_grader():
     cmd = [str(GRADER_SCRIPT), '--skip-reboot', '--json']
 
     if tasks:
-        # Extract task numbers from task-XX format
-        task_nums = [t.replace('task-', '') for t in tasks]
+        # Extract task numbers - handles both "task-01" and "01" formats
+        task_nums = []
+        for t in tasks:
+            # Strip 'task-' prefix if present, keep the rest
+            num = t.replace('task-', '') if t.startswith('task-') else t
+            task_nums.append(num)
         cmd.append(f"--tasks={','.join(task_nums)}")
 
     # Run the grader
