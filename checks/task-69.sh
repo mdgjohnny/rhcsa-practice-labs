@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Launch container as user20 using ubi9 with SHELL and HOSTNAME vars
+# Category: containers
 # Auto-start via systemd without login
 
 check 'su - user20 -c "podman ps -a 2>/dev/null | grep -qi ubi9"' \

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - Create lnfile1 in /var/tmp with 3 hard links
+# Category: essential-tools
 
 check 'run_ssh "$NODE2_IP" "[[ -f /var/tmp/lnfile1 ]]" 2>/dev/null' \
     "File /var/tmp/lnfile1 exists on node2" \

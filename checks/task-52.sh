@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Configure journald for persistent storage under /var/log/journal
+# Category: operate-systems
 
 check '[[ -d /var/log/journal ]]' \
     "Directory /var/log/journal exists" \

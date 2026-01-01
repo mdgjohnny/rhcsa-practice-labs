@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Verify root SSH access to node2
+# Category: essential-tools
 
 # Try hostname first, fall back to IP
 if run_ssh "$NODE2" exit &>/dev/null; then

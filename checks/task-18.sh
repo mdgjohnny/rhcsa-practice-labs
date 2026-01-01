@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Case-insensitive search for "essential" in /usr/share/dict/linux.words
+# Category: essential-tools
 # Output to /var/tmp/pattern.txt, omit empty lines
 
 check '[[ -f /var/tmp/pattern.txt ]]' \

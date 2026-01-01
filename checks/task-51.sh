@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Flip the SELinux boolean nfs_export_all_rw persistently
+# Category: security
 
 check 'getsebool nfs_export_all_rw | grep -q "on"' \
     "Boolean nfs_export_all_rw is on" \

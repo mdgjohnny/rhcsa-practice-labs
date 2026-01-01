@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - Mariadb container as user edwin
+# Category: containers
 # Port 3306, /var/mariadb-container for persistent storage
 
 check 'run_ssh "$NODE2_IP" "id edwin &>/dev/null"' \

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Lock user70 account, capture lock line to /var/tmp/user70.lock
+# Category: users-groups
 
 check 'passwd -S user70 2>/dev/null | grep -qE "^user70 L|^user70.*locked"' \
     "User user70 account is locked" \

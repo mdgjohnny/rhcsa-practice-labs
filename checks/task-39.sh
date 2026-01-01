@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create /groups/sales and /groups/account
+# Category: file-systems
 # Alex can delete all files (ACL)
 
 check '[[ -d /groups/sales ]]' \

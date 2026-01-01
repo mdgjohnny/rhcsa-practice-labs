@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - Rootless container as user80 with /data01 mount
+# Category: containers
 # Auto-start via systemd
 
 check 'run_ssh "$NODE2_IP" "id user80 &>/dev/null"' \

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Set SELinux type shadow_t on /usr/testfile1
+# Category: security
 # Context should survive relabeling
 
 check '[[ -f /usr/testfile1 ]]' \

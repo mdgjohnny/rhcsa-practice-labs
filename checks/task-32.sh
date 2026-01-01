@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create /var/dir1 with full permissions, sticky bit
+# Category: file-systems
 # Non-owners cannot delete files
 
 check '[[ -d /var/dir1 ]]' \

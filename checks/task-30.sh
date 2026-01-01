@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Change group on /mnt/mnt1 to group10
+# Category: file-systems
 # rwx for group, no access for others
 
 check 'stat -c %G /mnt/mnt1 2>/dev/null | grep -q group10' \

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Attach the RHEL 9 ISO image to the VM, mount it persistently on /repo;
+# Category: file-systems
 # define access to both repositories and confirm
 
 ISO_FILENAME="${ISO_FILENAME:-rhel9.iso}"

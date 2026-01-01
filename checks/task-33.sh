@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create 200MB swap partition on secondary disk, use UUID, persistent
+# Category: local-storage
 
 check 'swapon --show | grep -q partition' \
     "Swap partition is active" \

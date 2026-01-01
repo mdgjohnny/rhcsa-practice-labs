@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Set hostname on node2
+# Category: networking
 
 LOCAL_HOSTNAME=$(hostname -s)
 

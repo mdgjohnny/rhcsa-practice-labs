@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create shared group directories /groups/dbadmin and /groups/accounting
+# Category: file-systems
 # with proper permissions (setgid, no access for others)
 
 check '[[ -d /groups/dbadmin ]]' \

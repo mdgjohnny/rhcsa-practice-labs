@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create user bob with shell that only allows password change
+# Category: users-groups
 
 check 'id bob &>/dev/null' \
     "User bob exists" \

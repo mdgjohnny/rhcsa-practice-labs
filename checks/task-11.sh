@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create users edwin, santos, serene, alex with appropriate groups
+# Category: users-groups
 # santos should have UID 1234 and no interactive shell
 
 check 'id edwin &>/dev/null' \

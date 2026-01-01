@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create user70 with UID 7000, comments "I am user70"
+# Category: users-groups
 # Max inactivity 30 days
 
 check 'id user70 &>/dev/null' \

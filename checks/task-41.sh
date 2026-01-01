@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create tar gzip archive of /etc, store in /var/tmp
+# Category: essential-tools
 
 check 'ls /var/tmp/*.tar.gz &>/dev/null || ls /var/tmp/*.tgz &>/dev/null' \
     "A .tar.gz archive exists in /var/tmp" \

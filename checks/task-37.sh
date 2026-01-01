@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - Extend lv1 by 64MB without unmounting
+# Category: file-systems
 
 LV_SIZE=$(run_ssh "$NODE2_IP" "lvs --noheadings -o lv_size --units m vg1/lv1 2>/dev/null" | tr -d ' m')
 

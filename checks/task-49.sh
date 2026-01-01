@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create /direct01 with SELinux contexts from /root (persistent)
+# Category: security
 
 check '[[ -d /direct01 ]]' \
     "Directory /direct01 exists" \

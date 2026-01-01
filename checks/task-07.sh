@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Check whether system time has been set to 'America/New_York' in node1
+# Category: deploy-maintain
 
 TIMEZONE=$(timedatectl show | awk -F'=' '/Timezone/ {print $2}')
 EXPECTED_TIMEZONE="America/New_York"

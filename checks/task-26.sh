@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Cron job for user70 to find "core" files in /var
+# Category: deploy-maintain
 # and copy to /var/tmp/coredir1, every Monday at 1:20 AM
 
 check '[[ -d /var/tmp/coredir1 ]]' \

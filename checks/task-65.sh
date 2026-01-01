@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Configure passwordless SSH for user100 from rhcsa1 to rhcsa2
+# Category: security
 # Copy /etc/sysconfig to rhcsa2:/var/tmp/remote
 
 check 'su - user100 -c "ssh -o BatchMode=yes -o ConnectTimeout=5 $NODE2_IP exit" &>/dev/null' \

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create LV lvol1 (280MB) in vgtest, mount ext4 on /mnt/mnt1
+# Category: local-storage
 
 check 'lvs vgtest/lvol1 &>/dev/null' \
     "Logical volume lvol1 exists in vgtest" \

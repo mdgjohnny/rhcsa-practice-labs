@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Search man pages for "password", output to /var/tmp/man.out
+# Category: essential-tools
 
 check '[[ -f /var/tmp/man.out ]]' \
     "File /var/tmp/man.out exists" \

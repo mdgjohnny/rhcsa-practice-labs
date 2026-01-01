@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Ping both node1 and node2
+# Category: networking
 # Assumes $NODE1 and $NODE2 have hostnames correctly set-up
 
 is_alive() {

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: NFS export home directories for user100, user200, user300
+# Category: file-systems
 # Auto-mount under /home1 on rhcsa1 when they log in
 
 check 'id user100 &>/dev/null' \

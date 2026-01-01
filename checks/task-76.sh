@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Configure mariadb container from task-75 as systemd user container
+# Category: containers
 # (This is a continuation of task 75)
 
 check 'run_ssh "$NODE2_IP" "[[ -d /home/edwin/.config/systemd/user ]]"' \

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Members of group100 (user100, user200) can collaborate on /shared
+# Category: file-systems
 # but cannot delete each other's files (sticky bit)
 
 check '[[ -d /shared ]]' \

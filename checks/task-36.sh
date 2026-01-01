@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - Add group20, change /mnt/lvfs1 group to group20
+# Category: file-systems
 # rwx for owner, group, and others
 
 check 'run_ssh "$NODE2_IP" "getent group group20 &>/dev/null" 2>/dev/null' \

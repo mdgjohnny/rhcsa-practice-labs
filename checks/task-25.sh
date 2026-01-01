@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create user50 with non-interactive shell
+# Category: users-groups
 
 check 'id user50 &>/dev/null' \
     "User user50 exists" \

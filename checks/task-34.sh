@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create 1GiB partition, ext4, label stdlabel, mount on /mnt/stdfs1
+# Category: local-storage
 
 check '[[ -d /mnt/stdfs1 ]]' \
     "Directory /mnt/stdfs1 exists" \

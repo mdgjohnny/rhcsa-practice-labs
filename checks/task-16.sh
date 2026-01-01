@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Set default boot target to multi-user on both VMs
+# Category: deploy-maintain
 
 DEFAULT_TARGET=$(systemctl get-default)
 

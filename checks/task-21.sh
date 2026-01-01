@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create group10 with user20 and user30 as secondary members
+# Category: users-groups
 
 check 'getent group group10 &>/dev/null' \
     "Group group10 exists" \

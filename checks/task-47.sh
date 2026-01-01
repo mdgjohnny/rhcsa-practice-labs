@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - Add custom message to /var/log/messages
+# Category: operate-systems
 # Confirm with regex, output to /root/customlogmessage
 
 check 'run_ssh "$NODE2_IP" "[[ -f /root/customlogmessage ]]" 2>/dev/null' \

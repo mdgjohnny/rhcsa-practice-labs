@@ -26,6 +26,14 @@ SCORE=0
 TOTAL=0
 DRY_RUN=false
 SKIP_REBOOT=false
+JSON_OUTPUT=false
+LIST_TASKS=false
+SELECTED_TASKS=""
+
+# For JSON output - stores results
+declare -a RESULTS_JSON=()
+CURRENT_TASK=""
+CURRENT_CATEGORY=""
 #-----------------------------------------
 
 # SSH options for non-interactive remote checks
@@ -50,9 +58,12 @@ usage() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --dry-run       Show configuration and task list without running checks"
-    echo "  --skip-reboot   Skip the reboot check (for API/automation use)"
-    echo "  -h, --help      Show this help message"
+    echo "  --dry-run         Show configuration and task list without running checks"
+    echo "  --skip-reboot     Skip the reboot check (for API/automation use)"
+    echo "  --json            Output results as JSON (for API integration)"
+    echo "  --tasks=LIST      Run only specific tasks (comma-separated, e.g., --tasks=01,05,27)"
+    echo "  --list-tasks      List all available tasks with categories"
+    echo "  -h, --help        Show this help message"
     exit 0
 }
 
@@ -65,6 +76,18 @@ parse_args() {
                 ;;
             --skip-reboot)
                 SKIP_REBOOT=true
+                shift
+                ;;
+            --json)
+                JSON_OUTPUT=true
+                shift
+                ;;
+            --tasks=*)
+                SELECTED_TASKS="${1#*=}"
+                shift
+                ;;
+            --list-tasks)
+                LIST_TASKS=true
                 shift
                 ;;
             -h|--help)
@@ -103,7 +126,7 @@ load_config() {
 }
 
 check_sudo() {
-	clear
+	[[ "$JSON_OUTPUT" == false ]] && clear
 	ls /root &>/dev/null || error_exit "Script must be run as root"
 }
 
@@ -136,21 +159,41 @@ check() {
     local ok_msg="$2"
     local fail_msg="$3"
     local points="${4:-10}"
+    local passed=false
 
     TOTAL=$(( TOTAL + points ))
     if eval "$condition"; then
-        echo -e "${GREEN}[OK]${NC} $ok_msg"
+        passed=true
         SCORE=$(( SCORE + points ))
+        if [[ "$JSON_OUTPUT" == false ]]; then
+            echo -e "${GREEN}[OK]${NC} $ok_msg"
+        fi
     else
-        echo -e "${RED}[FAIL]${NC} $fail_msg"
+        if [[ "$JSON_OUTPUT" == false ]]; then
+            echo -e "${RED}[FAIL]${NC} $fail_msg"
+        fi
+    fi
+
+    # Store result for JSON output
+    if [[ "$JSON_OUTPUT" == true ]]; then
+        local json_entry=$(cat <<EOF
+{"task":"$CURRENT_TASK","category":"$CURRENT_CATEGORY","check":"$ok_msg","passed":$passed,"points":$points}
+EOF
+)
+        RESULTS_JSON+=("$json_entry")
     fi
 }
 
 # Sources task script and compound each score
 evaluate_task() {
 	local task="$1"
-	local task_name=$(basename "$task" .sh)
-	echo -e "\n${YELLOW}=== Checking: ${task_name} ===${NC}"
+	CURRENT_TASK=$(basename "$task" .sh)
+	# Extract category from task file
+	CURRENT_CATEGORY=$(grep "^# Category:" "$task" | sed 's/# Category: //' || echo "unknown")
+
+	if [[ "$JSON_OUTPUT" == false ]]; then
+		echo -e "\n${YELLOW}=== Checking: ${CURRENT_TASK} ===${NC}"
+	fi
 	source "$task"
 }
 
@@ -177,14 +220,104 @@ check_violations() {
 }
 
 check_outcome() {
-	echo -e "\n"
-	echo "Your score is $SCORE out of a total $TOTAL"
-	if [[ $SCORE -ge $(( TOTAL / 10 * 7 )) ]]; then
-		echo -e "${GREEN}CONGRATULATIONS!${NC} You passed this sample exam!"
-		echo -e "This outcome is no guarantee for the real exam."
+	local passed=false
+	[[ $SCORE -ge $(( TOTAL / 10 * 7 )) ]] && passed=true
+
+	if [[ "$JSON_OUTPUT" == true ]]; then
+		output_json "$passed"
 	else
-		echo -e "${RED}FAIL${NC} You did not pass this sample exam."
-		echo -e "Don't give up and keep trying! ${GREEN}:)${NC}"
+		echo -e "\n"
+		echo "Your score is $SCORE out of a total $TOTAL"
+		if [[ "$passed" == true ]]; then
+			echo -e "${GREEN}CONGRATULATIONS!${NC} You passed this sample exam!"
+			echo -e "This outcome is no guarantee for the real exam."
+		else
+			echo -e "${RED}FAIL${NC} You did not pass this sample exam."
+			echo -e "Don't give up and keep trying! ${GREEN}:)${NC}"
+		fi
+	fi
+}
+
+output_json() {
+	local passed="$1"
+	local timestamp=$(date -Iseconds)
+
+	# Build results array
+	local results_arr=""
+	for i in "${!RESULTS_JSON[@]}"; do
+		[[ $i -gt 0 ]] && results_arr+=","
+		results_arr+="${RESULTS_JSON[$i]}"
+	done
+
+	# Calculate category stats
+	local categories=$(printf '%s\n' "${RESULTS_JSON[@]}" | grep -oP '"category":"\K[^"]+' | sort -u)
+	local cat_stats=""
+	local first=true
+	for cat in $categories; do
+		local cat_total=$(printf '%s\n' "${RESULTS_JSON[@]}" | grep "\"category\":\"$cat\"" | grep -oP '"points":\K[0-9]+' | paste -sd+ | bc)
+		local cat_passed=$(printf '%s\n' "${RESULTS_JSON[@]}" | grep "\"category\":\"$cat\"" | grep '"passed":true' | grep -oP '"points":\K[0-9]+' | paste -sd+ | bc)
+		[[ -z "$cat_passed" ]] && cat_passed=0
+		[[ "$first" == false ]] && cat_stats+=","
+		cat_stats+="\"$cat\":{\"earned\":$cat_passed,\"possible\":$cat_total}"
+		first=false
+	done
+
+	cat <<EOF
+{
+  "timestamp": "$timestamp",
+  "score": $SCORE,
+  "total": $TOTAL,
+  "passed": $passed,
+  "passing_threshold": 70,
+  "categories": {$cat_stats},
+  "checks": [$results_arr]
+}
+EOF
+}
+
+list_tasks() {
+	local json_mode="$1"
+	if [[ "$json_mode" == true ]]; then
+		echo "["
+		local first=true
+		for task in "${TASKS[@]}"; do
+			local name=$(basename "$task" .sh)
+			local category=$(grep "^# Category:" "$task" | sed 's/# Category: //')
+			local desc=$(grep "^# Task:" "$task" | sed 's/# Task: //')
+			[[ "$first" == false ]] && echo ","
+			echo "{\"id\":\"$name\",\"category\":\"$category\",\"description\":\"$desc\"}"
+			first=false
+		done
+		echo "]"
+	else
+		printf "%-12s %-18s %s\n" "TASK" "CATEGORY" "DESCRIPTION"
+		printf "%-12s %-18s %s\n" "----" "--------" "-----------"
+		for task in "${TASKS[@]}"; do
+			local name=$(basename "$task" .sh)
+			local category=$(grep "^# Category:" "$task" | sed 's/# Category: //')
+			local desc=$(grep "^# Task:" "$task" | sed 's/# Task: //')
+			printf "%-12s %-18s %s\n" "$name" "$category" "${desc:0:50}"
+		done
+	fi
+}
+
+get_filtered_tasks() {
+	if [[ -z "$SELECTED_TASKS" ]]; then
+		echo "${TASKS[@]}"
+	else
+		local filtered=()
+		IFS=',' read -ra selected <<< "$SELECTED_TASKS"
+		for task in "${TASKS[@]}"; do
+			local name=$(basename "$task" .sh)
+			local num="${name#task-}"
+			for sel in "${selected[@]}"; do
+				if [[ "$num" == "$sel" ]]; then
+					filtered+=("$task")
+					break
+				fi
+			done
+		done
+		echo "${filtered[@]}"
 	fi
 }
 
@@ -239,6 +372,11 @@ dry_run() {
 main() {
 	parse_args "$@"
 
+	if [[ "$LIST_TASKS" == true ]]; then
+		list_tasks "$JSON_OUTPUT"
+		exit 0
+	fi
+
 	if [[ "$DRY_RUN" == true ]]; then
 		dry_run
 		exit 0
@@ -249,7 +387,13 @@ main() {
 	load_config
 	[[ ${#TASKS[@]} -eq 0 ]] && error_exit "No tasks found in checks/"
 	check_violations
-	for task in "${TASKS[@]}"; do
+
+	# Get filtered tasks if --tasks specified
+	local run_tasks
+	read -ra run_tasks <<< "$(get_filtered_tasks)"
+	[[ ${#run_tasks[@]} -eq 0 ]] && error_exit "No matching tasks found"
+
+	for task in "${run_tasks[@]}"; do
 		evaluate_task "$task"
 	done
 	check_outcome

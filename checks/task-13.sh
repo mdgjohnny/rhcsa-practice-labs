@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Find all files owned by user edwin and copy them to /root/edwinfiles
+# Category: essential-tools
 
 check '[[ -d /root/edwinfiles ]]' \
     "Directory /root/edwinfiles exists" \
