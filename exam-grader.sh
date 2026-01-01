@@ -310,17 +310,19 @@ EOF
 list_tasks() {
 	local json_mode="$1"
 	if [[ "$json_mode" == true ]]; then
-		echo "["
 		local first=true
+		local entries=()
 		for task in "${TASKS[@]}"; do
 			local name=$(basename "$task" .sh)
 			local category=$(grep "^# Category:" "$task" | sed 's/# Category: //')
 			local desc=$(grep "^# Task:" "$task" | sed 's/# Task: //')
-			[[ "$first" == false ]] && echo ","
-			echo "{\"id\":\"$name\",\"category\":\"$category\",\"description\":\"$desc\"}"
-			first=false
+			# Escape quotes in description
+			desc="${desc//\"/\\\"}"
+			entries+=("{\"id\":\"$name\",\"category\":\"$category\",\"description\":\"$desc\"}")
 		done
-		echo "]"
+		# Join with commas and output
+		local IFS=,
+		echo "[${entries[*]}]"
 	else
 		printf "%-12s %-18s %s\n" "TASK" "CATEGORY" "DESCRIPTION"
 		printf "%-12s %-18s %s\n" "----" "--------" "-----------"
