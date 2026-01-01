@@ -41,6 +41,7 @@ SSH_OPTS="-o ConnectTimeout=5"
 
 # SSH wrapper - uses sshpass with ROOT_PASSWORD when set
 # Usage: run_ssh <host> <command>
+# Note: Prefer hostnames over IPs as some systems block IP-based SSH
 run_ssh() {
     local host="$1"
     shift
@@ -51,6 +52,11 @@ run_ssh() {
     fi
 }
 
+# SSH to node2 - tries hostname first, falls back to IP
+ssh_node2() {
+    run_ssh "$NODE2" "$@" 2>/dev/null || run_ssh "$NODE2_IP" "$@"
+}
+
 # ----------------------------------------
 # Argument parsing
 # ----------------------------------------
@@ -59,6 +65,7 @@ usage() {
     echo ""
     echo "Options:"
     echo "  --dry-run         Show configuration and task list without running checks"
+    echo "  --check-ssh       Check SSH connectivity between nodes"
     echo "  --skip-reboot     Skip the reboot check (for API/automation use)"
     echo "  --json            Output results as JSON (for API integration)"
     echo "  --tasks=LIST      Run only specific tasks (comma-separated, e.g., --tasks=01,05,27)"
@@ -72,6 +79,10 @@ parse_args() {
         case "$1" in
             --dry-run)
                 DRY_RUN=true
+                shift
+                ;;
+            --check-ssh)
+                CHECK_SSH=true
                 shift
                 ;;
             --skip-reboot)
@@ -321,6 +332,34 @@ get_filtered_tasks() {
 	fi
 }
 
+check_ssh() {
+    local TARGET_ONE_HOSTNAME="${TARGET_ONE_HOSTNAME:-$NODE1}"
+    local TARGET_ONE_IP="${TARGET_ONE_IP:-$NODE1_IP}"
+    local TARGET_TWO_HOSTNAME="${TARGET_TWO_HOSTNAME:-$NODE2}"
+    local TARGET_TWO_IP="${TARGET_TWO_IP:-$NODE2_IP}"
+	echo -e "\n${YELLOW}--- SSH Connectivity ---${NC}"
+	if [[ -n "$ROOT_PASSWORD" ]]; then
+		echo "     Using sshpass with ROOT_PASSWORD"
+	else
+		echo "     Using key-based authentication"
+	fi
+	if [[ -n "$TARGET_ONE_HOSTNAME" ]]; then
+		if run_ssh "$TARGET_ONE_HOSTNAME" exit &>/dev/null || run_ssh "$TARGET_ONE_IP" exit &>/dev/null; then
+			echo -e "${GREEN}[OK]${NC} Can SSH to node1"
+		else
+			echo -e "${RED}[FAIL]${NC} Cannot SSH to node1 ($TARGET_ONE_HOSTNAME / $TARGET_ONE_IP)"
+		fi
+	fi
+	if [[ -n "$TARGET_TWO_IP" ]]; then
+		if run_ssh "$TARGET_TWO_HOSTNAME" exit &>/dev/null || run_ssh "$TARGET_TWO_IP" exit &>/dev/null; then
+			echo -e "${GREEN}[OK]${NC} Can SSH to node2"
+		else
+			echo -e "${RED}[FAIL]${NC} Cannot SSH to node2 ($TARGET_TWO_HOSTNAME / $TARGET_TWO_IP)"
+		fi
+	fi
+
+}
+
 dry_run() {
 	echo -e "${YELLOW}=== DRY RUN MODE ===${NC}\n"
 
@@ -338,28 +377,9 @@ dry_run() {
 	fi
 
 	# SSH connectivity (quick test)
-	echo -e "\n${YELLOW}--- SSH Connectivity ---${NC}"
-	if [[ -n "$ROOT_PASSWORD" ]]; then
-		echo "     Using sshpass with ROOT_PASSWORD"
-	else
-		echo "     Using key-based authentication"
-	fi
-	if [[ -n "$NODE1_IP" ]]; then
-		if run_ssh "$NODE1" exit &>/dev/null || run_ssh "$NODE1_IP" exit &>/dev/null; then
-			echo -e "${GREEN}[OK]${NC} Can SSH to node1"
-		else
-			echo -e "${RED}[FAIL]${NC} Cannot SSH to node1 ($NODE1 / $NODE1_IP)"
-		fi
-	fi
-	if [[ -n "$NODE2_IP" ]]; then
-		if run_ssh "$NODE2" exit &>/dev/null || run_ssh "$NODE2_IP" exit &>/dev/null; then
-			echo -e "${GREEN}[OK]${NC} Can SSH to node2"
-		else
-			echo -e "${RED}[FAIL]${NC} Cannot SSH to node2 ($NODE2 / $NODE2_IP)"
-		fi
-	fi
+	check_ssh "$NODE1 $NODE1_IP $NODE2 $NODE2_IP"
 
-	# Task files
+    # Task files
 	echo -e "\n${YELLOW}--- Task Files ---${NC}"
 	echo "Found ${#TASKS[@]} task files in checks/"
 	for task in "${TASKS[@]}"; do
@@ -381,6 +401,23 @@ main() {
 		dry_run
 		exit 0
 	fi
+
+    if [[ "$CHECK_SSH" == true ]]; then 
+        if [[ $# -ne 4 && $# -ne 0 ]]; then
+                        echo "check_ssh needs four arguments: <node1-hostname> <node1-ip> <node2-hostname> <node2-ip>" >&2
+                        exit 1
+        else
+            shift
+            local TARGET_ONE_HOSTNAME="$1"
+            local TARGET_ONE_IP="$2"
+            local TARGE_TWO_HOSTNAME="$3"
+            local TARGET_TWO_IP="$4"
+            check_ssh "$TARGET_ONE_HOSTNAME" "$TARGET_ONE_IP" "$TARGET_TWO_HOSTNAME" "$TARGET_TWO_IP"
+        fi
+        # Defaults to calling check_ssh with global variables
+        check_ssh
+            exit 0
+    fi
 
 	check_sudo
 	[[ "$SKIP_REBOOT" == false ]] && check_reboot

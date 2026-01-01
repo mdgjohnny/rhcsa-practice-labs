@@ -1,1 +1,13 @@
+# Logs
 *.log
+
+# Local configuration (contains passwords)
+config
+
+# Database
+results.db
+
+# Python
+.venv/
+__pycache__/
+*.pyc

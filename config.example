@@ -5,13 +5,13 @@
 #   cp config.example config
 #   vim config
 
-# Node 1 (where you run the grader)
-NODE1_IP="192.168.122.10"
-NODE1="rhcsa1"
+# Node 1 (where you run the grader from)
+NODE1_IP="192.168.99.11"
+NODE1="node1"
 
-# Node 2 (remote node)
-NODE2_IP="192.168.122.11"
-NODE2="rhcsa2"
+# Node 2 (remote node for multi-node tasks)
+NODE2_IP="192.168.99.12"
+NODE2="node2"
 
 # Root password for SSH (used with sshpass)
-ROOT_PASSWORD="redhat"
+ROOT_PASSWORD="vagrant"
