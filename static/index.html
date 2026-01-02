@@ -1302,7 +1302,10 @@
                 document.getElementById('node1_ip').value = config.node1_ip || '';
                 document.getElementById('node2').value = config.node2 || 'rhcsa2';
                 document.getElementById('node2_ip').value = config.node2_ip || '';
-                document.getElementById('root_password').value = config.root_password || '';
+                // Password is not returned for security - show placeholder if set
+                const pwField = document.getElementById('root_password');
+                pwField.value = '';
+                pwField.placeholder = config.has_password ? '••••••• (password set)' : 'VM root password';
 
                 document.getElementById('vm1-name').textContent = config.node1 || 'node1';
                 document.getElementById('vm2-name').textContent = config.node2 || 'node2';

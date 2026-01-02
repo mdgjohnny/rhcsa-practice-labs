@@ -8,18 +8,24 @@ import json
 import logging
 import os
 import random
+import re
 import sqlite3
 import subprocess
 import sys
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
 
+# Environment configuration
+DEBUG = os.environ.get('FLASK_DEBUG', 'false').lower() in ('true', '1', 'yes')
+LOG_LEVEL = os.environ.get('LOG_LEVEL', 'DEBUG' if DEBUG else 'INFO').upper()
+
 # Configure logging
 LOG_FILE = Path(__file__).parent.parent / 'api.log'
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=getattr(logging, LOG_LEVEL, logging.INFO),
     format='%(asctime)s [%(levelname)s] %(message)s',
     handlers=[
         logging.FileHandler(LOG_FILE),
@@ -65,6 +71,31 @@ def get_db():
     return conn
 
 
+@contextmanager
+def db_connection():
+    """Context manager for database connections."""
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+
+def parse_grader_json(output):
+    """Parse JSON output from grader script, handling formatting quirks."""
+    try:
+        return json.loads(output)
+    except json.JSONDecodeError:
+        # Try cleaning up common formatting issues
+        cleaned = output.replace('\n,', ',').replace(',]', ']').replace(',}', '}')
+        return json.loads(cleaned)
+
+
 # Initialize DB on startup
 init_db()
 
@@ -89,14 +120,11 @@ def list_tasks():
         logger.error(f"list_tasks failed: {result.stderr}")
         return jsonify({'error': result.stderr}), 500
 
-    # Parse the JSON output (fix formatting issues)
     try:
-        tasks = json.loads(result.stdout.replace('\n,', ','))
+        tasks = parse_grader_json(result.stdout)
     except json.JSONDecodeError as e:
-        logger.warning(f"JSON cleanup needed: {e}")
-        # Fallback: clean up the output
-        cleaned = result.stdout.replace('\n', '').replace(',]', ']')
-        tasks = json.loads(cleaned)
+        logger.error(f"Failed to parse task list: {e}")
+        return jsonify({'error': 'Failed to parse task list'}), 500
 
     logger.debug(f"Returning {len(tasks)} tasks")
     return jsonify(tasks)
@@ -110,7 +138,7 @@ def get_config():
         'node1_ip': '',
         'node2': 'rhcsa2',
         'node2_ip': '',
-        'root_password': ''
+        'has_password': False
     }
 
     if CONFIG_FILE.exists():
@@ -131,22 +159,82 @@ def get_config():
                 elif key == 'node2_ip':
                     config['node2_ip'] = value
                 elif key == 'root_password':
-                    config['root_password'] = value
+                    # Don't expose password, just indicate if set
+                    config['has_password'] = bool(value)
 
     return jsonify(config)
+
+
+def sanitize_config_value(value):
+    """Sanitize config values to prevent injection."""
+    if not value:
+        return ''
+    # Remove quotes and shell metacharacters
+    dangerous_chars = ['"', "'", '`', '$', '\\', ';', '&', '|', '>', '<', '\n', '\r']
+    result = str(value)
+    for char in dangerous_chars:
+        result = result.replace(char, '')
+    return result.strip()
+
+
+def validate_ip(ip):
+    """Validate IP address format."""
+    if not ip:
+        return True  # Empty is ok
+    pattern = r'^(\d{1,3}\.){3}\d{1,3}$'
+    if not re.match(pattern, ip):
+        return False
+    parts = ip.split('.')
+    return all(0 <= int(p) <= 255 for p in parts)
+
+
+def validate_hostname(name):
+    """Validate hostname format."""
+    if not name:
+        return False
+    # Allow alphanumeric, hyphens, max 63 chars per label
+    pattern = r'^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$'
+    return bool(re.match(pattern, name))
 
 
 @app.route('/api/config', methods=['POST'])
 def save_config():
     """Save configuration."""
-    data = request.json
+    data = request.json or {}
+
+    # Validate and sanitize inputs
+    node1 = sanitize_config_value(data.get('node1', 'rhcsa1'))
+    node2 = sanitize_config_value(data.get('node2', 'rhcsa2'))
+    node1_ip = sanitize_config_value(data.get('node1_ip', ''))
+    node2_ip = sanitize_config_value(data.get('node2_ip', ''))
+    root_password = sanitize_config_value(data.get('root_password', ''))
+
+    # Validate hostnames
+    if not validate_hostname(node1):
+        return jsonify({'error': 'Invalid node1 hostname'}), 400
+    if not validate_hostname(node2):
+        return jsonify({'error': 'Invalid node2 hostname'}), 400
+
+    # Validate IPs if provided
+    if node1_ip and not validate_ip(node1_ip):
+        return jsonify({'error': 'Invalid node1 IP address'}), 400
+    if node2_ip and not validate_ip(node2_ip):
+        return jsonify({'error': 'Invalid node2 IP address'}), 400
+
+    # If password not provided, preserve existing
+    if not root_password and CONFIG_FILE.exists():
+        with open(CONFIG_FILE) as f:
+            for line in f:
+                if line.strip().startswith('ROOT_PASSWORD='):
+                    root_password = line.split('=', 1)[1].strip().strip('"\'')
+                    break
 
     config_content = f'''# RHCSA Practice Labs Configuration
-NODE1="{data.get('node1', 'rhcsa1')}"
-NODE1_IP="{data.get('node1_ip', '')}"
-NODE2="{data.get('node2', 'rhcsa2')}"
-NODE2_IP="{data.get('node2_ip', '')}"
-ROOT_PASSWORD="{data.get('root_password', '')}"
+NODE1="{node1}"
+NODE1_IP="{node1_ip}"
+NODE2="{node2}"
+NODE2_IP="{node2_ip}"
+ROOT_PASSWORD="{root_password}"
 '''
 
     with open(CONFIG_FILE, 'w') as f:
@@ -363,24 +451,22 @@ def save_result():
     """Save exam/practice result to database."""
     data = request.json
 
-    conn = get_db()
-    c = conn.cursor()
-    c.execute('''
-        INSERT INTO results (timestamp, mode, score, total, passed, duration_seconds, categories, checks)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (
-        data.get('timestamp', datetime.now().isoformat()),
-        data.get('mode', 'practice'),
-        data.get('score', 0),
-        data.get('total', 0),
-        1 if data.get('passed') else 0,
-        data.get('duration_seconds'),
-        json.dumps(data.get('categories', {})),
-        json.dumps(data.get('checks', []))
-    ))
-    conn.commit()
-    result_id = c.lastrowid
-    conn.close()
+    with db_connection() as conn:
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO results (timestamp, mode, score, total, passed, duration_seconds, categories, checks)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            data.get('timestamp', datetime.now().isoformat()),
+            data.get('mode', 'practice'),
+            data.get('score', 0),
+            data.get('total', 0),
+            1 if data.get('passed') else 0,
+            data.get('duration_seconds'),
+            json.dumps(data.get('categories', {})),
+            json.dumps(data.get('checks', []))
+        ))
+        result_id = c.lastrowid
 
     return jsonify({'id': result_id, 'status': 'saved'})
 
@@ -388,25 +474,24 @@ def save_result():
 @app.route('/api/results', methods=['GET'])
 def get_results():
     """Get all stored results."""
-    conn = get_db()
-    c = conn.cursor()
-    c.execute('SELECT * FROM results ORDER BY timestamp DESC')
-    rows = c.fetchall()
-    conn.close()
+    with db_connection() as conn:
+        c = conn.cursor()
+        c.execute('SELECT * FROM results ORDER BY timestamp DESC')
+        rows = c.fetchall()
 
-    results = []
-    for row in rows:
-        results.append({
-            'id': row['id'],
-            'timestamp': row['timestamp'],
-            'mode': row['mode'],
-            'score': row['score'],
-            'total': row['total'],
-            'passed': bool(row['passed']),
-            'duration_seconds': row['duration_seconds'],
-            'categories': json.loads(row['categories']),
-            'checks': json.loads(row['checks'])
-        })
+        results = []
+        for row in rows:
+            results.append({
+                'id': row['id'],
+                'timestamp': row['timestamp'],
+                'mode': row['mode'],
+                'score': row['score'],
+                'total': row['total'],
+                'passed': bool(row['passed']),
+                'duration_seconds': row['duration_seconds'],
+                'categories': json.loads(row['categories']),
+                'checks': json.loads(row['checks'])
+            })
 
     return jsonify(results)
 
@@ -414,17 +499,16 @@ def get_results():
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
     """Get aggregated statistics."""
-    conn = get_db()
-    c = conn.cursor()
+    with db_connection() as conn:
+        c = conn.cursor()
 
-    # Overall stats
-    c.execute('SELECT COUNT(*) as total, SUM(passed) as passed FROM results')
-    overall = c.fetchone()
+        # Overall stats
+        c.execute('SELECT COUNT(*) as total, SUM(passed) as passed FROM results')
+        overall = c.fetchone()
 
-    # Category performance from results
-    c.execute('SELECT categories FROM results')
-    rows = c.fetchall()
-    conn.close()
+        # Category performance from results
+        c.execute('SELECT categories FROM results')
+        rows = c.fetchall()
 
     category_totals = {}
     for row in rows:
@@ -532,16 +616,10 @@ def random_tasks():
         return jsonify({'error': 'Failed to list tasks', 'message': result.stderr}), 500
 
     try:
-        tasks = json.loads(result.stdout.replace('\n,', ','))
+        tasks = parse_grader_json(result.stdout)
     except json.JSONDecodeError as e:
-        logger.warning(f"JSON parse needed cleanup: {e}")
-        try:
-            cleaned = result.stdout.replace('\n', '').replace(',]', ']')
-            tasks = json.loads(cleaned)
-        except json.JSONDecodeError as e2:
-            logger.error(f"Failed to parse task list: {e2}")
-            logger.error(f"Raw output: {result.stdout[:500]}")
-            return jsonify({'error': 'Failed to parse tasks', 'message': str(e2)}), 500
+        logger.error(f"Failed to parse task list: {e}")
+        return jsonify({'error': 'Failed to parse tasks', 'message': str(e)}), 500
 
     logger.debug(f"Found {len(tasks)} tasks")
 
@@ -556,4 +634,5 @@ def random_tasks():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    logger.info(f"Starting RHCSA Practice Labs API (debug={DEBUG}, log_level={LOG_LEVEL})")
+    app.run(host='0.0.0.0', port=5000, debug=DEBUG)
