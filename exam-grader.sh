@@ -159,6 +159,8 @@ load_config() {
 
 check_sudo() {
 	[[ "$JSON_OUTPUT" == false ]] && clear
+	# Root check skipped for API/JSON mode - SSH uses sshpass with password
+	[[ "$JSON_OUTPUT" == true ]] && return 0
 	ls /root &>/dev/null || error_exit "Script must be run as root"
 }
 

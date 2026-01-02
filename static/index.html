@@ -19,6 +19,109 @@
             --rh-cyan: #009596;
         }
 
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .toast {
+            padding: 1rem 1.25rem;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease-out;
+            position: relative;
+        }
+
+        .toast.success {
+            background: var(--rh-green);
+            border-left: 4px solid #2d6327;
+        }
+
+        .toast.error {
+            background: var(--rh-red-dark);
+            border-left: 4px solid var(--rh-red);
+        }
+
+        .toast.warning {
+            background: #8a6d00;
+            border-left: 4px solid var(--rh-orange);
+        }
+
+        .toast.info {
+            background: #004080;
+            border-left: 4px solid var(--rh-blue);
+        }
+
+        .toast-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .toast-message {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            opacity: 0.7;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .toast-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .toast.hiding {
+            animation: slideOut 0.3s ease-in forwards;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -198,6 +301,25 @@
 
         .task-item.completed {
             opacity: 0.6;
+        }
+
+        .task-item.task-passed {
+            border-left-color: var(--rh-green);
+            background: rgba(146, 212, 0, 0.1);
+        }
+
+        .task-item.task-passed .task-number {
+            background: var(--rh-green);
+            color: var(--rh-dark);
+        }
+
+        .task-item.task-failed {
+            border-left-color: var(--rh-red);
+            background: rgba(204, 0, 0, 0.1);
+        }
+
+        .task-item.task-failed .task-number {
+            background: var(--rh-red);
         }
 
         .task-number {
@@ -597,6 +719,23 @@
             color: var(--rh-gray-light);
         }
 
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(21, 21, 21, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
         .alert {
             padding: 1rem;
             border-radius: 4px;
@@ -743,6 +882,9 @@
     </style>
 </head>
 <body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
     <!-- Header -->
     <header class="header">
         <div class="header-left">
@@ -921,7 +1063,11 @@
             </div>
 
             <!-- Exam Running View -->
-            <div class="content-body hidden" id="view-exam-running">
+            <div class="content-body hidden" id="view-exam-running" style="position: relative;">
+                <!-- Loading Overlay -->
+                <div id="grading-overlay" class="loading-overlay hidden">
+                    <div class="loading">Grading your work...</div>
+                </div>
                 <!-- Breadcrumb -->
                 <div class="breadcrumb" style="margin-bottom: 1rem; font-size: 0.9rem;">
                     <a href="#" onclick="confirmAbandon(); return false;" style="color: var(--rh-gray-light);">Home</a>
@@ -1017,6 +1163,40 @@
         let examStartTime = null;
         let currentTaskIndex = 0;
         const EXAM_DURATION = 3 * 60 * 60 * 1000; // 3 hours
+
+        // Toast Notifications
+        function showToast(type, title, message, duration = 5000) {
+            const container = document.getElementById('toast-container');
+            const icons = {
+                success: '✓',
+                error: '✗',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type] || 'ℹ'}</span>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    ${message ? `<div class="toast-message">${message}</div>` : ''}
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+
+            container.appendChild(toast);
+
+            // Auto-remove after duration
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.classList.add('hiding');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+
+            return toast;
+        }
 
         // View Management
         function showView(viewId) {
@@ -1232,7 +1412,7 @@
         function startPractice() {
             const ids = getSelectedTaskIds();
             if (ids.length === 0) {
-                alert('Please select at least one task.');
+                showToast('warning', 'No Tasks Selected', 'Please select at least one task to practice.');
                 return;
             }
             selectedTasks = allTasks.filter(t => ids.includes(t.id));
@@ -1251,7 +1431,7 @@
                 document.getElementById('breadcrumb-mode').textContent = 'Exam';
                 startExamView(tasks, true);
             } catch (e) {
-                alert('Failed to generate exam tasks.');
+                showToast('error', 'Exam Generation Failed', 'Failed to generate questions for exam mode. Check server logs.');
             }
         }
 
@@ -1317,8 +1497,66 @@
                     <h2>${task.id}</h2>
                     <p style="font-size: 1.1rem; line-height: 1.6;">${task.description}</p>
                     <p class="mt-1" style="color: var(--rh-cyan);">Category: ${task.category}</p>
+                    <div class="mt-2" style="display: flex; align-items: center; gap: 1rem;">
+                        <button class="btn btn-primary" onclick="gradeCurrentTask('${task.id}')" id="grade-task-btn">
+                            ✓ Grade This Task
+                        </button>
+                        <span id="task-grade-result"></span>
+                    </div>
                 </div>
             `;
+        }
+
+        async function gradeCurrentTask(taskId) {
+            const btn = document.getElementById('grade-task-btn');
+            const resultEl = document.getElementById('task-grade-result');
+
+            btn.disabled = true;
+            btn.textContent = 'Grading...';
+            resultEl.innerHTML = '<span style="color: var(--rh-gray-light);">Checking...</span>';
+
+            try {
+                const res = await fetch(`/api/grade-task/${taskId}`, { method: 'POST' });
+                const result = await res.json();
+
+                if (result.error) {
+                    resultEl.innerHTML = `<span style="color: var(--rh-red);">✗ Error: ${result.message}</span>`;
+                    showToast('error', 'Grading Failed', result.message);
+                } else if (result.passed) {
+                    resultEl.innerHTML = `
+                        <span style="color: var(--rh-green);">✓ ALL PASSED (${result.points}/${result.max_points} pts)</span>
+                        <div style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--rh-gray-light);">
+                            ${result.details ? result.details.join('<br>') : ''}
+                        </div>
+                    `;
+                    showToast('success', 'Task Passed!', `${taskId}: ${result.checks_passed}/${result.checks_total} checks passed`);
+                    updateTaskStatus(taskId, true);
+                } else {
+                    resultEl.innerHTML = `
+                        <span style="color: var(--rh-red);">✗ ${result.checks_passed}/${result.checks_total} checks passed (${result.points}/${result.max_points} pts)</span>
+                        <div style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--rh-gray-light);">
+                            ${result.details ? result.details.join('<br>') : ''}
+                        </div>
+                    `;
+                    showToast('warning', 'Task Not Complete', `${result.checks_passed}/${result.checks_total} checks passed`);
+                    updateTaskStatus(taskId, false);
+                }
+            } catch (e) {
+                resultEl.innerHTML = `<span style="color: var(--rh-red);">✗ Connection error</span>`;
+                showToast('error', 'Connection Error', 'Failed to reach grading server.');
+            }
+
+            btn.disabled = false;
+            btn.textContent = '✓ Grade This Task';
+        }
+
+        function updateTaskStatus(taskId, passed) {
+            // Update sidebar task item to show pass/fail status
+            const taskItem = document.querySelector(`.task-item[data-id="${taskId}"]`);
+            if (taskItem) {
+                taskItem.classList.remove('task-passed', 'task-failed');
+                taskItem.classList.add(passed ? 'task-passed' : 'task-failed');
+            }
         }
 
         // Timer
@@ -1359,8 +1597,10 @@
         async function submitExam() {
             stopTimer();
             const duration = examStartTime ? Math.floor((Date.now() - examStartTime) / 1000) : null;
+            const overlay = document.getElementById('grading-overlay');
 
-            document.getElementById('view-exam-running').innerHTML = '<div class="loading">Grading your work...</div>';
+            // Show loading overlay instead of destroying the view
+            overlay.classList.remove('hidden');
 
             try {
                 // Send task IDs to the API
@@ -1374,7 +1614,8 @@
                 const result = await res.json();
 
                 if (result.error) {
-                    alert('Grading error: ' + result.error);
+                    overlay.classList.add('hidden');
+                    showToast('error', 'Grading Error', result.message || result.error);
                     showView('mode-select');
                     return;
                 }
@@ -1386,9 +1627,11 @@
                     body: JSON.stringify({ ...result, mode: currentMode, duration_seconds: duration })
                 });
 
+                overlay.classList.add('hidden');
                 displayResults(result);
             } catch (e) {
-                alert('Failed to submit exam.');
+                overlay.classList.add('hidden');
+                showToast('error', 'Submission Failed', 'Failed to submit for grading. Please try again.');
                 showView('mode-select');
             }
         }

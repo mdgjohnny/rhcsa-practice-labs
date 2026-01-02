@@ -5,14 +5,28 @@ Flask backend for the web interface
 """
 
 import json
+import logging
 import os
 import random
 import sqlite3
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
+
+# Configure logging
+LOG_FILE = Path(__file__).parent.parent / 'api.log'
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[
+        logging.FileHandler(LOG_FILE),
+        logging.StreamHandler(sys.stderr)
+    ]
+)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__, static_folder='../static', static_url_path='')
 
@@ -64,6 +78,7 @@ def index():
 @app.route('/api/tasks', methods=['GET'])
 def list_tasks():
     """List all available tasks."""
+    logger.debug("list_tasks called")
     result = subprocess.run(
         [str(GRADER_SCRIPT), '--list-tasks', '--json'],
         capture_output=True,
@@ -71,16 +86,19 @@ def list_tasks():
         cwd=str(BASE_DIR)
     )
     if result.returncode != 0:
+        logger.error(f"list_tasks failed: {result.stderr}")
         return jsonify({'error': result.stderr}), 500
 
     # Parse the JSON output (fix formatting issues)
     try:
         tasks = json.loads(result.stdout.replace('\n,', ','))
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
+        logger.warning(f"JSON cleanup needed: {e}")
         # Fallback: clean up the output
         cleaned = result.stdout.replace('\n', '').replace(',]', ']')
         tasks = json.loads(cleaned)
 
+    logger.debug(f"Returning {len(tasks)} tasks")
     return jsonify(tasks)
 
 
@@ -193,21 +211,29 @@ def healthcheck():
 @app.route('/api/run', methods=['POST'])
 def run_grader():
     """Run the exam grader."""
-    data = request.json
-    mode = data.get('mode', 'practice')  # practice or exam
-    tasks = data.get('tasks', [])  # List of task IDs
+    data = request.json or {}
+    mode = data.get('mode', 'practice')
+    tasks = data.get('tasks', [])
 
-    # Build command
-    cmd = [str(GRADER_SCRIPT), '--skip-reboot', '--json']
+    logger.info(f"run_grader called: mode={mode}, tasks={tasks}")
 
-    if tasks:
-        # Extract task numbers - handles both "task-01" and "01" formats
-        task_nums = []
-        for t in tasks:
-            # Strip 'task-' prefix if present, keep the rest
-            num = t.replace('task-', '') if t.startswith('task-') else t
-            task_nums.append(num)
-        cmd.append(f"--tasks={','.join(task_nums)}")
+    # Validate tasks
+    if not tasks or len(tasks) == 0:
+        logger.warning("run_grader: No tasks provided")
+        return jsonify({
+            'error': 'No tasks selected',
+            'message': 'Please select at least one task to grade.'
+        }), 400
+
+    # Extract task numbers - handles both "task-01" and "01" formats
+    task_nums = []
+    for t in tasks:
+        num = t.replace('task-', '') if isinstance(t, str) and t.startswith('task-') else str(t)
+        task_nums.append(num)
+
+    # Build command (Flask must be run with sudo for SSH access to VMs)
+    cmd = [str(GRADER_SCRIPT), '--skip-reboot', '--json', f"--tasks={','.join(task_nums)}"]
+    logger.debug(f"Running grader command: {' '.join(cmd)}")
 
     # Run the grader
     result = subprocess.run(
@@ -217,15 +243,119 @@ def run_grader():
         cwd=str(BASE_DIR)
     )
 
+    logger.debug(f"Grader returncode: {result.returncode}")
+    if result.stderr:
+        logger.debug(f"Grader stderr: {result.stderr[:500]}")
+
     if result.returncode != 0:
-        return jsonify({'error': result.stderr or 'Grader failed'}), 500
+        error_msg = result.stderr.strip() if result.stderr else 'Grader process failed'
+        logger.error(f"Grader failed: {error_msg}")
+        logger.error(f"Grader stdout: {result.stdout[:500] if result.stdout else 'empty'}")
+
+        # Check for common errors and provide helpful messages
+        if 'must be run as root' in (result.stdout or ''):
+            error_msg = 'Flask must be run with sudo: sudo python app.py'
+
+        return jsonify({
+            'error': 'Grader failed',
+            'message': error_msg,
+            'details': result.stdout[:500] if result.stdout else None
+        }), 500
 
     try:
         grader_result = json.loads(result.stdout)
+        logger.info(f"Grader success: score={grader_result.get('score', 'N/A')}/{grader_result.get('total', 'N/A')}")
     except json.JSONDecodeError as e:
-        return jsonify({'error': f'Failed to parse grader output: {e}', 'raw': result.stdout}), 500
+        logger.error(f"JSON parse error: {e}")
+        logger.error(f"Raw output: {result.stdout[:500]}")
+        return jsonify({
+            'error': 'Invalid grader output',
+            'message': f'Failed to parse grader response: {str(e)}',
+            'raw': result.stdout[:1000]
+        }), 500
 
     return jsonify(grader_result)
+
+
+@app.route('/api/grade-task/<task_id>', methods=['POST'])
+def grade_single_task(task_id):
+    """Grade a single task and return the result."""
+    logger.info(f"grade_single_task called: task_id={task_id}")
+
+    # Extract task number
+    task_num = task_id.replace('task-', '') if task_id.startswith('task-') else task_id
+
+    # Build command for single task
+    cmd = [str(GRADER_SCRIPT), '--skip-reboot', '--json', f"--tasks={task_num}"]
+    logger.debug(f"Running single task grader: {' '.join(cmd)}")
+
+    result = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        cwd=str(BASE_DIR)
+    )
+
+    logger.debug(f"Single task grader returncode: {result.returncode}")
+
+    if result.returncode != 0:
+        error_msg = result.stderr.strip() if result.stderr else 'Grader process failed'
+        logger.error(f"Single task grader failed: {error_msg}")
+
+        # Check for common errors
+        if 'must be run as root' in (result.stdout or ''):
+            error_msg = 'Flask must be run with sudo: sudo python app.py'
+
+        return jsonify({
+            'error': 'Grader failed',
+            'message': error_msg,
+            'task_id': task_id
+        }), 500
+
+    try:
+        grader_result = json.loads(result.stdout)
+
+        # Extract all checks for this task (tasks can have multiple checks)
+        task_checks = [c for c in grader_result.get('checks', [])
+                       if c.get('task') == task_id or c.get('task') == f"task-{task_num}"]
+
+        if task_checks:
+            # Aggregate results
+            total_points = sum(c.get('points', 0) for c in task_checks if c.get('passed'))
+            max_points = sum(c.get('points', 0) for c in task_checks)
+            all_passed = all(c.get('passed', False) for c in task_checks)
+            passed_count = sum(1 for c in task_checks if c.get('passed'))
+            total_count = len(task_checks)
+
+            # Build detailed message
+            check_details = [f"{'✓' if c.get('passed') else '✗'} {c.get('check', 'Check')}"
+                             for c in task_checks]
+
+            logger.info(f"Task {task_id}: {passed_count}/{total_count} checks passed, {total_points}/{max_points} points")
+            return jsonify({
+                'task_id': task_id,
+                'passed': all_passed,
+                'points': total_points,
+                'max_points': max_points,
+                'checks_passed': passed_count,
+                'checks_total': total_count,
+                'details': check_details,
+                'message': f"{passed_count}/{total_count} checks passed"
+            })
+        else:
+            return jsonify({
+                'task_id': task_id,
+                'passed': False,
+                'message': 'Task not found in grader output'
+            })
+
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON parse error for single task: {e}")
+        return jsonify({
+            'error': 'Invalid grader output',
+            'message': str(e),
+            'task_id': task_id
+        }), 500
 
 
 @app.route('/api/results', methods=['POST'])
@@ -386,6 +516,8 @@ def random_tasks():
     count = request.args.get('count', 15, type=int)
     count = max(13, min(20, count))  # Clamp between 13-20
 
+    logger.info(f"random_tasks called: count={count}")
+
     # Get all tasks
     result = subprocess.run(
         [str(GRADER_SCRIPT), '--list-tasks', '--json'],
@@ -394,17 +526,31 @@ def random_tasks():
         cwd=str(BASE_DIR)
     )
 
+    logger.debug(f"list-tasks returncode: {result.returncode}")
+    if result.returncode != 0:
+        logger.error(f"list-tasks failed: {result.stderr}")
+        return jsonify({'error': 'Failed to list tasks', 'message': result.stderr}), 500
+
     try:
         tasks = json.loads(result.stdout.replace('\n,', ','))
-    except json.JSONDecodeError:
-        cleaned = result.stdout.replace('\n', '').replace(',]', ']')
-        tasks = json.loads(cleaned)
+    except json.JSONDecodeError as e:
+        logger.warning(f"JSON parse needed cleanup: {e}")
+        try:
+            cleaned = result.stdout.replace('\n', '').replace(',]', ']')
+            tasks = json.loads(cleaned)
+        except json.JSONDecodeError as e2:
+            logger.error(f"Failed to parse task list: {e2}")
+            logger.error(f"Raw output: {result.stdout[:500]}")
+            return jsonify({'error': 'Failed to parse tasks', 'message': str(e2)}), 500
+
+    logger.debug(f"Found {len(tasks)} tasks")
 
     # Exclude task-ssh (it's a prereq check)
     tasks = [t for t in tasks if t['id'] != 'task-ssh']
 
     # Select random tasks
     selected = random.sample(tasks, min(count, len(tasks)))
+    logger.info(f"Selected {len(selected)} random tasks for exam")
 
     return jsonify(selected)
 
