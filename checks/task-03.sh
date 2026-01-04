@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# Task: Set hostname on node1
+# Task: Set hostname to rhcsa1 on node1
 # Category: networking
+# Target: node1
 
-LOCAL_HOSTNAME=$(hostname -s)
-
-check '[[ "$LOCAL_HOSTNAME" == "$NODE1" ]]' \
-    "Hostname set to $NODE1" \
-    "Hostname not set to $NODE1 (got $LOCAL_HOSTNAME)"
+check 'run_ssh "$NODE1_IP" "hostname -s" 2>/dev/null | grep -q "^rhcsa1$"' \
+    "Hostname set to rhcsa1" \
+    "Hostname not set to rhcsa1"
