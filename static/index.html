@@ -2396,6 +2396,12 @@
             // Ensure index is valid
             if (currentTaskIndex >= selectedTasks.length) currentTaskIndex = 0;
 
+            // Collapse all categories by default for cleaner view
+            collapsedCategories.clear();
+            const allCategories = [...new Set(selectedTasks.map(t => t.category))];
+            allCategories.forEach(c => collapsedCategories.add(c));
+            document.getElementById('toggle-collapse').textContent = 'Expand All';
+
             // Show the practice view
             showView('exam-running');
             const examSidebar = document.getElementById('exam-sidebar');
