@@ -29,6 +29,7 @@ SKIP_REBOOT=false
 JSON_OUTPUT=false
 LIST_TASKS=false
 SELECTED_TASKS=""
+TARGET_OVERRIDE=""
 
 # For JSON output - stores results
 declare -a RESULTS_JSON=()
@@ -90,6 +91,7 @@ usage() {
     echo "  --skip-reboot     Skip the reboot check (for API/automation use)"
     echo "  --json            Output results as JSON (for API integration)"
     echo "  --tasks=LIST      Run only specific tasks (comma-separated, e.g., --tasks=01,05,27)"
+    echo "  --target=VM       Override target VM (node1, node2, or both)"
     echo "  --list-tasks      List all available tasks with categories"
     echo "  -h, --help        Show this help message"
     exit 0
@@ -116,6 +118,14 @@ parse_args() {
                 ;;
             --tasks=*)
                 SELECTED_TASKS="${1#*=}"
+                shift
+                ;;
+            --target=*)
+                TARGET_OVERRIDE="${1#*=}"
+                if [[ "$TARGET_OVERRIDE" != "node1" && "$TARGET_OVERRIDE" != "node2" && "$TARGET_OVERRIDE" != "both" ]]; then
+                    echo "Invalid target: $TARGET_OVERRIDE (must be node1, node2, or both)"
+                    exit 1
+                fi
                 shift
                 ;;
             --list-tasks)
@@ -318,21 +328,35 @@ list_tasks() {
 			local name=$(basename "$task" .sh)
 			local category=$(grep "^# Category:" "$task" | sed 's/# Category: //')
 			local desc=$(grep "^# Task:" "$task" | sed 's/# Task: //')
+			local target=$(grep "^# Target:" "$task" | sed 's/# Target: //')
+			# Default target based on description if not specified
+			if [[ -z "$target" ]]; then
+				if [[ "$desc" == *"node2"* ]] && [[ "$desc" != *"node1"* ]]; then
+					target="node2"
+				elif [[ "$desc" == *"node1"* ]] && [[ "$desc" != *"node2"* ]]; then
+					target="node1"
+				elif [[ "$desc" == *"both"* ]] || [[ "$desc" == *"node1"* && "$desc" == *"node2"* ]]; then
+					target="both"
+				else
+					target="node1"  # Default
+				fi
+			fi
 			# Escape quotes in description
 			desc="${desc//\"/\\\"}"
-			entries+=("{\"id\":\"$name\",\"category\":\"$category\",\"description\":\"$desc\"}")
+			entries+=("{\"id\":\"$name\",\"category\":\"$category\",\"description\":\"$desc\",\"target\":\"$target\"}")
 		done
 		# Join with commas and output
 		local IFS=,
 		echo "[${entries[*]}]"
 	else
-		printf "%-12s %-18s %s\n" "TASK" "CATEGORY" "DESCRIPTION"
-		printf "%-12s %-18s %s\n" "----" "--------" "-----------"
+		printf "%-12s %-8s %-18s %s\n" "TASK" "TARGET" "CATEGORY" "DESCRIPTION"
+		printf "%-12s %-8s %-18s %s\n" "----" "------" "--------" "-----------"
 		for task in "${TASKS[@]}"; do
 			local name=$(basename "$task" .sh)
 			local category=$(grep "^# Category:" "$task" | sed 's/# Category: //')
 			local desc=$(grep "^# Task:" "$task" | sed 's/# Task: //')
-			printf "%-12s %-18s %s\n" "$name" "$category" "${desc:0:50}"
+			local target=$(grep "^# Target:" "$task" | sed 's/# Target: //' || echo "node1")
+			printf "%-12s %-8s %-18s %s\n" "$name" "${target:-node1}" "$category" "${desc:0:45}"
 		done
 	fi
 }
@@ -551,6 +575,29 @@ main() {
 	[[ "$SKIP_REBOOT" == false ]] && check_reboot
 	load_config
 	[[ ${#TASKS[@]} -eq 0 ]] && error_exit "No tasks found in checks/"
+
+	# Apply target VM override if specified
+	if [[ -n "$TARGET_OVERRIDE" ]]; then
+		if [[ "$JSON_OUTPUT" == false ]]; then
+			echo -e "${YELLOW}Target override: $TARGET_OVERRIDE${NC}"
+		fi
+		case "$TARGET_OVERRIDE" in
+			node1)
+				# Redirect all node2 checks to node1
+				NODE2_IP="$NODE1_IP"
+				NODE2="$NODE1"
+				;;
+			node2)
+				# Redirect all node1 checks to node2
+				NODE1_IP="$NODE2_IP"
+				NODE1="$NODE2"
+				;;
+			both)
+				# Default behavior - no override needed
+				;;
+		esac
+	fi
+
 	check_violations
 
 	# Get filtered tasks if --tasks specified

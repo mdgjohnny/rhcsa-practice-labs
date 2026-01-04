@@ -1,582 +1,858 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RHCSA Practice Labs</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <style>
         :root {
-            --rh-red: #EE0000;
-            --rh-red-dark: #A30000;
-            --rh-black: #151515;
-            --rh-gray-dark: #1F1F1F;
-            --rh-gray: #3C3F42;
-            --rh-gray-light: #6A6E73;
-            --rh-white: #FFFFFF;
-            --rh-blue: #0066CC;
-            --rh-green: #3E8635;
-            --rh-orange: #F0AB00;
-            --rh-cyan: #009596;
-        }
+            /* Palette - Premium Dark */
+            --bg-body: #0a0a0b;
+            --bg-card: #141416;
+            --bg-card-glass: rgba(26, 26, 29, 0.7);
 
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 400px;
-        }
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
 
-        .toast {
-            padding: 1rem 1.25rem;
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            animation: slideIn 0.3s ease-out;
-            position: relative;
-        }
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --primary-hover: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
 
-        .toast.success {
-            background: var(--rh-green);
-            border-left: 4px solid #2d6327;
-        }
+            --success: #22c55e;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
 
-        .toast.error {
-            background: var(--rh-red-dark);
-            border-left: 4px solid var(--rh-red);
-        }
+            /* RH Legacy (kept for specific specific target pills but muted) */
+            --rh-red: #ef4444;
+            --rh-green: #22c55e;
+            --rh-orange: #f59e0b;
+            --rh-blue: #3b82f6;
+            --rh-cyan: #06b6d4;
+            --rh-black: #0a0a0b;
+            --rh-gray-dark: #18181b;
+            --rh-gray: #27272a;
+            --rh-gray-light: #71717a;
+            --rh-white: #ffffff;
 
-        .toast.warning {
-            background: #8a6d00;
-            border-left: 4px solid var(--rh-orange);
-        }
+            /* Effects */
+            --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+            --glass-shine: rgba(255, 255, 255, 0.03);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
-        .toast.info {
-            background: #004080;
-            border-left: 4px solid var(--rh-blue);
-        }
-
-        .toast-icon {
-            font-size: 1.25rem;
-            flex-shrink: 0;
-        }
-
-        .toast-content {
-            flex: 1;
-        }
-
-        .toast-title {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .toast-message {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .toast-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.25rem;
-            cursor: pointer;
-            opacity: 0.7;
-            padding: 0;
-            line-height: 1;
-        }
-
-        .toast-close:hover {
-            opacity: 1;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
+            /* Toast Notifications - Re-added below vars */
+            .toast-container {
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                max-width: 400px;
             }
-            to {
-                transform: translateX(0);
+
+            .toast {
+                padding: 1rem 1.25rem;
+                border-radius: 8px;
+                background: rgba(20, 20, 22, 0.95);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: var(--shadow-lg);
+                display: flex;
+                align-items: flex-start;
+                gap: 1rem;
+                animation: slideIn 0.3s ease-out;
+                color: var(--text-main);
+            }
+
+            .toast.success {
+                border-left: 4px solid var(--success);
+            }
+
+            .toast.error {
+                border-left: 4px solid var(--error);
+            }
+
+            .toast.warning {
+                border-left: 4px solid var(--warning);
+            }
+
+            .toast.info {
+                border-left: 4px solid var(--info);
+            }
+
+            .toast-title {
+                font-weight: 600;
+                font-size: 0.95rem;
+                margin-bottom: 0.15rem;
+            }
+
+            .toast-message {
+                font-size: 0.9rem;
+                color: var(--text-muted);
+            }
+
+            .toast-close {
+                background: none;
+                border: none;
+                color: var(--text-muted);
+                cursor: pointer;
+                padding: 0.25rem;
+                transition: color 0.2s;
+            }
+
+            .toast-close:hover {
+                color: var(--text-main);
+            }
+
+
+            /* Toast Notifications */
+            .toast-container {
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                max-width: 400px;
+            }
+
+            .toast {
+                padding: 1rem 1.25rem;
+                border-radius: 6px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+                display: flex;
+                align-items: flex-start;
+                gap: 0.75rem;
+                animation: slideIn 0.3s ease-out;
+                position: relative;
+            }
+
+            .toast.success {
+                background: var(--rh-green);
+                border-left: 4px solid #2d6327;
+            }
+
+            .toast.error {
+                background: var(--rh-red-dark);
+                border-left: 4px solid var(--rh-red);
+            }
+
+            .toast.warning {
+                background: #8a6d00;
+                border-left: 4px solid var(--rh-orange);
+            }
+
+            .toast.info {
+                background: #004080;
+                border-left: 4px solid var(--rh-blue);
+            }
+
+            .toast-icon {
+                font-size: 1.25rem;
+                flex-shrink: 0;
+            }
+
+            .toast-content {
+                flex: 1;
+            }
+
+            .toast-title {
+                font-weight: 600;
+                margin-bottom: 0.25rem;
+            }
+
+            .toast-message {
+                font-size: 0.9rem;
+                opacity: 0.9;
+            }
+
+            .toast-close {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 1.25rem;
+                cursor: pointer;
+                opacity: 0.7;
+                padding: 0;
+                line-height: 1;
+            }
+
+            .toast-close:hover {
                 opacity: 1;
             }
-        }
 
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
             }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
+
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
             }
-        }
-
-        .toast.hiding {
-            animation: slideOut 0.3s ease-in forwards;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Red Hat Display', 'Segoe UI', system-ui, sans-serif;
-            background: var(--rh-black);
-            color: var(--rh-white);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Top Header Bar */
-        .header {
-            background: var(--rh-gray-dark);
-            border-bottom: 3px solid var(--rh-red);
-            padding: 0.75rem 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        .logo-icon {
-            width: 28px;
-            height: 28px;
-            background: var(--rh-red);
-            border-radius: 2px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        .header-center {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .vm-status {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .vm-indicator {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.4rem 0.75rem;
-            background: var(--rh-gray);
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-
-        .vm-indicator .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--rh-gray-light);
-        }
-
-        .vm-indicator .dot.ok { background: var(--rh-green); }
-        .vm-indicator .dot.fail { background: var(--rh-red); }
-        .vm-indicator .dot.pending { background: var(--rh-orange); }
-
-        .timer-display {
-            font-family: 'Consolas', monospace;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--rh-white);
-            padding: 0.25rem 1rem;
-            background: var(--rh-gray);
-            border-radius: 4px;
-        }
-
-        .timer-display.warning {
-            color: var(--rh-orange);
-            animation: pulse 1s infinite;
-        }
-
-        .timer-display.critical {
-            color: var(--rh-red);
-            animation: pulse 0.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        .header-right {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        /* Main Layout */
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        /* Left Sidebar - Task List */
-        .sidebar {
-            width: 320px;
-            background: var(--rh-gray-dark);
-            border-right: 1px solid var(--rh-gray);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .sidebar-header {
-            padding: 1rem;
-            border-bottom: 1px solid var(--rh-gray);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .sidebar-header h2 {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--rh-gray-light);
-        }
-
-        .task-count {
-            font-size: 0.85rem;
-            color: var(--rh-gray-light);
-        }
-
-        .task-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0.5rem;
-        }
-
-        .task-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            margin-bottom: 0.25rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.15s;
-            border-left: 3px solid transparent;
-        }
-
-        .task-item:hover {
-            background: var(--rh-gray);
-        }
-
-        .task-item.active {
-            background: var(--rh-gray);
-            border-left-color: var(--rh-red);
-        }
-
-        .task-item.completed {
-            opacity: 0.6;
-        }
-
-        .task-item.task-passed {
-            border-left-color: var(--rh-green);
-            background: rgba(146, 212, 0, 0.1);
-        }
-
-        .task-item.task-passed .task-number {
-            background: var(--rh-green);
-            color: var(--rh-dark);
-        }
-
-        .task-item.task-failed {
-            border-left-color: var(--rh-red);
-            background: rgba(204, 0, 0, 0.1);
-        }
-
-        .task-item.task-failed .task-number {
-            background: var(--rh-red);
-        }
-
-        .task-number {
-            width: 24px;
-            height: 24px;
-            background: var(--rh-gray);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-
-        .task-item.completed .task-number {
-            background: var(--rh-green);
-        }
-
-        .task-item.failed .task-number {
-            background: var(--rh-red);
-        }
-
-        .task-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .task-title {
-            font-size: 0.9rem;
-            margin-bottom: 0.25rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .task-category {
-            font-size: 0.75rem;
-            color: var(--rh-cyan);
-            text-transform: capitalize;
-        }
-
-        /* Main Content Area */
-        .content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .content-header {
-            padding: 1.5rem 2rem;
-            border-bottom: 1px solid var(--rh-gray);
-            background: var(--rh-gray-dark);
-        }
-
-        .content-header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .content-header .meta {
-            display: flex;
-            gap: 1.5rem;
-            font-size: 0.85rem;
-            color: var(--rh-gray-light);
-        }
-
-        .content-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 2rem;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 0.6rem 1.25rem;
-            border: none;
-            border-radius: 4px;
-            font-family: inherit;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: var(--rh-red);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--rh-red-dark);
-        }
-
-        .btn-secondary {
-            background: var(--rh-gray);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #4a4d50;
-        }
-
-        .btn-success {
-            background: var(--rh-green);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #2e6a28;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--rh-gray-light);
-            color: var(--rh-white);
-        }
-
-        .btn-outline:hover {
-            border-color: var(--rh-white);
-        }
-
-        /* Cards */
-        .card {
-            background: var(--rh-gray-dark);
-            border: 1px solid var(--rh-gray);
-            border-radius: 6px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .card h2 {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--rh-gray);
-        }
-
-        /* Forms */
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.4rem;
-            font-size: 0.85rem;
-            color: var(--rh-gray-light);
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 0.6rem 0.75rem;
-            background: var(--rh-black);
-            border: 1px solid var(--rh-gray);
-            border-radius: 4px;
-            color: var(--rh-white);
-            font-family: inherit;
-            font-size: 0.9rem;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--rh-blue);
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-
-        /* Mode Selection */
-        .mode-cards {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-            margin: 1.5rem 0;
-        }
-
-        .mode-card {
-            background: var(--rh-gray-dark);
-            border: 2px solid var(--rh-gray);
-            border-radius: 8px;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .mode-card:hover {
-            border-color: var(--rh-gray-light);
-        }
-
-        .mode-card.active {
-            border-color: var(--rh-red);
-            background: rgba(238, 0, 0, 0.1);
-        }
-
-        .mode-card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .mode-card p {
-            color: var(--rh-gray-light);
-            font-size: 0.9rem;
-        }
-
-        .mode-card .icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        /* Category Grid */
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .category-card {
-            background: var(--rh-gray-dark);
-            border: 2px solid var(--rh-gray);
-            border-radius: 8px;
-            padding: 1.25rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .category-card:hover {
-            border-color: var(--rh-gray-light);
-            background: var(--rh-gray);
-        }
-
-        .category-card h4 {
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-            text-transform: capitalize;
-        }
-
-        .category-card .task-count {
-            color: var(--rh-gray-light);
-            font-size: 0.85rem;
-        }
-
-        @media (max-width: 768px) {
-            .category-grid {
+
+            .toast.hiding {
+                animation: slideOut 0.3s ease-in forwards;
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                background: var(--bg-body);
+                color: var(--text-main);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                line-height: 1.5;
+            }
+
+            /* Top Header Bar */
+            .header {
+                background: rgba(10, 10, 11, 0.8);
+                backdrop-filter: blur(12px);
+                border-bottom: var(--glass-border);
+                padding: 0.75rem 1.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                position: sticky;
+                top: 0;
+                z-index: 50;
+            }
+
+            .header-left {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .logo {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-weight: 700;
+                font-size: 1.1rem;
+            }
+
+            .logo-icon {
+                width: 28px;
+                height: 28px;
+                background: var(--rh-red);
+                border-radius: 2px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 0.9rem;
+            }
+
+            .header-center {
+                display: flex;
+                align-items: center;
+                gap: 2rem;
+            }
+
+            .vm-status {
+                display: flex;
+                gap: 1rem;
+            }
+
+            .vm-indicator {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.4rem 0.75rem;
+                background: var(--rh-gray);
+                border-radius: 4px;
+                font-size: 0.85rem;
+            }
+
+            .vm-indicator .dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--rh-gray-light);
+            }
+
+            .vm-indicator .dot.ok {
+                background: var(--rh-green);
+            }
+
+            .vm-indicator .dot.fail {
+                background: var(--rh-red);
+            }
+
+            .vm-indicator .dot.pending {
+                background: var(--rh-orange);
+            }
+
+            .timer-display {
+                font-family: 'Consolas', monospace;
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: var(--rh-white);
+                padding: 0.25rem 1rem;
+                background: var(--rh-gray);
+                border-radius: 4px;
+            }
+
+            .timer-display.warning {
+                color: var(--rh-orange);
+                animation: pulse 1s infinite;
+            }
+
+            .timer-display.critical {
+                color: var(--rh-red);
+                animation: pulse 0.5s infinite;
+            }
+
+            @keyframes pulse {
+
+                0%,
+                100% {
+                    opacity: 1;
+                }
+
+                50% {
+                    opacity: 0.6;
+                }
+            }
+
+            .header-right {
+                display: flex;
+                gap: 0.75rem;
+            }
+
+            /* Main Layout */
+            .main-container {
+                display: flex;
+                flex: 1;
+                overflow: hidden;
+            }
+
+            /* Left Sidebar - Task List */
+            .sidebar {
+                width: 320px;
+                background: var(--rh-gray-dark);
+                border-right: 1px solid var(--rh-gray);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .sidebar-header {
+                padding: 1rem;
+                border-bottom: 1px solid var(--rh-gray);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .sidebar-header h2 {
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: var(--rh-gray-light);
+            }
+
+            .task-count {
+                font-size: 0.85rem;
+                color: var(--rh-gray-light);
+            }
+
+            /* Sidebar search and controls */
+            .sidebar-controls {
+                padding: 0.5rem;
+                border-bottom: 1px solid var(--rh-gray);
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .sidebar-search {
+                width: 100%;
+                padding: 0.5rem 0.75rem;
+                background: var(--rh-black);
+                border: 1px solid var(--rh-gray);
+                border-radius: 4px;
+                color: var(--rh-white);
+                font-size: 0.85rem;
+            }
+
+            .sidebar-search:focus {
+                outline: none;
+                border-color: var(--rh-blue);
+            }
+
+            .sidebar-toggles {
+                display: flex;
+                gap: 0.5rem;
+                font-size: 0.75rem;
+            }
+
+            .sidebar-toggle {
+                padding: 0.25rem 0.5rem;
+                background: var(--rh-gray);
+                border: none;
+                border-radius: 3px;
+                color: var(--rh-gray-light);
+                cursor: pointer;
+                font-size: 0.7rem;
+            }
+
+            .sidebar-toggle:hover,
+            .sidebar-toggle.active {
+                background: var(--rh-blue);
+                color: white;
+            }
+
+            /* Task list with categories */
+            .task-list {
+                flex: 1;
+                overflow-y: auto;
+                padding: 0.5rem;
+            }
+
+            .task-category-group {
+                margin-bottom: 0.5rem;
+            }
+
+            .task-category-header {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem;
+                background: var(--rh-gray);
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 0.8rem;
+                text-transform: capitalize;
+                user-select: none;
+            }
+
+            .task-category-header:hover {
+                background: #4a4d50;
+            }
+
+            .task-category-header .arrow {
+                transition: transform 0.2s;
+                font-size: 0.7rem;
+            }
+
+            .task-category-header.collapsed .arrow {
+                transform: rotate(-90deg);
+            }
+
+            .task-category-header .cat-count {
+                margin-left: auto;
+                background: var(--rh-gray-dark);
+                padding: 0.1rem 0.4rem;
+                border-radius: 10px;
+                font-size: 0.7rem;
+            }
+
+            .task-category-items {
+                padding-left: 0.25rem;
+            }
+
+            .task-category-items.hidden {
+                display: none;
+            }
+
+            /* Compact task items */
+            .task-item {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem;
+                margin: 0.15rem 0;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background 0.15s;
+                border-left: 3px solid transparent;
+                font-size: 0.85rem;
+            }
+
+            .task-item.compact {
+                padding: 0.35rem 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            .task-item.compact .task-number {
+                width: 20px;
+                height: 20px;
+                font-size: 0.65rem;
+            }
+
+            .task-item.compact .task-title {
+                font-size: 0.8rem;
+            }
+
+            .task-item:hover {
+                background: var(--rh-gray);
+            }
+
+            .task-item.active {
+                background: var(--rh-gray);
+                border-left-color: var(--rh-red);
+            }
+
+            .task-item.completed {
+                opacity: 0.6;
+            }
+
+            .task-item.task-passed {
+                border-left-color: var(--rh-green);
+                background: rgba(146, 212, 0, 0.1);
+            }
+
+            .task-item.task-passed .task-number {
+                background: var(--rh-green);
+                color: var(--rh-dark);
+            }
+
+            .task-item.task-failed {
+                border-left-color: var(--rh-red);
+                background: rgba(204, 0, 0, 0.1);
+            }
+
+            .task-item.task-failed .task-number {
+                background: var(--rh-red);
+            }
+
+            .task-number {
+                width: 24px;
+                height: 24px;
+                background: var(--rh-gray);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.75rem;
+                font-weight: 600;
+                flex-shrink: 0;
+            }
+
+            .task-item.completed .task-number {
+                background: var(--rh-green);
+            }
+
+            .task-item.failed .task-number {
+                background: var(--rh-red);
+            }
+
+            .task-info {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .task-title {
+                font-size: 0.9rem;
+                margin-bottom: 0.25rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .task-category {
+                font-size: 0.75rem;
+                color: var(--rh-cyan);
+                text-transform: capitalize;
+            }
+
+            .task-target {
+                font-size: 0.65rem;
+                padding: 0.15rem 0.4rem;
+                border-radius: 3px;
+                text-transform: uppercase;
+                font-weight: 600;
+                margin-left: 0.5rem;
+            }
+
+            .task-target.node1 {
+                background: rgba(0, 149, 150, 0.3);
+                color: var(--rh-cyan);
+            }
+
+            .task-target.node2 {
+                background: rgba(240, 171, 0, 0.3);
+                color: var(--rh-orange);
+            }
+
+            .task-target.both {
+                background: rgba(102, 0, 204, 0.3);
+                color: #b380ff;
+            }
+
+            /* Main Content Area */
+            .content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .content-header {
+                padding: 1.5rem 2rem;
+                border-bottom: 1px solid var(--rh-gray);
+                background: var(--rh-gray-dark);
+            }
+
+            .content-header h1 {
+                font-size: 1.5rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+            }
+
+            .content-header .meta {
+                display: flex;
+                gap: 1.5rem;
+                font-size: 0.85rem;
+                color: var(--rh-gray-light);
+            }
+
+            .content-body {
+                flex: 1;
+                overflow-y: auto;
+                padding: 2rem;
+            }
+
+            /* Buttons */
+            .btn {
+                padding: 0.6rem 1.25rem;
+                border: none;
+                border-radius: 6px;
+                font-family: inherit;
+                font-size: 0.9rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            }
+
+            .btn:active {
+                transform: scale(0.98);
+            }
+
+            .btn-primary {
+                background: var(--primary-gradient);
+                color: white;
+                box-shadow: var(--shadow-glow);
+            }
+
+            .btn-primary:hover {
+                background: var(--primary-hover);
+                box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+            }
+
+            .btn-secondary {
+                background: var(--rh-gray);
+                color: var(--text-main);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .btn-secondary:hover {
+                background: #27272a;
+                border-color: rgba(255, 255, 255, 0.2);
+            }
+
+            .btn-success {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                color: white;
+            }
+
+            .btn-success:hover {
+                background: linear-gradient(135deg, #059669 0%, #047857 100%);
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+            }
+
+            .btn-outline {
+                background: transparent;
+                border: 1px solid var(--rh-gray-light);
+                color: var(--text-muted);
+            }
+
+            .btn-outline:hover {
+                border-color: var(--text-main);
+                color: var(--text-main);
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            /* Cards */
+            .card {
+                background: var(--bg-card);
+                border: var(--glass-border);
+                border-radius: 12px;
+                padding: 2rem;
+                margin-bottom: 2rem;
+                box-shadow: var(--shadow-lg);
+                position: relative;
+                overflow: hidden;
+                background-clip: padding-box;
+            }
+
+            /* Subtle shine effect */
+            .card::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            }
+
+            .card h2 {
+                font-size: 1.25rem;
+                margin-bottom: 1.25rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                font-weight: 600;
+                color: var(--text-main);
+            }
+
+            /* Forms */
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 0.4rem;
+                font-size: 0.85rem;
+                color: var(--rh-gray-light);
+            }
+
+            .form-group input,
+            .form-group select {
+                width: 100%;
+                padding: 0.6rem 0.75rem;
+                background: var(--rh-black);
+                border: 1px solid var(--rh-gray);
+                border-radius: 4px;
+                color: var(--rh-white);
+                font-family: inherit;
+                font-size: 0.9rem;
+            }
+
+            .form-group input:focus,
+            .form-group select:focus {
+                outline: none;
+                border-color: var(--rh-blue);
+            }
+
+            .form-row {
+                display: grid;
                 grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            /* Mode Selection */
+            .mode-cards {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+                margin: 1.5rem 0;
+            }
+
+            .mode-card {
+                background: var(--rh-gray-dark);
+                border: 2px solid var(--rh-gray);
+                border-radius: 8px;
+                padding: 2rem;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .mode-card:hover {
+                border-color: var(--rh-gray-light);
+            }
+
+            .mode-card.active {
+                border-color: var(--rh-red);
+                background: rgba(238, 0, 0, 0.1);
+            }
+
+            .mode-card h3 {
+                font-size: 1.25rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .mode-card p {
+                color: var(--rh-gray-light);
+                font-size: 0.9rem;
+            }
+
+            .mode-card .icon {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+
+            /* Category Grid */
+            .category-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .category-card {
+                background: var(--rh-gray-dark);
+                border: 2px solid var(--rh-gray);
+                border-radius: 8px;
+                padding: 1.25rem;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .category-card:hover {
+                border-color: var(--rh-gray-light);
+                background: var(--rh-gray);
+            }
+
+            .category-card h4 {
+                font-size: 1rem;
+                margin-bottom: 0.5rem;
+                text-transform: capitalize;
+            }
+
+            .category-card .task-count {
+                color: var(--rh-gray-light);
+                font-size: 0.85rem;
+            }
+
+            @media (max-width: 768px) {
+                .category-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
             }
         }
 
@@ -608,8 +884,13 @@
             letter-spacing: 0.5px;
         }
 
-        .result-box.passed .value { color: var(--rh-green); }
-        .result-box.failed .value { color: var(--rh-red); }
+        .result-box.passed .value {
+            color: var(--rh-green);
+        }
+
+        .result-box.failed .value {
+            color: var(--rh-red);
+        }
 
         /* Check Results List */
         .check-list {
@@ -674,6 +955,9 @@
             justify-content: space-between;
             margin-bottom: 0.4rem;
             font-size: 0.9rem;
+            background: none;
+            border: none;
+            padding: 0;
         }
 
         .category-bar .name {
@@ -684,9 +968,17 @@
             font-weight: 600;
         }
 
-        .category-bar .pct.good { color: var(--rh-green); }
-        .category-bar .pct.ok { color: var(--rh-orange); }
-        .category-bar .pct.bad { color: var(--rh-red); }
+        .category-bar .pct.good {
+            color: var(--rh-green);
+        }
+
+        .category-bar .pct.ok {
+            color: var(--rh-orange);
+        }
+
+        .category-bar .pct.bad {
+            color: var(--rh-red);
+        }
 
         .progress-track {
             height: 8px;
@@ -701,17 +993,42 @@
             transition: width 0.3s;
         }
 
-        .progress-fill.good { background: var(--rh-green); }
-        .progress-fill.ok { background: var(--rh-orange); }
-        .progress-fill.bad { background: var(--rh-red); }
+        .progress-fill.good {
+            background: var(--rh-green);
+        }
+
+        .progress-fill.ok {
+            background: var(--rh-orange);
+        }
+
+        .progress-fill.bad {
+            background: var(--rh-red);
+        }
 
         /* Utilities */
-        .hidden { display: none !important; }
-        .text-center { text-align: center; }
-        .mt-1 { margin-top: 1rem; }
-        .mt-2 { margin-top: 2rem; }
-        .mb-1 { margin-bottom: 1rem; }
-        .mb-2 { margin-bottom: 2rem; }
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-1 {
+            margin-top: 1rem;
+        }
+
+        .mt-2 {
+            margin-top: 2rem;
+        }
+
+        .mb-1 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 2rem;
+        }
 
         .loading {
             text-align: center;
@@ -879,8 +1196,426 @@
             background: var(--rh-gray-dark);
             border-top: 1px solid var(--rh-gray);
         }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner-large {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--info);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .step-item.active {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .step-item.done {
+            color: var(--success);
+        }
+
+        .step-item.fail {
+            color: var(--error);
+        }
+
+        .step-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        /* Sidebar sticky footer */
+        .sidebar-footer {
+            padding: 0.75rem;
+            background: var(--rh-gray-dark);
+            border-top: 1px solid var(--rh-gray);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .sidebar-footer .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .sidebar-progress {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--rh-gray-light);
+        }
+
+        .sidebar-progress .progress-bar {
+            flex: 1;
+            height: 6px;
+            background: var(--rh-gray);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .sidebar-progress .progress-fill {
+            height: 100%;
+            background: var(--rh-green);
+            transition: width 0.3s;
+        }
+
+        /* Grading Progress Modal */
+        .grading-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .grading-modal.hidden {
+            display: none;
+        }
+
+        .grading-modal-content {
+            background: var(--rh-gray-dark);
+            border: 1px solid var(--rh-gray);
+            border-radius: 8px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .grading-modal h2 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .grading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--rh-gray);
+            border-top-color: var(--rh-red);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes reboot-progress {
+            from {
+                width: 0%;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+
+        .reboot-card:hover {
+            border-color: var(--rh-orange) !important;
+            background: var(--rh-gray) !important;
+        }
+
+        .reboot-card.confirming {
+            border-color: var(--rh-orange) !important;
+            background: rgba(240, 171, 0, 0.1) !important;
+        }
+
+        .reboot-target-card.confirming {
+            border-color: var(--rh-orange);
+            background: rgba(240, 171, 0, 0.1);
+            animation: pulse-border 1s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% {
+                border-color: var(--rh-orange);
+            }
+
+            50% {
+                border-color: rgba(240, 171, 0, 0.3);
+            }
+
+            100% {
+                border-color: var(--rh-orange);
+            }
+        }
+
+        .reboot-progress-container {
+            height: 4px;
+            background: var(--rh-gray);
+            border-radius: 2px;
+            margin-top: 0.75rem;
+            overflow: hidden;
+            display: none;
+        }
+
+        .reboot-target-card.rebooting .reboot-progress-container {
+            display: block;
+        }
+
+        .reboot-progress-bar {
+            height: 100%;
+            background: var(--rh-orange);
+            width: 0%;
+            transition: width 0.5s linear;
+        }
+
+        .grading-progress-bar {
+            height: 8px;
+            background: var(--rh-gray);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .grading-progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--rh-red), var(--rh-orange));
+            transition: width 0.3s;
+        }
+
+        .grading-status {
+            font-size: 0.9rem;
+            color: var(--rh-gray-light);
+            margin-bottom: 1rem;
+        }
+
+        .grading-task-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--rh-gray);
+            border-radius: 4px;
+        }
+
+        .grading-task-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--rh-gray);
+            font-size: 0.85rem;
+        }
+
+        .grading-task-item:last-child {
+            border-bottom: none;
+        }
+
+        .grading-task-item .icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+        }
+
+        .grading-task-item.pending .icon {
+            background: var(--rh-gray);
+            color: var(--rh-gray-light);
+        }
+
+        .grading-task-item.grading .icon {
+            background: var(--rh-orange);
+            animation: pulse 1s infinite;
+        }
+
+        .grading-task-item.passed .icon {
+            background: var(--rh-green);
+        }
+
+        .grading-task-item.failed .icon {
+            background: var(--rh-red);
+        }
+
+        .grading-task-item .task-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Reboot Modal */
+        .reboot-modal-content {
+            background: var(--rh-gray-dark);
+            border: 1px solid var(--rh-gray);
+            border-radius: 8px;
+            padding: 0;
+            width: 90%;
+            max-width: 600px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .reboot-modal-header {
+            padding: 1.5rem;
+            background: var(--rh-black);
+            border-bottom: 1px solid var(--rh-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reboot-modal-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .reboot-modal-body {
+            padding: 2rem;
+        }
+
+        .reboot-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .reboot-target-card {
+            background: var(--rh-gray);
+            border: 2px solid transparent;
+            border-radius: 6px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reboot-target-card:hover {
+            background: #4a4d50;
+            transform: translateY(-2px);
+        }
+
+        .reboot-target-card.active {
+            border-color: var(--rh-orange);
+            background: rgba(240, 171, 0, 0.1);
+        }
+
+        .reboot-target-card .icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            color: var(--rh-gray-light);
+            transition: color 0.2s;
+        }
+
+        .reboot-target-card:hover .icon {
+            color: var(--rh-white);
+        }
+
+        .reboot-target-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .reboot-target-card .status {
+            font-size: 0.85rem;
+            color: var(--rh-gray-light);
+            min-height: 1.2em;
+        }
+
+        .reboot-target-card.rebooting .icon {
+            animation: pulse-orange 1.5s infinite;
+            color: var(--rh-orange);
+        }
+
+        .reboot-target-card.success {
+            border-color: var(--rh-green);
+        }
+
+        .reboot-target-card.success .icon {
+            color: var(--rh-green);
+        }
+
+        .reboot-target-card.success .status {
+            color: var(--rh-green);
+        }
+
+        .reboot-target-card.error {
+            border-color: var(--rh-red);
+        }
+
+        .reboot-target-card.error .icon {
+            color: var(--rh-red);
+        }
+
+        .reboot-target-card.error .status {
+            color: var(--rh-red);
+        }
+
+        /* Reboot All Section */
+        .reboot-all-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--rh-gray);
+            text-align: center;
+        }
+
+        @keyframes pulse-orange {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .task-jump-select {
+            width: 100%;
+            padding: 0.4rem;
+            background: var(--rh-black);
+            border: 1px solid var(--rh-gray);
+            border-radius: 4px;
+            color: var(--rh-white);
+            font-size: 0.8rem;
+        }
     </style>
 </head>
+
 <body>
     <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
@@ -888,7 +1623,7 @@
     <!-- Header -->
     <header class="header">
         <div class="header-left">
-            <div class="logo">
+            <div class="logo" onclick="goHome()" style="cursor: pointer;" title="Go to Home">
                 <div class="logo-icon">RH</div>
                 <span>RHCSA Practice Labs</span>
             </div>
@@ -907,7 +1642,7 @@
             <div class="timer-display hidden" id="timer">03:00:00</div>
         </div>
         <div class="header-right">
-            <button class="btn btn-outline" onclick="showView('setup')">Setup</button>
+            <button class="btn btn-outline" onclick="showView('setup')">Configure VMs</button>
             <button class="btn btn-outline" onclick="showView('stats')">Statistics</button>
         </div>
     </header>
@@ -919,21 +1654,123 @@
                 <h2>Tasks</h2>
                 <span class="task-count" id="task-count">0/0</span>
             </div>
+            <div class="sidebar-controls">
+                <input type="text" class="sidebar-search" id="task-search" placeholder="Search tasks..."
+                    oninput="filterSidebarTasks()">
+                <div class="sidebar-toggles">
+                    <button class="sidebar-toggle" id="toggle-compact" onclick="toggleCompactMode()">Compact</button>
+                    <button class="sidebar-toggle" id="toggle-collapse" onclick="toggleAllCategories()">Collapse
+                        All</button>
+                    <select class="task-jump-select" id="task-jump" onchange="jumpToTask()" style="flex:1;">
+                        <option value="">Jump to task...</option>
+                    </select>
+                </div>
+            </div>
             <div class="task-list" id="sidebar-task-list"></div>
+            <div class="sidebar-footer">
+                <div class="sidebar-progress">
+                    <span id="graded-count">0</span>/<span id="total-task-count">0</span> graded
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="graded-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="submitExam()">Submit All for Grading</button>
+                <button class="btn btn-secondary" onclick="confirmAbandon()"
+                    style="font-size: 0.8rem; padding: 0.4rem;">Abandon</button>
+            </div>
         </aside>
+
+        <!-- Grading Progress Modal -->
+        <div class="grading-modal hidden" id="grading-modal">
+            <div class="grading-modal-content">
+                <h2>
+                    <div class="grading-spinner" id="grading-spinner"></div>
+                    <span id="grading-title">Grading in Progress</span>
+                </h2>
+                <div class="grading-progress-bar">
+                    <div class="fill" id="grading-progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="grading-status" id="grading-status">Preparing to grade...</div>
+                <div class="grading-task-list" id="grading-task-list"></div>
+                <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <button class="btn btn-secondary" onclick="abortGrading()" id="cancel-grading-btn">Cancel
+                        Grading</button>
+                    <span style="color: var(--rh-gray-light); font-size: 0.8rem;">Press ESC to cancel</span>
+                </div>
+            </div>
+        </div>
 
         <!-- Main Content -->
         <main class="content">
-            <!-- Welcome View -->
-            <div class="content-body" id="view-welcome">
-                <div class="welcome">
-                    <h1>Red Hat Certified System Administrator</h1>
-                    <p>Practice environment for RHCSA (EX200) certification exam.
-                       Configure your virtual machines, then choose Practice mode to study specific topics
-                       or Exam mode for a timed simulation.</p>
-                    <div class="actions">
-                        <button class="btn btn-primary" onclick="showView('setup')">Configure VMs</button>
-                        <button class="btn btn-secondary" onclick="showView('mode-select')">Start Practice</button>
+            <!-- Welcome View (Revamped) -->
+            <div class="content-body" id="view-welcome"
+                style="align-items: center; justify-content: center; display: flex; text-align: center; padding-top: 3rem;">
+
+                <div style="max-width: 800px; width: 100%; animation: fadeInUp 0.5s ease-out;">
+                    <!-- Hero -->
+                    <div style="margin-bottom: 4rem;">
+                        <h1
+                            style="font-size: 3.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; line-height: 1.1;">
+                            Master <span
+                                style="background: var(--primary-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">RHCSA</span><br>Practice
+                            Labs
+                        </h1>
+                        <p
+                            style="font-size: 1.25rem; color: var(--text-muted); max-width: 600px; margin: 0 auto; line-height: 1.6;">
+                            A professional-grade environment to test your Red Hat System Administrator skills. Real VMs,
+                            real tasks, instant feedback.
+                        </p>
+                    </div>
+
+                    <!-- Main Actions -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 4rem;">
+                        <div class="card action-card" onclick="startQuickPractice()"
+                            style="margin: 0; text-align: left; cursor: pointer; transition: transform 0.2s, border-color 0.2s; border: 1px solid rgba(255,255,255,0.08);">
+                            <div
+                                style="width: 48px; height: 48px; background: rgba(59, 130, 246, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; color: #3b82f6; font-size: 1.5rem;">
+                                🚀</div>
+                            <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Quick Practice</h3>
+                            <p style="color: var(--text-muted); font-size: 0.95rem;">Jump straight into practice mode
+                                with all tasks enabled. No setup required.</p>
+                        </div>
+
+                        <div class="card action-card" onclick="selectMode('exam')"
+                            style="margin: 0; text-align: left; cursor: pointer; transition: transform 0.2s, border-color 0.2s; border: 1px solid rgba(255,255,255,0.08);">
+                            <div
+                                style="width: 48px; height: 48px; background: rgba(245, 158, 11, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; color: #f59e0b; font-size: 1.5rem;">
+                                ⏱️</div>
+                            <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Exam Simulation
+                            </h3>
+                            <p style="color: var(--text-muted); font-size: 0.95rem;">Simulate the real exam. 3 hours,
+                                random tasks, and strict grading.</p>
+                        </div>
+                    </div>
+
+                    <!-- Footer / Helper -->
+                    <div
+                        style="display: flex; justify-content: center; gap: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+                        <span onclick="toggleHowTo()"
+                            style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: color 0.2s;"
+                            onmouseover="this.style.color='white'" onmouseout="this.style.color='#a1a1aa'">
+                            ℹ️ How it works
+                        </span>
+                        <span onclick="showView('setup')"
+                            style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: color 0.2s;"
+                            onmouseover="this.style.color='white'" onmouseout="this.style.color='#a1a1aa'">
+                            ⚙️ Configure VMs
+                        </span>
+                    </div>
+
+                    <!-- Hidden How To Modal/Content -->
+                    <div id="howto-content" class="hidden"
+                        style="margin-top: 2rem; text-align: left; background: var(--bg-card); padding: 2rem; border-radius: 12px; border: var(--glass-border);">
+                        <h3 style="color: white; margin-bottom: 1rem;">Getting Started</h3>
+                        <ol style="color: var(--text-muted); margin-left: 1.5rem; line-height: 1.8;">
+                            <li>Ensure you have two RHEL/Clone VMs running.</li>
+                            <li>Click "Configure VMs" to set their IPs and root password.</li>
+                            <li>Choose "Quick Practice" to start working on tasks immediately.</li>
+                            <li>Use the sidebar to grade individual tasks as you complete them.</li>
+                        </ol>
                     </div>
                 </div>
             </div>
@@ -969,9 +1806,13 @@
                         </div>
                         <div></div>
                     </div>
-                    <div class="mt-1">
+                    <div class="mt-1" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         <button class="btn btn-primary" onclick="saveConfig()">Save Configuration</button>
                         <button class="btn btn-secondary" onclick="testConnection()">Test Connection</button>
+                        <button class="btn btn-outline" onclick="showRebootModal()"
+                            style="border-color: var(--rh-orange); color: var(--rh-orange);">
+                            <span style="font-size: 1.1em;">↻</span> Reboot VMs
+                        </button>
                     </div>
                     <div id="connection-result" class="mt-1"></div>
                 </div>
@@ -1019,7 +1860,8 @@
             <!-- Practice by Category View -->
             <div class="content-body hidden" id="view-practice-category">
                 <h1 class="mb-2">Select Category</h1>
-                <p style="color: var(--rh-gray-light); margin-bottom: 1.5rem;">Choose an RHCSA objective to practice:</p>
+                <p style="color: var(--rh-gray-light); margin-bottom: 1.5rem;">Choose an RHCSA objective to practice:
+                </p>
                 <div class="category-grid" id="category-grid">
                     <div class="loading">Loading categories...</div>
                 </div>
@@ -1033,7 +1875,8 @@
                     <div class="mb-1">
                         <button class="btn btn-secondary" onclick="selectAllTasks()">Select All</button>
                         <button class="btn btn-secondary" onclick="deselectAllTasks()">Clear</button>
-                        <select id="category-filter" onchange="filterByCategory()" style="margin-left: 1rem; padding: 0.5rem; background: var(--rh-black); border: 1px solid var(--rh-gray); color: white; border-radius: 4px;">
+                        <select id="category-filter" onchange="filterByCategory()"
+                            style="margin-left: 1rem; padding: 0.5rem; background: var(--rh-black); border: 1px solid var(--rh-gray); color: white; border-radius: 4px;">
                             <option value="">All Categories</option>
                         </select>
                     </div>
@@ -1064,10 +1907,6 @@
 
             <!-- Exam Running View -->
             <div class="content-body hidden" id="view-exam-running" style="position: relative;">
-                <!-- Loading Overlay -->
-                <div id="grading-overlay" class="loading-overlay hidden">
-                    <div class="loading">Grading your work...</div>
-                </div>
                 <!-- Breadcrumb -->
                 <div class="breadcrumb" style="margin-bottom: 1rem; font-size: 0.9rem;">
                     <a href="#" onclick="confirmAbandon(); return false;" style="color: var(--rh-gray-light);">Home</a>
@@ -1088,9 +1927,43 @@
                 </div>
                 <!-- Task Navigation -->
                 <div class="task-nav" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                    <button class="btn btn-secondary" id="prev-task-btn" onclick="navigateTask(-1)" disabled>Previous</button>
+                    <button class="btn btn-secondary" id="prev-task-btn" onclick="navigateTask(-1)"
+                        disabled>Previous</button>
                     <button class="btn btn-primary" id="next-task-btn" onclick="navigateTask(1)">Next</button>
-                    <span id="task-nav-indicator" style="margin-left: auto; color: var(--rh-gray-light); align-self: center;">Task 1 of 1</span>
+                    <span id="task-nav-indicator"
+                        style="margin-left: auto; color: var(--rh-gray-light); align-self: center;">Task 1 of 1</span>
+                </div>
+            </div>
+
+            <!-- Connecting / Intermediate View -->
+            <div class="content-body hidden" id="view-connecting"
+                style="align-items: center; justify-content: center; display: flex; flex-direction: column;">
+                <div style="text-align: center; max-width: 400px; width: 100%;">
+                    <div class="spinner-large" style="margin: 0 auto 2rem;"></div>
+                    <h2 style="margin-bottom: 1.5rem;">Initializing Environment</h2>
+
+                    <div class="connection-steps"
+                        style="text-align: left; background: var(--bg-card); padding: 1.5rem; border-radius: 8px; border: var(--glass-border);">
+                        <div class="step-item pending" id="step-tasks">
+                            <span class="step-icon">○</span> Loading Tasks
+                        </div>
+                        <div class="step-item pending" id="step-config">
+                            <span class="step-icon">○</span> Checking Configuration
+                        </div>
+                        <div class="step-item pending" id="step-node1">
+                            <span class="step-icon">○</span> Connecting to Node 1
+                        </div>
+                        <div class="step-item pending" id="step-node2">
+                            <span class="step-icon">○</span> Connecting to Node 2
+                        </div>
+                    </div>
+
+                    <div id="connect-error-actions" class="hidden" style="margin-top: 2rem; animation: fadeInUp 0.3s;">
+                        <p style="color: var(--error); margin-bottom: 1rem;" id="connect-error-msg">Connection failed.
+                        </p>
+                        <button class="btn btn-primary" onclick="showView('setup')">Configure VMs</button>
+                        <button class="btn btn-secondary" onclick="showView('welcome')">Cancel</button>
+                    </div>
                 </div>
             </div>
 
@@ -1126,33 +1999,71 @@
             <!-- Statistics View -->
             <div class="content-body hidden" id="view-stats">
                 <h1 class="mb-2">Performance Statistics</h1>
-                <div style="margin-bottom: 1rem;">
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--rh-gray-light);">
-                        <input type="checkbox" id="use-mock-stats" onchange="loadStats()">
-                        Use mock data (for testing)
-                    </label>
-                </div>
+
                 <div class="results-summary" id="stats-summary">
                     <div class="loading">Loading statistics...</div>
                 </div>
                 <div class="card">
-                    <h2>Areas to Improve</h2>
-                    <div id="weak-areas"></div>
-                </div>
-                <div class="card">
                     <h2>Performance by Category</h2>
                     <div class="category-bars" id="category-stats"></div>
+                    <div id="weak-areas"
+                        style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--rh-gray);"></div>
                 </div>
-                <button class="btn btn-secondary" onclick="showView('welcome')">Back to Home</button>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-secondary" onclick="showView('welcome')">Back to Home</button>
+                    <button class="btn btn-outline" onclick="clearAllResults()"
+                        style="border-color: var(--rh-red); color: var(--rh-red);">Clear All History</button>
+                </div>
             </div>
         </main>
     </div>
 
-    <!-- Actions Bar (shown during exam) -->
-    <div class="actions-bar hidden" id="exam-actions">
-        <button class="btn btn-success" onclick="submitExam()">Submit for Grading</button>
-        <button class="btn btn-secondary" onclick="confirmAbandon()">Abandon Exam</button>
+    <!-- Reboot Modal -->
+    <div class="grading-modal hidden" id="reboot-modal" onclick="if(event.target === this) hideRebootModal()">
+        <div class="reboot-modal-content">
+            <div class="reboot-modal-header">
+                <h2>
+                    <span style="color: var(--rh-orange);">↻</span> Reboot Virtual Machines
+                </h2>
+                <button class="toast-close" onclick="hideRebootModal()">×</button>
+            </div>
+            <div class="reboot-modal-body">
+                <p style="color: var(--rh-gray-light); margin-bottom: 2rem; text-align: center;">
+                    Select a virtual machine to reboot. The system will wait for it to come back online.
+                </p>
+
+                <div class="reboot-grid">
+                    <div class="reboot-target-card" id="card-node1" onclick="rebootNode('node1')">
+                        <div class="icon">💻</div>
+                        <h3>Node 1</h3>
+                        <div class="status" id="status-node1">Ready</div>
+                        <div class="reboot-progress-container">
+                            <div class="reboot-progress-bar" id="progress-node1"></div>
+                        </div>
+                    </div>
+                    <div class="reboot-target-card" id="card-node2" onclick="rebootNode('node2')">
+                        <div class="icon">💻</div>
+                        <h3>Node 2</h3>
+                        <div class="status" id="status-node2">Ready</div>
+                        <div class="reboot-progress-container">
+                            <div class="reboot-progress-bar" id="progress-node2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reboot-all-section">
+                    <button class="btn btn-outline" onclick="rebootNode('both')"
+                        style="width: 100%; justify-content: center; border-color: var(--rh-orange); color: var(--rh-orange);">
+                        Reboot Both Systems
+                    </button>
+                    <div id="status-both"
+                        style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--rh-gray-light); min-height: 1.2em;">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
 
     <script>
         // State
@@ -1162,6 +2073,10 @@
         let timerInterval = null;
         let examStartTime = null;
         let currentTaskIndex = 0;
+        let compactMode = false;
+        let collapsedCategories = new Set();
+        let taskResults = new Map(); // Track graded tasks: taskId -> {passed, graded}
+        let gradingAborted = false; // Flag to cancel grading
         const EXAM_DURATION = 3 * 60 * 60 * 1000; // 3 hours
 
         // Toast Notifications
@@ -1198,7 +2113,212 @@
             return toast;
         }
 
+        // How To Section Toggle
+        function toggleHowTo() {
+            const content = document.getElementById('howto-content');
+            content.classList.toggle('hidden');
+        }
+
+        // Practice flow - check if VMs configured first
+        let vmsConfigured = false;
+
+        async function startPracticeFlow() {
+            // Check if we've already verified config
+            if (vmsConfigured) {
+                showView('mode-select');
+                return;
+            }
+
+            // Show loading state
+            showToast('info', 'Checking VMs', 'Testing connection to VMs...');
+
+            // Check config and connection
+            try {
+                const configRes = await fetch('/api/config');
+                const config = await configRes.json();
+
+                // Check if IPs are set
+                if (!config.node1_ip || !config.node2_ip) {
+                    showToast('warning', 'Setup Required', 'Please configure your VM IP addresses first.');
+                    showView('setup');
+                    return;
+                }
+
+                // Check if password is set
+                if (!config.has_password) {
+                    showToast('warning', 'Setup Required', 'Please set the root password for SSH access.');
+                    showView('setup');
+                    return;
+                }
+
+                // Test connection with timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+                let connData;
+                try {
+                    const connRes = await fetch('/api/test-connection', {
+                        method: 'POST',
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    connData = await connRes.json();
+                } catch (e) {
+                    clearTimeout(timeoutId);
+                    if (e.name === 'AbortError') {
+                        showToast('error', 'Connection Timeout', 'VMs are not responding. Check if they are running.');
+                    } else {
+                        showToast('error', 'Connection Error', 'Could not test VM connection.');
+                    }
+                    showView('setup');
+                    return;
+                }
+
+                document.getElementById('vm1-status').className = 'dot ' + (connData.node1 ? 'ok' : 'fail');
+                document.getElementById('vm2-status').className = 'dot ' + (connData.node2 ? 'ok' : 'fail');
+
+                if (!connData.node1 && !connData.node2) {
+                    showToast('error', 'VMs Offline', 'Both VMs are unreachable. Make sure they are running.');
+                    showView('setup');
+                    return;
+                } else if (!connData.node1) {
+                    showToast('error', 'Node1 Offline', `Cannot connect to node1 (${config.node1_ip}). Check if it's running.`);
+                    showView('setup');
+                    return;
+                } else if (!connData.node2) {
+                    showToast('error', 'Node2 Offline', `Cannot connect to node2 (${config.node2_ip}). Check if it's running.`);
+                    showView('setup');
+                    return;
+                }
+
+                // All good!
+                vmsConfigured = true;
+                showView('mode-select');
+
+            } catch (e) {
+                showToast('error', 'Error', 'Could not verify VM configuration.');
+                showView('setup');
+            }
+        }
+
+        // Quick Start Flow with Intermediate "Connecting" View
+        async function startQuickPractice() {
+            // 1. Check Config SILENTLY first to avoid showing loading screen if unconfigured
+            try {
+                const configRes = await fetch('/api/config');
+                const config = await configRes.json();
+
+                // Simple validation check
+                if (!config.node1_ip || !config.node2_ip) {
+                    showView('setup');
+                    showToast('info', 'Setup Required', 'Please configure your laboratory VMs first to start practicing.');
+                    return;
+                }
+            } catch (e) {
+                // If checking config fails, assume setup needed
+                showView('setup');
+                return;
+            }
+
+            // 2. Config is present, proceed with connection flow
+            showView('connecting');
+
+            // Reset UI
+            document.querySelectorAll('.step-item').forEach(el => {
+                el.className = 'step-item pending';
+                el.querySelector('.step-icon').textContent = '○';
+            });
+            document.getElementById('connect-error-actions').classList.add('hidden');
+
+            const updateStep = (id, status) => {
+                const el = document.getElementById(id);
+                el.className = `step-item ${status}`;
+                const icon = el.querySelector('.step-icon');
+                if (status === 'active') icon.innerHTML = '<span class="loading" style="width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;display:block;animation:spin 1s linear infinite;"></span>';
+                if (status === 'done') icon.textContent = '✓';
+                if (status === 'fail') icon.textContent = '✗';
+            };
+
+            updateStep('step-tasks', 'active');
+
+            try {
+                // 1. Load Tasks
+                await new Promise(r => setTimeout(r, 400)); // Min wait for UX
+                if (allTasks.length === 0) {
+                    const res = await fetch('/api/tasks');
+                    allTasks = await res.json();
+                }
+                updateStep('step-tasks', 'done');
+
+                // 2. Check Config
+                updateStep('step-config', 'active');
+                await new Promise(r => setTimeout(r, 400));
+
+                // We'll treat fetching config as the "check"
+                const configRes = await fetch('/api/config');
+                const config = await configRes.json();
+
+                if (!config.node1_ip || !config.node2_ip || !config.has_password) {
+                    updateStep('step-config', 'fail');
+                    document.getElementById('connect-error-msg').textContent = 'VMs are not configured.';
+                    document.getElementById('connect-error-actions').classList.remove('hidden');
+                    return;
+                }
+                updateStep('step-config', 'done');
+
+                // 3. Test Connection
+                updateStep('step-node1', 'active');
+                updateStep('step-node2', 'active');
+
+                const connRes = await fetch('/api/test-connection', { method: 'POST' });
+                const data = await connRes.json();
+
+                // Node 1
+                if (data.node1) updateStep('step-node1', 'done');
+                else updateStep('step-node1', 'fail');
+
+                // Node 2
+                if (data.node2) updateStep('step-node2', 'done');
+                else updateStep('step-node2', 'fail');
+
+                // Result Logic
+                if (data.node1 && data.node2) {
+                    // Success!
+                    vmsConfigured = true;
+                    selectedTasks = allTasks;
+                    currentMode = 'practice';
+                    document.getElementById('breadcrumb-mode').textContent = 'Quick Practice';
+
+                    // Tiny delay to see the checkmarks
+                    setTimeout(() => {
+                        startExamView(selectedTasks, false);
+                    }, 500);
+                } else {
+                    document.getElementById('connect-error-msg').textContent = 'Could not connect to one or more VMs.';
+                    document.getElementById('connect-error-actions').classList.remove('hidden');
+                }
+
+            } catch (e) {
+                console.error(e);
+                updateStep('step-tasks', 'fail');
+                document.getElementById('connect-error-msg').textContent = 'System error occurred.';
+                document.getElementById('connect-error-actions').classList.remove('hidden');
+            }
+        }
+
         // View Management
+        function goHome() {
+            // If in exam mode, confirm before leaving
+            const examSidebar = document.getElementById('exam-sidebar');
+            if (!examSidebar.classList.contains('hidden')) {
+                if (!confirm('Leave current session and go to home? Your progress will be preserved.')) {
+                    return;
+                }
+                stopTimer();
+            }
+            showView('welcome');
+        }
+
         function showView(viewId) {
             document.querySelectorAll('.content-body').forEach(v => v.classList.add('hidden'));
             document.getElementById(`view-${viewId}`).classList.remove('hidden');
@@ -1206,7 +2326,6 @@
             // Hide exam UI elements when not in exam
             if (viewId !== 'exam-running') {
                 document.getElementById('exam-sidebar').classList.add('hidden');
-                document.getElementById('exam-actions').classList.add('hidden');
                 document.getElementById('timer').classList.add('hidden');
             }
 
@@ -1281,10 +2400,10 @@
 
             document.getElementById('breadcrumb-mode').textContent = `Practice: ${category.replace(/-/g, ' ')}`;
 
+            taskResults.clear(); // Reset grading state
             renderTaskSidebar();
             showView('exam-running');
             document.getElementById('exam-sidebar').classList.remove('hidden');
-            document.getElementById('exam-actions').classList.remove('hidden');
 
             // Auto-select first task
             if (selectedTasks.length > 0) {
@@ -1338,7 +2457,16 @@
 
         async function testConnection() {
             const result = document.getElementById('connection-result');
-            result.innerHTML = '<div class="loading">Testing connectivity...</div>';
+            const node1Name = document.getElementById('node1').value || 'Node 1';
+            const node2Name = document.getElementById('node2').value || 'Node 2';
+
+            // Sleek loading state
+            result.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 1rem; color: var(--text-muted); padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 6px;">
+                    <div class="spinner-large" style="width: 20px; height: 20px; border-width: 2px;"></div>
+                    <span>Pinging VMs...</span>
+                </div>
+            `;
 
             try {
                 const res = await fetch('/api/test-connection', { method: 'POST' });
@@ -1347,14 +2475,212 @@
                 document.getElementById('vm1-status').className = 'dot ' + (data.node1 ? 'ok' : 'fail');
                 document.getElementById('vm2-status').className = 'dot ' + (data.node2 ? 'ok' : 'fail');
 
+                // Sleek result card
+                const rowStyle = 'display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0;';
+                const borderStyle = 'border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.5rem;';
+
                 result.innerHTML = `
-                    <div class="alert ${data.node1 && data.node2 ? 'alert-info' : 'alert-warning'}">
-                        Node 1: ${data.node1 ? '✓ Connected' : '✗ Failed'}<br>
-                        Node 2: ${data.node2 ? '✓ Connected' : '✗ Failed'}
+                    <div style="margin-top: 0.5rem; padding: 1.25rem; background: var(--bg-card); border-radius: 8px; border: var(--glass-border); box-shadow: var(--shadow-md);">
+                        <div style="${rowStyle} ${borderStyle}">
+                            <span style="color: var(--text-main); font-weight: 500;">${node1Name}</span>
+                            <span style="display: flex; align-items: center; gap: 0.5rem; color: ${data.node1 ? 'var(--success)' : 'var(--error)'};">
+                                ${data.node1 ? '✓ Online' : '✗ Unreachable'}
+                            </span>
+                        </div>
+                        <div style="${rowStyle}">
+                            <span style="color: var(--text-main); font-weight: 500;">${node2Name}</span>
+                            <span style="display: flex; align-items: center; gap: 0.5rem; color: ${data.node2 ? 'var(--success)' : 'var(--error)'};">
+                                ${data.node2 ? '✓ Online' : '✗ Unreachable'}
+                            </span>
+                        </div>
                     </div>
                 `;
+
+                if (data.node1 && data.node2) {
+                    showToast('success', 'Connected', 'Both VMs are online and reachable.');
+                } else {
+                    showToast('warning', 'Connection Issue', 'One or more VMs are unreachable.');
+                }
+
             } catch (e) {
-                result.innerHTML = '<div class="alert alert-warning">Connection test failed.</div>';
+                result.innerHTML = `
+                    <div style="margin-top: 0.5rem; padding: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error); border-radius: 6px; color: var(--error);">
+                        ⚠ Integration Request Failed
+                    </div>
+                `;
+            }
+        }
+
+        // Reboot Modal Functions
+        function showRebootModal() {
+            document.getElementById('reboot-modal').classList.remove('hidden');
+            // Reset states
+            ['node1', 'node2'].forEach(node => {
+                resetCardState(node);
+            });
+            document.getElementById('status-both').textContent = '';
+            pendingReboot = null;
+        }
+
+        function hideRebootModal() {
+            document.getElementById('reboot-modal').classList.add('hidden');
+        }
+
+        function resetCardState(node) {
+            const card = document.getElementById(`card-${node}`);
+            const status = document.getElementById(`status-${node}`);
+            const progress = document.getElementById(`progress-${node}`);
+
+            card.className = 'reboot-target-card';
+            status.textContent = 'Ready';
+            status.style.color = 'var(--rh-gray-light)';
+            if (progress) progress.style.width = '0%';
+        }
+
+        async function rebootNode(target) {
+            // Confirmation Logic
+            if (pendingReboot !== target) {
+                // Reset others
+                if (pendingReboot && pendingReboot !== target) {
+                    if (pendingReboot === 'both') {
+                        // Reset global button state if needed, though simpler to just ignore
+                    } else {
+                        // Don't fully reset if it's currently rebooting
+                        const card = document.getElementById(`card-${pendingReboot}`);
+                        if (!card.classList.contains('rebooting')) {
+                            resetCardState(pendingReboot);
+                        }
+                    }
+                }
+
+                pendingReboot = target;
+
+                if (target === 'both') {
+                    const statusBoth = document.getElementById('status-both');
+                    statusBoth.innerHTML = '<span style="color: var(--rh-orange); font-weight: bold;">Click again to confirm rebooting BOTH nodes</span>';
+                } else {
+                    const card = document.getElementById(`card-${target}`);
+                    if (card.classList.contains('rebooting')) return; // Already going
+
+                    const status = document.getElementById(`status-${target}`);
+                    card.classList.add('confirming');
+                    status.innerHTML = '<span style="color: var(--rh-orange); font-weight: bold;">Click to Confirm</span>';
+                }
+                return;
+            }
+
+            // Confirmed - Proceed
+            pendingReboot = null;
+
+            const nodes = target === 'both' ? ['node1', 'node2'] : [target];
+
+            // Update UI to show rebooting state
+            nodes.forEach(node => {
+                const card = document.getElementById(`card-${node}`);
+                const status = document.getElementById(`status-${node}`);
+
+                card.classList.remove('confirming');
+                card.classList.add('rebooting', 'active');
+                status.textContent = 'Starting...';
+            });
+
+            if (target === 'both') {
+                document.getElementById('status-both').textContent = 'Waiting for systems to come back online...';
+            }
+
+            // Progress Animation Loop
+            const progressIntervals = {};
+            nodes.forEach(node => {
+                let p = 0;
+                const progressEl = document.getElementById(`progress-${node}`);
+                const statusEl = document.getElementById(`status-${node}`);
+
+                progressIntervals[node] = setInterval(() => {
+                    p += 1;
+                    if (p > 95) p = 95; // Hold at 95% until done
+                    progressEl.style.width = p + '%';
+
+                    // Cycle messages
+                    if (p < 20) statusEl.textContent = 'Sending signal...';
+                    else if (p < 50) statusEl.textContent = 'System restarting...';
+                    else if (p < 80) statusEl.textContent = 'Waiting for SSH...';
+                    else statusEl.textContent = 'Finalizing...';
+                }, 600); // ~60 seconds to reach 95%
+            });
+
+            try {
+                // Execute reboots in parallel
+                const promises = nodes.map(async (node) => {
+                    try {
+                        const res = await fetch('/api/reboot-vm', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ node })
+                        });
+                        const data = await res.json();
+                        return { node, ok: data.ok, message: data.message };
+                    } catch (e) {
+                        return { node, ok: false, message: 'Network error' };
+                    }
+                });
+
+                const results = await Promise.all(promises);
+
+                // Update UI with results
+                results.forEach(result => {
+                    clearInterval(progressIntervals[result.node]);
+
+                    const card = document.getElementById(`card-${result.node}`);
+                    const status = document.getElementById(`status-${result.node}`);
+                    const progress = document.getElementById(`progress-${result.node}`);
+
+                    card.classList.remove('rebooting', 'active');
+                    progress.style.width = '100%';
+
+                    if (result.ok) {
+                        card.classList.add('success');
+                        status.textContent = '✓ Online';
+                        status.style.color = 'var(--rh-green)';
+                    } else {
+                        card.classList.add('error');
+                        status.textContent = '✗ Failed';
+                        status.style.color = 'var(--rh-red)';
+                    }
+                });
+
+                // Final status message
+                const allOk = results.every(r => r.ok);
+                if (target === 'both') {
+                    const statusBoth = document.getElementById('status-both');
+                    if (allOk) {
+                        statusBoth.textContent = '✓ All systems online';
+                        statusBoth.style.color = 'var(--rh-green)';
+                        showToast('success', 'Reboot Complete', 'Both VMs are back online.');
+                    } else {
+                        statusBoth.textContent = '⚠ Some systems failed to return';
+                        statusBoth.style.color = 'var(--rh-orange)';
+                        showToast('warning', 'Reboot Partial', 'Some VMs did not come back online.');
+                    }
+                } else {
+                    if (allOk) {
+                        showToast('success', 'Reboot Complete', `${target} is back online.`);
+                    } else {
+                        showToast('error', 'Reboot Failed', `${target} failed to come back online.`);
+                    }
+                }
+
+            } catch (e) {
+                console.error('Reboot error:', e);
+                showToast('error', 'System Error', 'An error occurred during the reboot process.');
+
+                // Cleanup on error
+                nodes.forEach(node => {
+                    clearInterval(progressIntervals[node]);
+                    const card = document.getElementById(`card-${node}`);
+                    const status = document.getElementById(`status-${node}`);
+                    card.className = 'reboot-target-card error';
+                    status.textContent = 'Error';
+                });
             }
         }
 
@@ -1378,13 +2704,16 @@
 
         function renderTaskCheckboxes(tasks) {
             const list = document.getElementById('task-checkbox-list');
-            list.innerHTML = tasks.map(t => `
+            list.innerHTML = tasks.map(t => {
+                const target = t.target || 'node1';
+                return `
                 <label class="task-checkbox-item">
                     <input type="checkbox" value="${t.id}">
                     <span class="desc">${t.id}: ${t.description}</span>
+                    <span class="task-target ${target}">${target}</span>
                     <span class="cat">${t.category}</span>
                 </label>
-            `).join('');
+            `}).join('');
         }
 
         function filterByCategory() {
@@ -1439,13 +2768,18 @@
         }
 
         function startExamView(tasks, timed) {
-            // Reset task index
+            // Reset task index and results
             currentTaskIndex = 0;
+            taskResults.clear();
+            // Collapse all categories by default for cleaner view
+            collapsedCategories.clear();
+            const allCategories = [...new Set(selectedTasks.map(t => t.category))];
+            allCategories.forEach(c => collapsedCategories.add(c));
+            document.getElementById('toggle-collapse').textContent = 'Expand All';
 
             // Show exam UI
             showView('exam-running');
             document.getElementById('exam-sidebar').classList.remove('hidden');
-            document.getElementById('exam-actions').classList.remove('hidden');
 
             if (timed) {
                 document.getElementById('timer').classList.remove('hidden');
@@ -1454,8 +2788,6 @@
 
             // Populate sidebar
             renderTaskSidebar();
-
-            document.getElementById('task-count').textContent = `0/${tasks.length}`;
 
             // Show first task and init navigation
             if (tasks.length > 0) {
@@ -1466,15 +2798,119 @@
 
         function renderTaskSidebar() {
             const sidebar = document.getElementById('sidebar-task-list');
-            sidebar.innerHTML = selectedTasks.map((t, i) => `
-                <div class="task-item task-list-item" data-id="${t.id}" onclick="selectTaskFromSidebar(${i})">
-                    <div class="task-number">${i + 1}</div>
-                    <div class="task-info">
-                        <div class="task-title">${t.description}</div>
-                        <div class="task-category">${t.category}</div>
+            const jumpSelect = document.getElementById('task-jump');
+            const searchTerm = document.getElementById('task-search')?.value?.toLowerCase() || '';
+
+            // Group tasks by category
+            const categories = {};
+            selectedTasks.forEach((t, i) => {
+                if (!categories[t.category]) categories[t.category] = [];
+                categories[t.category].push({ ...t, index: i });
+            });
+
+            // Filter tasks based on search
+            const filteredCategories = {};
+            for (const [cat, tasks] of Object.entries(categories)) {
+                const filtered = tasks.filter(t =>
+                    t.description.toLowerCase().includes(searchTerm) ||
+                    t.id.toLowerCase().includes(searchTerm) ||
+                    cat.toLowerCase().includes(searchTerm)
+                );
+                if (filtered.length > 0) {
+                    filteredCategories[cat] = filtered;
+                }
+            }
+
+            // Render grouped tasks
+            const compactClass = compactMode ? 'compact' : '';
+            let html = '';
+            for (const [cat, tasks] of Object.entries(filteredCategories).sort((a, b) => a[0].localeCompare(b[0]))) {
+                const isCollapsed = collapsedCategories.has(cat);
+                html += `
+                    <div class="task-category-group" data-category="${cat}">
+                        <div class="task-category-header ${isCollapsed ? 'collapsed' : ''}" onclick="toggleCategory('${cat}')">
+                            <span class="arrow">▼</span>
+                            <span>${cat.replace(/-/g, ' ')}</span>
+                            <span class="cat-count">${tasks.length}</span>
+                        </div>
+                        <div class="task-category-items ${isCollapsed ? 'hidden' : ''}">
+                            ${tasks.map(t => {
+                    const result = taskResults.get(t.id);
+                    const statusClass = result ? (result.passed ? 'task-passed' : 'task-failed') : '';
+                    return `
+                                <div class="task-item task-list-item ${compactClass} ${statusClass}" data-id="${t.id}" data-index="${t.index}" onclick="selectTaskFromSidebar(${t.index})">
+                                    <div class="task-number">${t.index + 1}</div>
+                                    <div class="task-info">
+                                        <div class="task-title">${t.description}</div>
+                                        ${!compactMode ? `<div class="task-category"><span class="task-target ${t.target || 'node1'}">${t.target || 'node1'}</span></div>` : ''}
+                                    </div>
+                                </div>
+                            `}).join('')}
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }
+            sidebar.innerHTML = html || '<div class="loading">No matching tasks</div>';
+
+            // Update jump-to dropdown
+            jumpSelect.innerHTML = '<option value="">Jump to task...</option>' +
+                selectedTasks.map((t, i) => `<option value="${i}">${i + 1}. ${t.id}</option>`).join('');
+
+            // Update counts
+            updateGradedCount();
+        }
+
+        function toggleCategory(cat) {
+            if (collapsedCategories.has(cat)) {
+                collapsedCategories.delete(cat);
+            } else {
+                collapsedCategories.add(cat);
+            }
+            renderTaskSidebar();
+        }
+
+        function toggleCompactMode() {
+            compactMode = !compactMode;
+            document.getElementById('toggle-compact').classList.toggle('active', compactMode);
+            renderTaskSidebar();
+        }
+
+        function toggleAllCategories() {
+            const categories = [...new Set(selectedTasks.map(t => t.category))];
+            const allCollapsed = categories.every(c => collapsedCategories.has(c));
+
+            if (allCollapsed) {
+                collapsedCategories.clear();
+                document.getElementById('toggle-collapse').textContent = 'Collapse All';
+            } else {
+                categories.forEach(c => collapsedCategories.add(c));
+                document.getElementById('toggle-collapse').textContent = 'Expand All';
+            }
+            renderTaskSidebar();
+        }
+
+        function filterSidebarTasks() {
+            renderTaskSidebar();
+        }
+
+        function jumpToTask() {
+            const select = document.getElementById('task-jump');
+            const index = parseInt(select.value);
+            if (!isNaN(index)) {
+                selectTaskFromSidebar(index);
+                select.value = ''; // Reset dropdown
+            }
+        }
+
+        function updateGradedCount() {
+            const gradedCount = taskResults.size;
+            const totalCount = selectedTasks.length;
+            const pct = totalCount > 0 ? (gradedCount / totalCount * 100) : 0;
+
+            document.getElementById('graded-count').textContent = gradedCount;
+            document.getElementById('total-task-count').textContent = totalCount;
+            document.getElementById('graded-progress').style.width = pct + '%';
+            document.getElementById('task-count').textContent = `${gradedCount}/${totalCount}`;
         }
 
         function selectTaskFromSidebar(index) {
@@ -1495,12 +2931,28 @@
                 el.classList.toggle('active', el.dataset.id === taskId);
             });
 
+            const target = task.target || 'node1';
+            const targetLabel = target === 'both' ? 'node1 & node2' : target;
+
             document.getElementById('current-task-detail').innerHTML = `
                 <div class="card">
                     <h2>${task.id}</h2>
                     <p style="font-size: 1.1rem; line-height: 1.6;">${task.description}</p>
-                    <p class="mt-1" style="color: var(--rh-cyan);">Category: ${task.category}</p>
-                    <div class="mt-2" style="display: flex; align-items: center; gap: 1rem;">
+                    <p class="mt-1" style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="color: var(--rh-cyan);">Category: ${task.category}</span>
+                        <span style="color: var(--rh-gray-light);">|</span>
+                        <span>Default Target: <span class="task-target ${target}" style="font-size: 0.8rem;">${targetLabel}</span></span>
+                    </p>
+                    <div class="mt-2" style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="color: var(--rh-gray-light); font-size: 0.9rem;">Grade on:</span>
+                            <select id="grade-vm-select" style="padding: 0.5rem; background: var(--rh-black); border: 1px solid var(--rh-gray); color: white; border-radius: 4px;">
+                                <option value="default" ${target === 'node1' ? 'selected' : ''}>Default (${targetLabel})</option>
+                                <option value="node1">node1 only</option>
+                                <option value="node2">node2 only</option>
+                                <option value="both">both VMs</option>
+                            </select>
+                        </label>
                         <button class="btn btn-primary" onclick="gradeCurrentTask('${task.id}')" id="grade-task-btn">
                             ✓ Grade This Task
                         </button>
@@ -1513,13 +2965,18 @@
         async function gradeCurrentTask(taskId) {
             const btn = document.getElementById('grade-task-btn');
             const resultEl = document.getElementById('task-grade-result');
+            const vmSelect = document.getElementById('grade-vm-select');
+            const selectedVm = vmSelect ? vmSelect.value : 'default';
 
             btn.disabled = true;
             btn.textContent = 'Grading...';
             resultEl.innerHTML = '<span style="color: var(--rh-gray-light);">Checking...</span>';
 
             try {
-                const res = await fetch(`/api/grade-task/${taskId}`, { method: 'POST' });
+                const url = selectedVm === 'default'
+                    ? `/api/grade-task/${taskId}`
+                    : `/api/grade-task/${taskId}?target=${selectedVm}`;
+                const res = await fetch(url, { method: 'POST' });
                 const result = await res.json();
 
                 if (result.error) {
@@ -1533,7 +2990,7 @@
                         </div>
                     `;
                     showToast('success', 'Task Passed!', `${taskId}: ${result.checks_passed}/${result.checks_total} checks passed`);
-                    updateTaskStatus(taskId, true);
+                    updateTaskStatus(taskId, true, result.points, result.max_points);
                 } else {
                     resultEl.innerHTML = `
                         <span style="color: var(--rh-red);">✗ ${result.checks_passed}/${result.checks_total} checks passed (${result.points}/${result.max_points} pts)</span>
@@ -1542,7 +2999,7 @@
                         </div>
                     `;
                     showToast('warning', 'Task Not Complete', `${result.checks_passed}/${result.checks_total} checks passed`);
-                    updateTaskStatus(taskId, false);
+                    updateTaskStatus(taskId, false, result.points, result.max_points);
                 }
             } catch (e) {
                 resultEl.innerHTML = `<span style="color: var(--rh-red);">✗ Connection error</span>`;
@@ -1553,13 +3010,19 @@
             btn.textContent = '✓ Grade This Task';
         }
 
-        function updateTaskStatus(taskId, passed) {
+        function updateTaskStatus(taskId, passed, points = 0, maxPoints = 0) {
+            // Track result
+            taskResults.set(taskId, { passed, points, maxPoints });
+
             // Update sidebar task item to show pass/fail status
             const taskItem = document.querySelector(`.task-item[data-id="${taskId}"]`);
             if (taskItem) {
                 taskItem.classList.remove('task-passed', 'task-failed');
                 taskItem.classList.add(passed ? 'task-passed' : 'task-failed');
             }
+
+            // Update graded count
+            updateGradedCount();
         }
 
         // Timer
@@ -1596,59 +3059,274 @@
             }
         }
 
-        // Submit
+        // ESC key handler for canceling grading
+        function handleGradingEsc(e) {
+            if (e.key === 'Escape') {
+                abortGrading();
+            }
+        }
+
+        function abortGrading() {
+            gradingAborted = true;
+            document.getElementById('grading-status').textContent = 'Cancelling...';
+            document.getElementById('cancel-grading-btn').disabled = true;
+        }
+
+        // Submit with progress modal
         async function submitExam() {
             stopTimer();
+            gradingAborted = false; // Reset abort flag
             const duration = examStartTime ? Math.floor((Date.now() - examStartTime) / 1000) : null;
-            const overlay = document.getElementById('grading-overlay');
+            const modal = document.getElementById('grading-modal');
+            const taskList = document.getElementById('grading-task-list');
+            const progressFill = document.getElementById('grading-progress-fill');
+            const statusEl = document.getElementById('grading-status');
+            const cancelBtn = document.getElementById('cancel-grading-btn');
+            const spinner = document.getElementById('grading-spinner');
+            const titleEl = document.getElementById('grading-title');
 
-            // Show loading overlay instead of destroying the view
-            overlay.classList.remove('hidden');
+            // Reset modal UI
+            cancelBtn.disabled = false;
+            cancelBtn.textContent = 'Cancel Grading';
+            spinner.style.display = 'block';
+            titleEl.textContent = 'Preparing to Grade';
 
+            // Show modal
+            taskList.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--rh-gray-light);">Preparing...</div>';
+            modal.classList.remove('hidden');
+            progressFill.style.width = '0%';
+            statusEl.textContent = 'Rebooting VMs to ensure configs survive...';
+
+            // Add ESC key listener
+            document.addEventListener('keydown', handleGradingEsc);
+
+            // Reboot both VMs in parallel before grading
             try {
-                // Send task IDs to the API
-                const taskIds = selectedTasks.map(t => typeof t === 'string' ? t : t.id);
-                const res = await fetch('/api/run', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mode: currentMode, tasks: taskIds })
-                });
+                // Progress Animation for Reboot
+                let p = 0;
+                const rebootInterval = setInterval(() => {
+                    if (gradingAborted) return;
+                    p += 0.5; // Slow increment
+                    if (p > 95) p = 95;
 
-                const result = await res.json();
+                    // Update bar
+                    progressFill.style.width = p + '%';
 
-                if (result.error) {
-                    overlay.classList.add('hidden');
-                    showToast('error', 'Grading Error', result.message || result.error);
-                    showView('mode-select');
+                    // Update text based on progress
+                    if (p < 15) statusEl.textContent = 'Sending reboot signals to VMs...';
+                    else if (p < 40) statusEl.textContent = 'Systems are ensuring configurations persist...';
+                    else if (p < 70) statusEl.textContent = 'Waiting for SSH services to come back online...';
+                    else statusEl.textContent = 'Finalizing connection establishment...';
+                }, 100); // Update every 100ms
+
+                // Execute reboots
+                const rebootPromises = Promise.all([
+                    fetch('/api/reboot-vm', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ node: 'node1' })
+                    }).then(r => r.json()).catch(() => ({ ok: false })),
+                    fetch('/api/reboot-vm', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ node: 'node2' })
+                    }).then(r => r.json()).catch(() => ({ ok: false }))
+                ]);
+
+                // Minimum wait time for realism and to ensure VMs actually go down/up (15s minimum)
+                const waitPromise = new Promise(resolve => setTimeout(resolve, 15000));
+
+                const [[r1, r2]] = await Promise.all([rebootPromises, waitPromise]);
+
+                clearInterval(rebootInterval);
+
+                if (gradingAborted) {
+                    document.removeEventListener('keydown', handleGradingEsc);
+                    modal.classList.add('hidden');
+                    showToast('warning', 'Cancelled', 'Grading cancelled during reboot.');
                     return;
                 }
 
-                // Save result
+                if (!r1.ok || !r2.ok) {
+                    // Build specific error message
+                    const failures = [];
+                    if (!r1.ok) failures.push(`Node1: ${r1.message || 'failed to come back online (timeout)'}`);
+                    if (!r2.ok) failures.push(`Node2: ${r2.message || 'failed to come back online (timeout)'}`);
+                    statusEl.innerHTML = `<span style="color: var(--rh-orange);">⚠ Reboot issues:</span><br>${failures.join('<br>')}`;
+                    progressFill.style.width = '100%';
+                    progressFill.style.backgroundColor = 'var(--rh-orange)';
+                    await new Promise(r => setTimeout(r, 3000)); // Show longer so user can read
+                } else {
+                    statusEl.textContent = 'VMs rebooted successfully. Starting grading...';
+                    progressFill.style.width = '100%';
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+
+                // Reset for grading
+                progressFill.style.backgroundColor = 'var(--primary-color)'; // Reset color
+                progressFill.style.width = '0%';
+
+            } catch (e) {
+                statusEl.textContent = 'Could not reboot VMs. Continuing with grading...';
+                await new Promise(r => setTimeout(r, 1500));
+            }
+
+            if (gradingAborted) {
+                document.removeEventListener('keydown', handleGradingEsc);
+                modal.classList.add('hidden');
+                showToast('warning', 'Cancelled', 'Grading cancelled.');
+                return;
+            }
+
+            // Now show task list and begin grading
+            titleEl.textContent = 'Grading in Progress';
+            taskList.innerHTML = selectedTasks.map((t, i) => `
+                <div class="grading-task-item pending" data-task-id="${t.id}">
+                    <div class="icon">○</div>
+                    <span class="task-name">${i + 1}. ${t.description}</span>
+                </div>
+            `).join('');
+            statusEl.textContent = `Grading ${selectedTasks.length} tasks in parallel...`;
+
+            // Grade all tasks in parallel with real-time UI updates
+            const results = [];
+            let totalScore = 0;
+            let totalPoints = 0;
+            let completedCount = 0;
+            let cancelled = false;
+
+            // Mark all tasks as grading
+            selectedTasks.forEach(task => {
+                const taskEl = taskList.querySelector(`[data-task-id="${task.id}"]`);
+                taskEl.className = 'grading-task-item grading';
+                taskEl.querySelector('.icon').textContent = '◐';
+            });
+
+            // Create all grading promises
+            const gradingPromises = selectedTasks.map(async (task, i) => {
+                const taskEl = taskList.querySelector(`[data-task-id="${task.id}"]`);
+
+                try {
+                    const res = await fetch(`/api/grade-task/${task.id}`, { method: 'POST' });
+                    const result = await res.json();
+
+                    const passed = result.passed || false;
+                    const points = result.points || 0;
+                    const maxPoints = result.max_points || 0;
+
+                    // Update totals atomically
+                    totalScore += points;
+                    totalPoints += maxPoints;
+
+                    // Update task status in modal immediately
+                    taskEl.className = `grading-task-item ${passed ? 'passed' : 'failed'}`;
+                    taskEl.querySelector('.icon').textContent = passed ? '✓' : '✗';
+
+                    // Track result
+                    taskResults.set(task.id, { passed, points, maxPoints });
+                    results.push({
+                        task: task.id,
+                        check: task.description,
+                        category: task.category,
+                        passed,
+                        points: maxPoints
+                    });
+
+                    return { success: true, passed, points, maxPoints };
+
+                } catch (e) {
+                    taskEl.className = 'grading-task-item failed';
+                    taskEl.querySelector('.icon').textContent = '!';
+                    results.push({
+                        task: task.id,
+                        check: task.description,
+                        category: task.category,
+                        passed: false,
+                        points: 0
+                    });
+                    return { success: false };
+                } finally {
+                    // Update progress bar as each task completes
+                    completedCount++;
+                    const pct = (completedCount / selectedTasks.length) * 100;
+                    progressFill.style.width = pct + '%';
+                    statusEl.textContent = `Graded ${completedCount} of ${selectedTasks.length} tasks...`;
+                }
+            });
+
+            // Wait for all grading to complete
+            await Promise.all(gradingPromises);
+
+            // Remove ESC key listener
+            document.removeEventListener('keydown', handleGradingEsc);
+
+            if (gradingAborted) {
+                cancelled = true;
+            }
+
+            if (cancelled) {
+                // Grading was cancelled (though parallel grading completes quickly)
+                spinner.style.display = 'none';
+                titleEl.textContent = 'Grading Cancelled';
+                statusEl.textContent = `Graded ${completedCount} of ${selectedTasks.length} tasks.`;
+                cancelBtn.textContent = 'Close';
+                cancelBtn.disabled = false;
+                cancelBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    renderTaskSidebar(); // Update sidebar with partial results
+                };
+                showToast('warning', 'Grading Cancelled', `Graded ${completedCount} of ${selectedTasks.length} tasks.`);
+                return;
+            }
+
+            statusEl.textContent = 'Grading complete! Preparing results...';
+
+            // Build final result object
+            const finalResult = {
+                score: totalScore,
+                total: totalPoints,
+                passed: totalScore >= (totalPoints * 0.7),
+                checks: results,
+                categories: {}
+            };
+
+            // Calculate category stats
+            results.forEach(r => {
+                if (!finalResult.categories[r.category]) {
+                    finalResult.categories[r.category] = { earned: 0, possible: 0 };
+                }
+                if (r.passed) finalResult.categories[r.category].earned += r.points;
+                finalResult.categories[r.category].possible += r.points;
+            });
+
+            // Save result
+            try {
                 await fetch('/api/results', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...result, mode: currentMode, duration_seconds: duration })
+                    body: JSON.stringify({ ...finalResult, mode: currentMode, duration_seconds: duration })
                 });
-
-                overlay.classList.add('hidden');
-                displayResults(result);
             } catch (e) {
-                overlay.classList.add('hidden');
-                showToast('error', 'Submission Failed', 'Failed to submit for grading. Please try again.');
-                showView('mode-select');
+                console.error('Failed to save results:', e);
             }
+
+            // Brief pause to show completion
+            await new Promise(r => setTimeout(r, 500));
+            modal.classList.add('hidden');
+
+            displayResults(finalResult);
         }
 
         function confirmAbandon() {
             if (confirm('Are you sure you want to abandon this exam? Your progress will be lost.')) {
                 stopTimer();
+                taskResults.clear();
                 showView('mode-select');
             }
         }
 
         function displayResults(result) {
             document.getElementById('exam-sidebar').classList.add('hidden');
-            document.getElementById('exam-actions').classList.add('hidden');
             document.getElementById('timer').classList.add('hidden');
 
             showView('results');
@@ -1673,16 +3351,35 @@
             `).join('');
         }
 
+        // Clear all results
+        async function clearAllResults() {
+            if (!confirm('Are you sure you want to delete all practice history? This cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/results', { method: 'DELETE' });
+                const data = await res.json();
+
+                if (data.status === 'cleared') {
+                    showToast('success', 'History Cleared', `Deleted ${data.deleted} result(s).`);
+                    loadStats(); // Refresh the stats view
+                } else {
+                    showToast('error', 'Error', 'Failed to clear history.');
+                }
+            } catch (e) {
+                showToast('error', 'Connection Error', 'Failed to reach server.');
+            }
+        }
+
         // Stats
         async function loadStats() {
             const summaryEl = document.getElementById('stats-summary');
             const weakAreasEl = document.getElementById('weak-areas');
             const categoryStatsEl = document.getElementById('category-stats');
 
-            const useMock = document.getElementById('use-mock-stats')?.checked;
-
             try {
-                const endpoint = useMock ? '/api/mock-stats' : '/api/stats';
+                const endpoint = '/api/stats';
                 const res = await fetch(endpoint);
                 const stats = await res.json();
 
@@ -1714,21 +3411,23 @@
                     </div>
                 `;
 
-                weakAreasEl.innerHTML = stats.weak_areas.length ?
-                    stats.weak_areas.map(w => {
-                        const cls = w.percentage >= 70 ? 'good' : w.percentage >= 50 ? 'ok' : 'bad';
-                        return `
-                            <div class="category-bar">
-                                <div class="header">
-                                    <span class="name">${w.category.replace(/-/g, ' ')}</span>
-                                    <span class="pct ${cls}">${w.percentage}%</span>
-                                </div>
-                                <div class="progress-track">
-                                    <div class="progress-fill ${cls}" style="width: ${w.percentage}%"></div>
+                // Show weak areas as a simple recommendation
+                if (stats.weak_areas.length > 0) {
+                    const weakNames = stats.weak_areas.map(w => `<strong>${w.category.replace(/-/g, ' ')}</strong> (${w.percentage}%)`).join(', ');
+                    weakAreasEl.innerHTML = `
+                        <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <span style="color: var(--rh-orange); font-size: 1.2rem;">💡</span>
+                            <div>
+                                <div style="color: var(--rh-orange); font-weight: 600; margin-bottom: 0.25rem;">Focus Areas</div>
+                                <div style="color: var(--rh-gray-light); font-size: 0.9rem;">
+                                    Practice these categories to improve: ${weakNames}
                                 </div>
                             </div>
-                        `;
-                    }).join('') : '<p style="color: var(--rh-gray-light)">Complete some practice sessions to see weak areas.</p>';
+                        </div>
+                    `;
+                } else {
+                    weakAreasEl.innerHTML = '';
+                }
 
                 // Sort: tested categories first (by percentage desc), then untested
                 const sortedCats = Object.entries(stats.categories).sort((a, b) => {
@@ -1780,4 +3479,5 @@
         loadConfig();
     </script>
 </body>
+
 </html>

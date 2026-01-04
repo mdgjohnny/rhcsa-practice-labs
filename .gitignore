@@ -3,6 +3,7 @@
 
 # Local configuration (contains passwords)
 config
+*.bak
 
 # Database
 results.db
@@ -11,3 +12,6 @@ results.db
 .venv/
 __pycache__/
 *.pyc
+
+# Agent Artifacts
+CLAUDE.md

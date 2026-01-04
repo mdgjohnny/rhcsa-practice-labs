@@ -22,6 +22,12 @@ from flask import Flask, jsonify, request, send_from_directory
 DEBUG = os.environ.get('FLASK_DEBUG', 'false').lower() in ('true', '1', 'yes')
 LOG_LEVEL = os.environ.get('LOG_LEVEL', 'DEBUG' if DEBUG else 'INFO').upper()
 
+# Subprocess timeouts (seconds)
+TIMEOUT_LIST_TASKS = 30
+TIMEOUT_GRADER = 300  # 5 minutes for full grading
+TIMEOUT_SINGLE_TASK = 60  # 1 minute per task
+TIMEOUT_SSH_CHECK = 10
+
 # Configure logging
 LOG_FILE = Path(__file__).parent.parent / 'api.log'
 logging.basicConfig(
@@ -106,16 +112,28 @@ def index():
     return send_from_directory(app.static_folder, 'index.html')
 
 
+@app.route('/favicon.svg')
+def favicon():
+    """Serve favicon."""
+    return send_from_directory(app.static_folder, 'favicon.svg')
+
+
 @app.route('/api/tasks', methods=['GET'])
 def list_tasks():
     """List all available tasks."""
     logger.debug("list_tasks called")
-    result = subprocess.run(
-        [str(GRADER_SCRIPT), '--list-tasks', '--json'],
-        capture_output=True,
-        text=True,
-        cwd=str(BASE_DIR)
-    )
+    try:
+        result = subprocess.run(
+            [str(GRADER_SCRIPT), '--list-tasks', '--json'],
+            capture_output=True,
+            text=True,
+            cwd=str(BASE_DIR),
+            timeout=TIMEOUT_LIST_TASKS
+        )
+    except subprocess.TimeoutExpired:
+        logger.error("list_tasks timed out")
+        return jsonify({'error': 'Request timed out'}), 504
+
     if result.returncode != 0:
         logger.error(f"list_tasks failed: {result.stderr}")
         return jsonify({'error': result.stderr}), 500
@@ -246,12 +264,21 @@ ROOT_PASSWORD="{root_password}"
 @app.route('/api/test-connection', methods=['POST'])
 def test_connection():
     """Test SSH connectivity to nodes."""
-    result = subprocess.run(
-        [str(GRADER_SCRIPT), '--check-ssh'],
-        capture_output=True,
-        text=True,
-        cwd=str(BASE_DIR)
-    )
+    try:
+        result = subprocess.run(
+            [str(GRADER_SCRIPT), '--check-ssh'],
+            capture_output=True,
+            text=True,
+            cwd=str(BASE_DIR),
+            timeout=TIMEOUT_SSH_CHECK
+        )
+    except subprocess.TimeoutExpired:
+        return jsonify({
+            'node1': False,
+            'node2': False,
+            'ok': False,
+            'error': 'SSH check timed out'
+        }), 504
 
     try:
         ssh_results = json.loads(result.stdout)
@@ -274,15 +301,96 @@ def test_connection():
     })
 
 
+@app.route('/api/reboot-vm', methods=['POST'])
+def reboot_vm():
+    """Reboot a specific VM and wait for it to come back online."""
+    import time
+
+    data = request.get_json() or {}
+    target = data.get('node', 'node1')  # Default to node1
+
+    if target not in ('node1', 'node2'):
+        return jsonify({'error': 'Invalid node. Use "node1" or "node2"'}), 400
+
+    logger.info(f"Rebooting {target}")
+
+    # Load config
+    if not CONFIG_FILE.exists():
+        return jsonify({'error': 'Config file not found'}), 400
+
+    config = {}
+    with open(CONFIG_FILE) as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith('#') or '=' not in line:
+                continue
+            key, value = line.split('=', 1)
+            config[key.strip()] = value.strip().strip('"\'')
+
+    node_ip = config.get(f'{target.upper()}_IP', '')
+    password = config.get('ROOT_PASSWORD', '')
+
+    if not node_ip:
+        return jsonify({'error': f'{target} IP not configured'}), 400
+    if not password:
+        return jsonify({'error': 'Root password not configured'}), 400
+
+    result = {'node': target, 'rebooted': False, 'online': False}
+
+    # Send reboot command
+    try:
+        reboot_cmd = ['sshpass', '-p', password, 'ssh', '-o', 'ConnectTimeout=10',
+                      '-o', 'StrictHostKeyChecking=no', f'root@{node_ip}',
+                      'nohup reboot &>/dev/null &']
+        subprocess.run(reboot_cmd, timeout=15, capture_output=True)
+        result['rebooted'] = True
+        logger.info(f"Reboot command sent to {target} ({node_ip})")
+    except Exception as e:
+        logger.error(f"Failed to reboot {target}: {e}")
+        return jsonify({'error': f'Failed to send reboot command: {e}', **result}), 500
+
+    # Wait for node to go down
+    time.sleep(5)
+
+    # Wait for node to come back (up to 90 seconds)
+    max_wait = 90
+    start_time = time.time()
+
+    while time.time() - start_time < max_wait:
+        try:
+            check_cmd = ['sshpass', '-p', password, 'ssh', '-o', 'ConnectTimeout=5',
+                         '-o', 'StrictHostKeyChecking=no', f'root@{node_ip}', 'echo ok']
+            check_result = subprocess.run(check_cmd, timeout=10, capture_output=True, text=True)
+            if check_result.returncode == 0 and 'ok' in check_result.stdout:
+                result['online'] = True
+                logger.info(f"{target} is back online")
+                break
+        except Exception:
+            pass
+        time.sleep(5)
+
+    logger.info(f"Reboot complete: {target} online={result['online']}")
+
+    return jsonify({
+        'ok': result['online'],
+        **result,
+        'message': f'{target} rebooted and online' if result['online'] else f'{target} failed to come back online'
+    })
+
+
 @app.route('/api/healthcheck', methods=['GET'])
 def healthcheck():
     """Comprehensive system health check."""
-    result = subprocess.run(
-        [str(GRADER_SCRIPT), '--dry-run', '--json'],
-        capture_output=True,
-        text=True,
-        cwd=str(BASE_DIR)
-    )
+    try:
+        result = subprocess.run(
+            [str(GRADER_SCRIPT), '--dry-run', '--json'],
+            capture_output=True,
+            text=True,
+            cwd=str(BASE_DIR),
+            timeout=TIMEOUT_LIST_TASKS
+        )
+    except subprocess.TimeoutExpired:
+        return jsonify({'ok': False, 'error': 'Health check timed out'}), 504
 
     try:
         health = json.loads(result.stdout)
@@ -323,13 +431,21 @@ def run_grader():
     cmd = [str(GRADER_SCRIPT), '--skip-reboot', '--json', f"--tasks={','.join(task_nums)}"]
     logger.debug(f"Running grader command: {' '.join(cmd)}")
 
-    # Run the grader
-    result = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        cwd=str(BASE_DIR)
-    )
+    # Run the grader with timeout
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            cwd=str(BASE_DIR),
+            timeout=TIMEOUT_GRADER
+        )
+    except subprocess.TimeoutExpired:
+        logger.error(f"Grader timed out after {TIMEOUT_GRADER}s")
+        return jsonify({
+            'error': 'Grading timed out',
+            'message': f'Grading took longer than {TIMEOUT_GRADER} seconds. Try fewer tasks.'
+        }), 504
 
     logger.debug(f"Grader returncode: {result.returncode}")
     if result.stderr:
@@ -368,21 +484,37 @@ def run_grader():
 @app.route('/api/grade-task/<task_id>', methods=['POST'])
 def grade_single_task(task_id):
     """Grade a single task and return the result."""
-    logger.info(f"grade_single_task called: task_id={task_id}")
+    # Get optional target VM override
+    target = request.args.get('target', None)
+    if target and target not in ('node1', 'node2', 'both'):
+        return jsonify({'error': 'Invalid target', 'message': 'Target must be node1, node2, or both'}), 400
+
+    logger.info(f"grade_single_task called: task_id={task_id}, target={target}")
 
     # Extract task number
     task_num = task_id.replace('task-', '') if task_id.startswith('task-') else task_id
 
     # Build command for single task
     cmd = [str(GRADER_SCRIPT), '--skip-reboot', '--json', f"--tasks={task_num}"]
+    if target:
+        cmd.append(f"--target={target}")
     logger.debug(f"Running single task grader: {' '.join(cmd)}")
 
-    result = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        cwd=str(BASE_DIR)
-    )
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            cwd=str(BASE_DIR),
+            timeout=TIMEOUT_SINGLE_TASK
+        )
+    except subprocess.TimeoutExpired:
+        logger.error(f"Single task grader timed out after {TIMEOUT_SINGLE_TASK}s")
+        return jsonify({
+            'error': 'Grading timed out',
+            'message': f'Task grading took longer than {TIMEOUT_SINGLE_TASK} seconds.',
+            'task_id': task_id
+        }), 504
 
     logger.debug(f"Single task grader returncode: {result.returncode}")
 
@@ -473,10 +605,22 @@ def save_result():
 
 @app.route('/api/results', methods=['GET'])
 def get_results():
-    """Get all stored results."""
+    """Get stored results with optional pagination."""
+    # Pagination parameters
+    limit = request.args.get('limit', 20, type=int)
+    offset = request.args.get('offset', 0, type=int)
+    limit = max(1, min(100, limit))  # Clamp between 1-100
+    offset = max(0, offset)
+
     with db_connection() as conn:
         c = conn.cursor()
-        c.execute('SELECT * FROM results ORDER BY timestamp DESC')
+
+        # Get total count
+        c.execute('SELECT COUNT(*) as count FROM results')
+        total = c.fetchone()['count']
+
+        # Get paginated results
+        c.execute('SELECT * FROM results ORDER BY timestamp DESC LIMIT ? OFFSET ?', (limit, offset))
         rows = c.fetchall()
 
         results = []
@@ -493,7 +637,36 @@ def get_results():
                 'checks': json.loads(row['checks'])
             })
 
-    return jsonify(results)
+    return jsonify({
+        'results': results,
+        'total': total,
+        'limit': limit,
+        'offset': offset,
+        'has_more': offset + len(results) < total
+    })
+
+
+@app.route('/api/results/<int:result_id>', methods=['DELETE'])
+def delete_result(result_id):
+    """Delete a specific result by ID."""
+    logger.info(f"Deleting result id={result_id}")
+    with db_connection() as conn:
+        c = conn.cursor()
+        c.execute('DELETE FROM results WHERE id = ?', (result_id,))
+        if c.rowcount == 0:
+            return jsonify({'error': 'Result not found'}), 404
+    return jsonify({'status': 'deleted', 'id': result_id})
+
+
+@app.route('/api/results', methods=['DELETE'])
+def clear_all_results():
+    """Clear all stored results."""
+    logger.info("Clearing all results")
+    with db_connection() as conn:
+        c = conn.cursor()
+        c.execute('DELETE FROM results')
+        deleted_count = c.rowcount
+    return jsonify({'status': 'cleared', 'deleted': deleted_count})
 
 
 @app.route('/api/stats', methods=['GET'])
@@ -521,16 +694,17 @@ def get_stats():
 
     # Get all available categories from tasks
     all_categories = set()
-    result = subprocess.run(
-        [str(GRADER_SCRIPT), '--list-tasks', '--json'],
-        capture_output=True,
-        text=True,
-        cwd=str(BASE_DIR)
-    )
     try:
+        result = subprocess.run(
+            [str(GRADER_SCRIPT), '--list-tasks', '--json'],
+            capture_output=True,
+            text=True,
+            cwd=str(BASE_DIR),
+            timeout=TIMEOUT_LIST_TASKS
+        )
         tasks = json.loads(result.stdout)
         all_categories = {t['category'] for t in tasks if t.get('category')}
-    except (json.JSONDecodeError, KeyError):
+    except (subprocess.TimeoutExpired, json.JSONDecodeError, KeyError):
         pass
 
     # Calculate percentages for all categories
@@ -565,33 +739,7 @@ def get_stats():
     })
 
 
-@app.route('/api/mock-stats', methods=['GET'])
-def mock_stats():
-    """Generate mock stats data for UI testing."""
-    # Simulate varied performance across categories
-    mock_categories = {
-        'essential-tools': {'earned': 45, 'possible': 60, 'percentage': 75.0, 'tested': True},
-        'file-systems': {'earned': 30, 'possible': 50, 'percentage': 60.0, 'tested': True},
-        'users-groups': {'earned': 70, 'possible': 80, 'percentage': 87.5, 'tested': True},
-        'networking': {'earned': 25, 'possible': 40, 'percentage': 62.5, 'tested': True},
-        'security': {'earned': 15, 'possible': 40, 'percentage': 37.5, 'tested': True},
-        'containers': {'earned': 10, 'possible': 30, 'percentage': 33.3, 'tested': True},
-        'local-storage': {'earned': 35, 'possible': 50, 'percentage': 70.0, 'tested': True},
-        'deploy-maintain': {'earned': 40, 'possible': 60, 'percentage': 66.7, 'tested': True},
-        'operate-systems': {'earned': 0, 'possible': 0, 'percentage': 0, 'tested': False},
-    }
 
-    # Calculate weak areas (lowest percentages among tested)
-    tested = {k: v for k, v in mock_categories.items() if v['tested']}
-    weak_areas = sorted(tested.items(), key=lambda x: x[1]['percentage'])[:3]
-
-    return jsonify({
-        'total_attempts': 12,
-        'passed': 7,
-        'pass_rate': 58.3,
-        'categories': mock_categories,
-        'weak_areas': [{'category': k, **v} for k, v in weak_areas]
-    })
 
 
 @app.route('/api/random-tasks', methods=['GET'])
@@ -603,12 +751,17 @@ def random_tasks():
     logger.info(f"random_tasks called: count={count}")
 
     # Get all tasks
-    result = subprocess.run(
-        [str(GRADER_SCRIPT), '--list-tasks', '--json'],
-        capture_output=True,
-        text=True,
-        cwd=str(BASE_DIR)
-    )
+    try:
+        result = subprocess.run(
+            [str(GRADER_SCRIPT), '--list-tasks', '--json'],
+            capture_output=True,
+            text=True,
+            cwd=str(BASE_DIR),
+            timeout=TIMEOUT_LIST_TASKS
+        )
+    except subprocess.TimeoutExpired:
+        logger.error("random_tasks: list-tasks timed out")
+        return jsonify({'error': 'Request timed out'}), 504
 
     logger.debug(f"list-tasks returncode: {result.returncode}")
     if result.returncode != 0:
