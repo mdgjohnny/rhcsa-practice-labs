@@ -3,8 +3,12 @@
 # Category: operate-systems
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
+# Check if default target is multi-user (text mode)
+check 'systemctl get-default | grep -q "multi-user.target"' \
+    "Default target is multi-user.target (text mode)" \
+    "Default target is not multi-user.target"
 
-echo "Task 80 check not yet implemented"
-exit 1
+# Check if graphical target is not active by default
+check '! systemctl is-active graphical.target &>/dev/null || systemctl get-default | grep -q multi-user' \
+    "System boots to text mode" \
+    "System may still boot to graphical mode"

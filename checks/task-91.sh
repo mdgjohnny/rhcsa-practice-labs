@@ -3,8 +3,7 @@
 # Category: deploy-maintain
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 91 check not yet implemented"
-exit 1
+check '[[ -d /repo ]]' \
+    "Directory /repo exists" \
+    "Directory /repo does not exist"

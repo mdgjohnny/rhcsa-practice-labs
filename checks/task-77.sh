@@ -3,8 +3,12 @@
 # Category: essential-tools
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
+# Check if COLOR variable is exported in profile files
+check 'grep -rq "export COLOR=red" /etc/profile /etc/profile.d/ ~/.bashrc ~/.bash_profile 2>/dev/null' \
+    "COLOR=red is exported in shell profile" \
+    "COLOR=red export not found in profile files"
 
-echo "Task 77 check not yet implemented"
-exit 1
+# Check if subshell inherits the variable
+check 'bash -c "echo \$COLOR" | grep -q "red"' \
+    "Subshell inherits COLOR=red" \
+    "Subshell does not have COLOR=red"

@@ -3,8 +3,8 @@
 # Category: users-groups
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 93 check not yet implemented"
-exit 1
+# Check /etc/login.defs for password policies
+check 'grep -q "PASS_MAX_DAYS.*90" /etc/login.defs' \
+    "PASS_MAX_DAYS is set to 90" \
+    "PASS_MAX_DAYS is not 90"

@@ -3,8 +3,12 @@
 # Category: users-groups
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
+# Check if the output file exists
+check '[[ -f /root/suidfiles ]]' \
+    "File /root/suidfiles exists" \
+    "File /root/suidfiles does not exist"
 
-echo "Task 133 check not yet implemented"
-exit 1
+# Check if file contains SUID files (should have entries like /usr/bin/passwd)
+check 'grep -q "/usr/bin/passwd\|/usr/bin/sudo\|/bin/su" /root/suidfiles 2>/dev/null' \
+    "/root/suidfiles contains common SUID files" \
+    "/root/suidfiles appears empty or incomplete"

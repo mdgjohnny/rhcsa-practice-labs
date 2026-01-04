@@ -3,8 +3,12 @@
 # Category: users-groups
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
+# Check if NEWFILE exists in /etc/skel
+check '[[ -f /etc/skel/NEWFILE ]]' \
+    "NEWFILE exists in /etc/skel" \
+    "NEWFILE does not exist in /etc/skel"
 
-echo "Task 107 check not yet implemented"
-exit 1
+# Check the file is empty (0 bytes)
+check '[[ ! -s /etc/skel/NEWFILE ]]' \
+    "NEWFILE is empty" \
+    "NEWFILE is not empty"

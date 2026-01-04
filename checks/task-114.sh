@@ -3,8 +3,17 @@
 # Category: deploy-maintain
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
+# Check if httpd or nginx is installed
+check 'rpm -q httpd &>/dev/null || rpm -q nginx &>/dev/null' \
+    "Web server package is installed" \
+    "No web server package installed"
 
-echo "Task 114 check not yet implemented"
-exit 1
+# Check if web server service is running
+check 'systemctl is-active httpd &>/dev/null || systemctl is-active nginx &>/dev/null' \
+    "Web server is running" \
+    "Web server is not running"
+
+# Check if web server is enabled for automatic start
+check 'systemctl is-enabled httpd &>/dev/null || systemctl is-enabled nginx &>/dev/null' \
+    "Web server is enabled at boot" \
+    "Web server is not enabled at boot"

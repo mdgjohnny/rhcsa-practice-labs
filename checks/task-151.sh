@@ -3,8 +3,17 @@
 # Category: essential-tools
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
+# Check archive exists
+check '[[ -f /var/tmp/usr.tar.bz2 ]]' \
+    "Archive /var/tmp/usr.tar.bz2 exists" \
+    "Archive /var/tmp/usr.tar.bz2 does not exist"
 
-echo "Task 151 check not yet implemented"
-exit 1
+# Check it's a bzip2 compressed file
+check 'file /var/tmp/usr.tar.bz2 2>/dev/null | grep -qi "bzip2"' \
+    "Archive is bzip2 compressed" \
+    "Archive is not bzip2 compressed"
+
+# Check archive contains /usr/lib content
+check 'tar -tjf /var/tmp/usr.tar.bz2 2>/dev/null | grep -q "lib"' \
+    "Archive contains lib directory content" \
+    "Archive does not contain expected content"

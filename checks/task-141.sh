@@ -3,8 +3,7 @@
 # Category: security
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 141 check not yet implemented"
-exit 1
+check 'getenforce | grep -qi permissive' \
+    "SELinux is in permissive mode" \
+    "SELinux is not in permissive mode"

@@ -3,8 +3,8 @@
 # Category: users-groups
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 116 check not yet implemented"
-exit 1
+check 'id password &>/dev/null' \
+    "User password exists" \
+    "User password does not exist"
+# Check /etc/login.defs for password policies

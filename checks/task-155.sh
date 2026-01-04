@@ -3,8 +3,7 @@
 # Category: users-groups
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 155 check not yet implemented"
-exit 1
+check 'grep -rq "user20" /etc/sudoers /etc/sudoers.d/ 2>/dev/null' \
+    "Sudo config for user20 exists" \
+    "No sudo config for user20"

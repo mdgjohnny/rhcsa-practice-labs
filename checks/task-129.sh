@@ -3,8 +3,7 @@
 # Category: file-systems
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 129 check not yet implemented"
-exit 1
+check '[[ -d /mydata ]]' \
+    "Directory /mydata exists" \
+    "Directory /mydata does not exist"

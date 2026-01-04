@@ -3,8 +3,12 @@
 # Category: networking
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
+# Check SSH service is running
+check 'systemctl is-active sshd &>/dev/null' \
+    "SSH server is running" \
+    "SSH server is not running"
 
-echo "Task 118 check not yet implemented"
-exit 1
+# Check SSH is enabled at boot
+check 'systemctl is-enabled sshd &>/dev/null' \
+    "SSH server is enabled at boot" \
+    "SSH server is not enabled"

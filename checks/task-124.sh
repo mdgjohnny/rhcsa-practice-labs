@@ -3,8 +3,10 @@
 # Category: file-systems
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 124 check not yet implemented"
-exit 1
+check 'swapon --show | grep -q .' \
+    "Swap is active" \
+    "No swap is active"
+check 'grep -q swap /etc/fstab' \
+    "Swap is configured in /etc/fstab" \
+    "Swap is not in /etc/fstab"

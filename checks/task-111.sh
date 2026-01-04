@@ -3,8 +3,7 @@
 # Category: file-systems
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 111 check not yet implemented"
-exit 1
+check 'lvs | grep -q that' \
+    "Logical volume that exists" \
+    "Logical volume that does not exist"

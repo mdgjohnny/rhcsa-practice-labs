@@ -3,8 +3,12 @@
 # Category: networking
 # Target: both
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
+# Check if X11 forwarding is enabled in sshd_config
+check 'grep -q "^X11Forwarding yes" /etc/ssh/sshd_config' \
+    "X11Forwarding is enabled in sshd_config" \
+    "X11Forwarding is not enabled"
 
-echo "Task 82 check not yet implemented"
-exit 1
+# Check if xauth is installed
+check 'command -v xauth &>/dev/null' \
+    "xauth is installed" \
+    "xauth is not installed"

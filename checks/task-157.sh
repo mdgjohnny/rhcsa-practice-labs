@@ -3,8 +3,7 @@
 # Category: operate-systems
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 157 check not yet implemented"
-exit 1
+check 'podman ps 2>/dev/null | grep -q . || docker ps 2>/dev/null | grep -q .' \
+    "Container is running" \
+    "No container is running"

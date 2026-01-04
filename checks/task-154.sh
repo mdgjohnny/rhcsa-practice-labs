@@ -3,8 +3,7 @@
 # Category: users-groups
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 154 check not yet implemented"
-exit 1
+check 'id use &>/dev/null' \
+    "User use exists" \
+    "User use does not exist"

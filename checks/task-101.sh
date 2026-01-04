@@ -3,8 +3,10 @@
 # Category: operate-systems
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 101 check not yet implemented"
-exit 1
+check 'systemctl is-active vsftpd &>/dev/null' \
+    "Service vsftpd is running" \
+    "Service vsftpd is not running"
+check 'systemctl is-enabled vsftpd &>/dev/null' \
+    "Service vsftpd is enabled" \
+    "Service vsftpd is not enabled"

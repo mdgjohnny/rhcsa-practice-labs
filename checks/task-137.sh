@@ -3,8 +3,10 @@
 # Category: users-groups
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 137 check not yet implemented"
-exit 1
+check 'id laura &>/dev/null' \
+    "User laura exists" \
+    "User laura does not exist"
+check 'grep -rq "laura" /etc/sudoers /etc/sudoers.d/ 2>/dev/null' \
+    "Sudo config for laura exists" \
+    "No sudo config for laura"

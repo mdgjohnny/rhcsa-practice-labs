@@ -3,8 +3,12 @@
 # Category: networking
 # Target: both
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
+# Check if SSH key exists
+check '[[ -f ~/.ssh/id_rsa ]] || [[ -f ~/.ssh/id_ed25519 ]]' \
+    "SSH key pair exists" \
+    "No SSH key pair found in ~/.ssh/"
 
-echo "Task 81 check not yet implemented"
-exit 1
+# Check if we can SSH to node2 without password (from node1 context)
+check 'ssh -o BatchMode=yes -o ConnectTimeout=5 root@$NODE2 exit 2>/dev/null' \
+    "Passwordless SSH to node2 works" \
+    "Passwordless SSH to node2 failed"

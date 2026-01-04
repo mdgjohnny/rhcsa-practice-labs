@@ -3,8 +3,13 @@
 # Category: containers
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 102 check not yet implemented"
-exit 1
+check '[[ -d /httproot ]]' \
+    "Directory /httproot exists" \
+    "Directory /httproot does not exist"
+check '[[ -d /var/www/html ]]' \
+    "Directory /var/www/html exists" \
+    "Directory /var/www/html does not exist"
+check 'podman ps 2>/dev/null | grep -q . || docker ps 2>/dev/null | grep -q .' \
+    "Container is running" \
+    "No container is running"

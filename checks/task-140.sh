@@ -3,8 +3,7 @@
 # Category: operate-systems
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
-
-echo "Task 140 check not yet implemented"
-exit 1
+# Check default target is multi-user
+check 'systemctl get-default | grep -q "multi-user.target"' \
+    "Default boot target is multi-user.target" \
+    "Default boot target is not multi-user.target"

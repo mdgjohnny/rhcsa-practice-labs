@@ -3,8 +3,13 @@
 # Category: users-groups
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 90 check not yet implemented"
-exit 1
+check 'id student &>/dev/null' \
+    "User student exists" \
+    "User student does not exist"
+check 'id root &>/dev/null' \
+    "User root exists" \
+    "User root does not exist"
+check 'id root &>/dev/null' \
+    "User root exists" \
+    "User root does not exist"

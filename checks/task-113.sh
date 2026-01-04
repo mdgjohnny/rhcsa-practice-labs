@@ -3,8 +3,13 @@
 # Category: users-groups
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 113 check not yet implemented"
-exit 1
+check 'id vicky &>/dev/null' \
+    "User vicky exists" \
+    "User vicky does not exist"
+check 'id vicky &>/dev/null' \
+    "User vicky exists" \
+    "User vicky does not exist"
+check '[[ $(id -u vicky 2>/dev/null) == "2008" ]]' \
+    "User vicky has UID 2008" \
+    "User vicky does not have UID 2008"

@@ -3,8 +3,7 @@
 # Category: operate-systems
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 153 check not yet implemented"
-exit 1
+check 'systemctl is-active atd &>/dev/null' \
+    "Service atd is running" \
+    "Service atd is not running"

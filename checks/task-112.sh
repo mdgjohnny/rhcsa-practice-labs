@@ -3,8 +3,7 @@
 # Category: essential-tools
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 112 check not yet implemented"
-exit 1
+check 'id linda &>/dev/null' \
+    "User linda exists" \
+    "User linda does not exist"

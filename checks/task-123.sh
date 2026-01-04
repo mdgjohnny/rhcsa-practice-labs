@@ -3,8 +3,12 @@
 # Category: operate-systems
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
+# Check if tuned is running
+check 'systemctl is-active tuned &>/dev/null' \
+    "tuned service is running" \
+    "tuned service is not running"
 
-echo "Task 123 check not yet implemented"
-exit 1
+# Check if throughput-performance profile is active
+check 'tuned-adm active 2>/dev/null | grep -qi "throughput"' \
+    "Throughput-optimized tuned profile is active" \
+    "Throughput profile is not active"

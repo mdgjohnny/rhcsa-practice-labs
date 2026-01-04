@@ -3,8 +3,7 @@
 # Category: file-systems
 # Target: node1
 
-# TODO: Implement checks for this task
-# This is a placeholder - add actual verification logic
 
-echo "Task 148 check not yet implemented"
-exit 1
+check 'vgs mount &>/dev/null' \
+    "Volume group mount exists" \
+    "Volume group mount does not exist"
