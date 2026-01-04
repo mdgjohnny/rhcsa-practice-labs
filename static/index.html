@@ -1939,26 +1939,13 @@
                         </button>
                         <button class="btn btn-outline" onclick="showRebootModal()"
                             style="border-color: var(--rh-orange); color: var(--rh-orange);">
-                            Reboot VMs
+                            <span style="font-size: 1.1em;">↻</span> Reboot VMs
                         </button>
-
-                        <button class="btn btn-secondary" onclick="showView('welcome')"
-                            id="btn-back-setup-home">Back</button>
-                        <button class="btn btn-secondary" onclick="resumeSession()" id="btn-cancel-setup-session"
-                            style="display: none; border-color: var(--rh-red); color: var(--rh-red);">
-                            Cancel & Return
-                        </button>
+                        <button class="btn btn-secondary" onclick="goHome()">Back</button>
                     </div>
-                    <span style="font-size: 1.1em;">↻</span> Reboot VMs
-                    </button>
+                    <div id="connection-result" class="mt-1"></div>
                 </div>
-                <div id="connection-result" class="mt-1"></div>
             </div>
-            <div class="mt-2" style="display: flex; gap: 0.75rem;">
-                <button class="btn btn-primary hidden" id="back-to-practice-btn" onclick="goBackToPractice()">Back
-                    to Current Session</button>
-            </div>
-    </div>
 
     <!-- Mode Selection View -->
     <div class="content-body hidden" id="view-mode-select">
@@ -2024,12 +2011,8 @@
             </div>
         </div>
         <div style="display: flex; gap: 1rem;">
-            <button class="btn btn-success" onclick="startPractice()" id="btn-start-practice">Start
-                Practice</button>
-            <button class="btn btn-secondary" onclick="showView('practice-choice')" id="btn-back-setup">Back</button>
-            <button class="btn btn-secondary" onclick="resumeSession()" id="btn-cancel-setup"
-                style="display: none; border-color: var(--rh-red); color: var(--rh-red);">Cancel & Return to
-                Session</button>
+            <button class="btn btn-success" onclick="startPractice()" id="btn-start-practice">Start Practice</button>
+            <button class="btn btn-secondary" onclick="showView('practice-choice')">Back</button>
         </div>
     </div>
 
@@ -2655,23 +2638,8 @@
                 previousView = currentView.id.replace('view-', '');
             }
 
-            // Update cancel button visibility in setup view
-            if (viewId === 'setup') {
-                const session = loadSavedSession();
-                const hasSession = session && session.selectedTasks && session.selectedTasks.length > 0;
-
-                const cancelBtn = document.getElementById('btn-cancel-setup-session');
-                const backBtn = document.getElementById('btn-back-setup-home');
-
-                if (cancelBtn) cancelBtn.style.display = hasSession ? 'inline-block' : 'none';
-                if (backBtn) backBtn.style.display = hasSession ? 'none' : 'inline-block';
-            }
-
             document.querySelectorAll('.content-body').forEach(v => v.classList.add('hidden'));
             document.getElementById(`view-${viewId}`).classList.remove('hidden');
-
-            // Persist view choice
-            localStorage.setItem('lastView', viewId);
 
             // Hide exam UI elements when not in exam
             if (viewId !== 'exam-running') {
@@ -2679,32 +2647,11 @@
                 document.getElementById('timer').classList.add('hidden');
             }
 
-            // Show/hide back to practice button in setup view
-            const backToPracticeBtn = document.getElementById('back-to-practice-btn');
-            if (backToPracticeBtn) {
-                // Show if we came from exam-running (active practice/exam session)
-                const hasActiveSession = !document.getElementById('exam-sidebar').classList.contains('hidden') ||
-                    previousView === 'exam-running';
-                backToPracticeBtn.classList.toggle('hidden', !hasActiveSession);
-            }
-
             // Load data for specific views
             if (viewId === 'practice-setup') loadTasks();
             if (viewId === 'practice-category') populateCategoryGrid();
             if (viewId === 'stats') loadStats();
             if (viewId === 'welcome') checkForSavedSession();
-        }
-
-        function goBackToPractice() {
-            if (selectedTasks.length > 0) {
-                showView('exam-running');
-                document.getElementById('exam-sidebar').classList.remove('hidden');
-                if (currentMode === 'exam') {
-                    document.getElementById('timer').classList.remove('hidden');
-                }
-            } else {
-                showView('welcome');
-            }
         }
 
         // Task Navigation
