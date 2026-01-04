@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-# Task: Set default boot target to multi-user on both VMs
+# Task: Set default boot target to multi-user.target on both VMs
 # Category: deploy-maintain
+# Target: both
 
-DEFAULT_TARGET=$(systemctl get-default)
+check 'run_ssh "$NODE1_IP" "systemctl get-default" 2>/dev/null | grep -q "multi-user.target"' \
+    "Node1: default target is multi-user.target" \
+    "Node1: default target is not multi-user.target"
 
-check '[[ "$DEFAULT_TARGET" == "multi-user.target" ]]' \
-    "Default target is multi-user.target" \
-    "Default target is not multi-user.target (got $DEFAULT_TARGET)"
+check 'run_ssh "$NODE2_IP" "systemctl get-default" 2>/dev/null | grep -q "multi-user.target"' \
+    "Node2: default target is multi-user.target" \
+    "Node2: default target is not multi-user.target"
