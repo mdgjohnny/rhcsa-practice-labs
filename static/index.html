@@ -152,6 +152,24 @@
                 border-left: 4px solid var(--rh-blue);
             }
 
+            .toast.success {
+                border-left: 4px solid var(--rh-green);
+                background: #0f2b0f;
+                color: #e0ffe0;
+            }
+
+            .toast.error {
+                border-left: 4px solid var(--rh-red);
+                background: #2b0f0f;
+                color: #ffe0e0;
+            }
+
+            .toast.warning {
+                border-left: 4px solid var(--rh-orange);
+                background: #2b200f;
+                color: #ffe0c0;
+            }
+
             .toast-icon {
                 font-size: 1.25rem;
                 flex-shrink: 0;
@@ -289,6 +307,29 @@
                 background: var(--rh-gray);
                 border-radius: 4px;
                 font-size: 0.85rem;
+                cursor: pointer;
+                transition: background 0.2s, transform 0.1s;
+            }
+
+            .vm-indicator:hover {
+                background: #3a3d40;
+                transform: translateY(-1px);
+            }
+
+            .vm-indicator .vm-info {
+                display: flex;
+                flex-direction: column;
+                line-height: 1.2;
+            }
+
+            .vm-indicator .vm-hostname {
+                font-weight: 500;
+            }
+
+            .vm-indicator .vm-ip {
+                font-size: 0.7rem;
+                color: var(--rh-gray-light);
+                font-family: 'Consolas', monospace;
             }
 
             .vm-indicator .dot {
@@ -296,6 +337,7 @@
                 height: 8px;
                 border-radius: 50%;
                 background: var(--rh-gray-light);
+                flex-shrink: 0;
             }
 
             .vm-indicator .dot.ok {
@@ -362,6 +404,8 @@
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
+                flex-shrink: 0;
+                min-width: 320px;
             }
 
             .sidebar-header {
@@ -854,774 +898,810 @@
                     grid-template-columns: repeat(2, 1fr);
                 }
             }
-        }
 
-        /* Results */
-        .results-summary {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .result-box {
-            background: var(--rh-gray);
-            border-radius: 6px;
-            padding: 1.25rem;
-            text-align: center;
-        }
-
-        .result-box .value {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .result-box .label {
-            font-size: 0.8rem;
-            color: var(--rh-gray-light);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .result-box.passed .value {
-            color: var(--rh-green);
-        }
-
-        .result-box.failed .value {
-            color: var(--rh-red);
-        }
-
-        /* Check Results List */
-        .check-list {
-            border: 1px solid var(--rh-gray);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .check-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--rh-gray);
-        }
-
-        .check-item:last-child {
-            border-bottom: none;
-        }
-
-        .check-item .icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            flex-shrink: 0;
-        }
-
-        .check-item.passed .icon {
-            background: var(--rh-green);
-        }
-
-        .check-item.failed .icon {
-            background: var(--rh-red);
-        }
-
-        .check-item .text {
-            flex: 1;
-            font-size: 0.9rem;
-        }
-
-        .check-item .category {
-            font-size: 0.75rem;
-            color: var(--rh-cyan);
-            text-transform: capitalize;
-        }
-
-        /* Stats */
-        .category-bars {
-            margin-top: 1rem;
-        }
-
-        .category-bar {
-            margin-bottom: 1rem;
-        }
-
-        .category-bar .header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.4rem;
-            font-size: 0.9rem;
-            background: none;
-            border: none;
-            padding: 0;
-        }
-
-        .category-bar .name {
-            text-transform: capitalize;
-        }
-
-        .category-bar .pct {
-            font-weight: 600;
-        }
-
-        .category-bar .pct.good {
-            color: var(--rh-green);
-        }
-
-        .category-bar .pct.ok {
-            color: var(--rh-orange);
-        }
-
-        .category-bar .pct.bad {
-            color: var(--rh-red);
-        }
-
-        .progress-track {
-            height: 8px;
-            background: var(--rh-gray);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.3s;
-        }
-
-        .progress-fill.good {
-            background: var(--rh-green);
-        }
-
-        .progress-fill.ok {
-            background: var(--rh-orange);
-        }
-
-        .progress-fill.bad {
-            background: var(--rh-red);
-        }
-
-        /* Utilities */
-        .hidden {
-            display: none !important;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .mt-1 {
-            margin-top: 1rem;
-        }
-
-        .mt-2 {
-            margin-top: 2rem;
-        }
-
-        .mb-1 {
-            margin-bottom: 1rem;
-        }
-
-        .mb-2 {
-            margin-bottom: 2rem;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 3rem;
-            color: var(--rh-gray-light);
-        }
-
-        .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(21, 21, 21, 0.95);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
-
-        .loading-overlay.hidden {
-            display: none;
-        }
-
-        .alert {
-            padding: 1rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-        }
-
-        .alert-info {
-            background: rgba(0, 102, 204, 0.2);
-            border: 1px solid var(--rh-blue);
-        }
-
-        .alert-warning {
-            background: rgba(240, 171, 0, 0.2);
-            border: 1px solid var(--rh-orange);
-        }
-
-        /* Task Checkbox List */
-        .task-checkbox-list {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid var(--rh-gray);
-            border-radius: 4px;
-        }
-
-        .task-checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.6rem 0.75rem;
-            border-bottom: 1px solid var(--rh-gray);
-            cursor: pointer;
-        }
-
-        .task-checkbox-item:last-child {
-            border-bottom: none;
-        }
-
-        .task-checkbox-item:hover {
-            background: var(--rh-gray);
-        }
-
-        .task-checkbox-item input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--rh-red);
-        }
-
-        .task-checkbox-item .desc {
-            flex: 1;
-            font-size: 0.85rem;
-        }
-
-        .task-checkbox-item .cat {
-            font-size: 0.75rem;
-            color: var(--rh-cyan);
-        }
-
-        /* Welcome Screen */
-        .welcome {
-            text-align: center;
-            padding: 4rem 2rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .welcome h1 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .welcome p {
-            color: var(--rh-gray-light);
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-
-        .welcome .actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-
-        /* Tab Navigation */
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid var(--rh-gray);
-            margin-bottom: 1.5rem;
-        }
-
-        .tab {
-            padding: 0.75rem 1.5rem;
-            background: none;
-            border: none;
-            color: var(--rh-gray-light);
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 0.9rem;
-            position: relative;
-        }
-
-        .tab:hover {
-            color: var(--rh-white);
-        }
-
-        .tab.active {
-            color: var(--rh-white);
-        }
-
-        .tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--rh-red);
-        }
-
-        /* Exam Running State */
-        .exam-instructions {
-            background: var(--rh-gray);
-            padding: 1.5rem;
-            border-radius: 6px;
-            margin-bottom: 1.5rem;
-        }
-
-        .exam-instructions h3 {
-            margin-bottom: 0.75rem;
-        }
-
-        .exam-instructions ul {
-            margin-left: 1.5rem;
-            color: var(--rh-gray-light);
-            line-height: 1.8;
-        }
-
-        .actions-bar {
-            display: flex;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--rh-gray-dark);
-            border-top: 1px solid var(--rh-gray);
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .spinner-large {
-            width: 48px;
-            height: 48px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: var(--info);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        .step-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 0;
-            color: var(--text-muted);
-            transition: all 0.2s;
-        }
-
-        .step-item.active {
-            color: var(--text-main);
-            font-weight: 500;
-        }
-
-        .step-item.done {
-            color: var(--success);
-        }
-
-        .step-item.fail {
-            color: var(--error);
-        }
-
-        .step-icon {
-            width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-        }
-
-        .step-spinner {
-            width: 14px;
-            height: 14px;
-            border: 2px solid currentColor;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        /* Sidebar sticky footer */
-        .sidebar-footer {
-            padding: 0.75rem;
-            background: var(--rh-gray-dark);
-            border-top: 1px solid var(--rh-gray);
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .sidebar-footer .btn {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .sidebar-progress {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--rh-gray-light);
-        }
-
-        .sidebar-progress .progress-bar {
-            flex: 1;
-            height: 6px;
-            background: var(--rh-gray);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .sidebar-progress .progress-fill {
-            height: 100%;
-            background: var(--rh-green);
-            transition: width 0.3s;
-        }
-
-        /* Grading Progress Modal */
-        .grading-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        }
-
-        .grading-modal.hidden {
-            display: none;
-        }
-
-        .grading-modal-content {
-            background: var(--rh-gray-dark);
-            border: 1px solid var(--rh-gray);
-            border-radius: 8px;
-            padding: 2rem;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .grading-modal h2 {
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .grading-spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid var(--rh-gray);
-            border-top-color: var(--rh-red);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes reboot-progress {
-            from {
-                width: 0%;
+            /* Results */
+            .results-summary {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1rem;
+                margin-bottom: 2rem;
             }
 
-            to {
+            .result-box {
+                background: var(--rh-gray);
+                border-radius: 6px;
+                padding: 1.25rem;
+                text-align: center;
+            }
+
+            .result-box .value {
+                font-size: 2rem;
+                font-weight: 700;
+                margin-bottom: 0.25rem;
+            }
+
+            .result-box .label {
+                font-size: 0.8rem;
+                color: var(--rh-gray-light);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .result-box.passed .value {
+                color: var(--rh-green);
+            }
+
+            .result-box.failed .value {
+                color: var(--rh-red);
+            }
+
+            /* Check Results List */
+            .check-list {
+                border: 1px solid var(--rh-gray);
+                border-radius: 6px;
+                overflow: hidden;
+            }
+
+            .check-item {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid var(--rh-gray);
+            }
+
+            .check-item:last-child {
+                border-bottom: none;
+            }
+
+            .check-item .icon {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.8rem;
+                flex-shrink: 0;
+            }
+
+            .check-item.passed .icon {
+                background: var(--rh-green);
+            }
+
+            .check-item.failed .icon {
+                background: var(--rh-red);
+            }
+
+            .check-item .text {
+                flex: 1;
+                font-size: 0.9rem;
+            }
+
+            .check-item .category {
+                font-size: 0.75rem;
+                color: var(--rh-cyan);
+                text-transform: capitalize;
+            }
+
+            /* Stats */
+            .category-bars {
+                margin-top: 1rem;
+            }
+
+            .category-bar {
+                margin-bottom: 1rem;
+            }
+
+            .category-bar .header {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 0.4rem;
+                font-size: 0.9rem;
+                background: none;
+                border: none;
+                padding: 0;
+            }
+
+            .category-bar .name {
+                text-transform: capitalize;
+            }
+
+            .category-bar .pct {
+                font-weight: 600;
+            }
+
+            .category-bar .pct.good {
+                color: var(--rh-green);
+            }
+
+            .category-bar .pct.ok {
+                color: var(--rh-orange);
+            }
+
+            .category-bar .pct.bad {
+                color: var(--rh-red);
+            }
+
+            .progress-track {
+                height: 8px;
+                background: var(--rh-gray);
+                border-radius: 4px;
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                height: 100%;
+                border-radius: 4px;
+                transition: width 0.3s;
+            }
+
+            .progress-fill.good {
+                background: var(--rh-green);
+            }
+
+            .progress-fill.ok {
+                background: var(--rh-orange);
+            }
+
+            .progress-fill.bad {
+                background: var(--rh-red);
+            }
+
+            /* Utilities */
+            .hidden {
+                display: none !important;
+            }
+
+            .text-center {
+                text-align: center;
+            }
+
+            .mt-1 {
+                margin-top: 1rem;
+            }
+
+            .mt-2 {
+                margin-top: 2rem;
+            }
+
+            .mb-1 {
+                margin-bottom: 1rem;
+            }
+
+            .mb-2 {
+                margin-bottom: 2rem;
+            }
+
+            .loading {
+                text-align: center;
+                padding: 3rem;
+                color: var(--rh-gray-light);
+            }
+
+            .loading-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(21, 21, 21, 0.95);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+            }
+
+            .loading-overlay.hidden {
+                display: none;
+            }
+
+            .alert {
+                padding: 1rem;
+                border-radius: 4px;
+                margin-bottom: 1rem;
+            }
+
+            .alert-info {
+                background: rgba(0, 102, 204, 0.2);
+                border: 1px solid var(--rh-blue);
+            }
+
+            .alert-warning {
+                background: rgba(240, 171, 0, 0.2);
+                border: 1px solid var(--rh-orange);
+            }
+
+            /* Task Checkbox List */
+            .task-checkbox-list {
+                max-height: 400px;
+                overflow-y: auto;
+                border: 1px solid var(--rh-gray);
+                border-radius: 4px;
+            }
+
+            .task-checkbox-item {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.6rem 0.75rem;
+                border-bottom: 1px solid var(--rh-gray);
+                cursor: pointer;
+            }
+
+            .task-checkbox-item:last-child {
+                border-bottom: none;
+            }
+
+            .task-checkbox-item:hover {
+                background: var(--rh-gray);
+            }
+
+            .task-checkbox-item input[type="checkbox"] {
+                width: 16px;
+                height: 16px;
+                accent-color: var(--rh-red);
+            }
+
+            .task-checkbox-item .desc {
+                flex: 1;
+                font-size: 0.85rem;
+            }
+
+            .task-checkbox-item .cat {
+                font-size: 0.75rem;
+                color: var(--rh-cyan);
+            }
+
+            /* Welcome Screen */
+            .welcome {
+                text-align: center;
+                padding: 4rem 2rem;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+
+            .welcome h1 {
+                font-size: 2rem;
+                margin-bottom: 1rem;
+            }
+
+            .welcome p {
+                color: var(--rh-gray-light);
+                margin-bottom: 2rem;
+                line-height: 1.6;
+            }
+
+            .welcome .actions {
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+            }
+
+            /* Tab Navigation */
+            .tabs {
+                display: flex;
+                border-bottom: 1px solid var(--rh-gray);
+                margin-bottom: 1.5rem;
+            }
+
+            .tab {
+                padding: 0.75rem 1.5rem;
+                background: none;
+                border: none;
+                color: var(--rh-gray-light);
+                cursor: pointer;
+                font-family: inherit;
+                font-size: 0.9rem;
+                position: relative;
+            }
+
+            .tab:hover {
+                color: var(--rh-white);
+            }
+
+            .tab.active {
+                color: var(--rh-white);
+            }
+
+            .tab.active::after {
+                content: '';
+                position: absolute;
+                bottom: -1px;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: var(--rh-red);
+            }
+
+            /* Exam Running State */
+            .exam-instructions {
+                background: var(--rh-gray);
+                padding: 1.5rem;
+                border-radius: 6px;
+                margin-bottom: 1.5rem;
+            }
+
+            .exam-instructions h3 {
+                margin-bottom: 0.75rem;
+            }
+
+            .exam-instructions ul {
+                margin-left: 1.5rem;
+                color: var(--rh-gray-light);
+                line-height: 1.8;
+            }
+
+            .actions-bar {
+                display: flex;
+                gap: 1rem;
+                padding: 1rem;
+                background: var(--rh-gray-dark);
+                border-top: 1px solid var(--rh-gray);
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .spinner-large {
+                width: 48px;
+                height: 48px;
+                border: 4px solid rgba(255, 255, 255, 0.1);
+                border-top-color: var(--info);
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+
+            .step-item {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.5rem 0;
+                color: var(--text-muted);
+                transition: all 0.2s;
+            }
+
+            .step-item.active {
+                color: var(--text-main);
+                font-weight: 500;
+            }
+
+            .step-item.done {
+                color: var(--success);
+            }
+
+            .step-item.fail {
+                color: var(--error);
+            }
+
+            .step-icon {
+                width: 18px;
+                height: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1rem;
+            }
+
+            .step-spinner {
+                width: 14px;
+                height: 14px;
+                border: 2px solid currentColor;
+                border-top-color: transparent;
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+            }
+
+            /* Sidebar sticky footer */
+            .sidebar-footer {
+                padding: 0.75rem;
+                background: var(--rh-gray-dark);
+                border-top: 1px solid var(--rh-gray);
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .sidebar-footer .btn {
                 width: 100%;
+                justify-content: center;
             }
-        }
 
-        .reboot-card:hover {
-            border-color: var(--rh-orange) !important;
-            background: var(--rh-gray) !important;
-        }
+            .sidebar-progress {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.8rem;
+                color: var(--rh-gray-light);
+            }
 
-        .reboot-card.confirming {
-            border-color: var(--rh-orange) !important;
-            background: rgba(240, 171, 0, 0.1) !important;
-        }
+            .sidebar-progress .progress-bar {
+                flex: 1;
+                height: 6px;
+                background: var(--rh-gray);
+                border-radius: 3px;
+                overflow: hidden;
+            }
 
-        .reboot-target-card.confirming {
-            border-color: var(--rh-orange);
-            background: rgba(240, 171, 0, 0.1);
-            animation: pulse-border 1s infinite;
-        }
+            .sidebar-progress .progress-fill {
+                height: 100%;
+                background: var(--rh-green);
+                transition: width 0.3s;
+            }
 
-        @keyframes pulse-border {
-            0% {
+            /* Grading Progress Modal */
+            .grading-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.85);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            }
+
+            .grading-modal.hidden {
+                display: none;
+            }
+
+            .grading-modal-content {
+                background: var(--rh-gray-dark);
+                border: 1px solid var(--rh-gray);
+                border-radius: 8px;
+                padding: 2rem;
+                width: 90%;
+                max-width: 500px;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+
+            .grading-modal h2 {
+                margin-bottom: 1rem;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .grading-spinner {
+                width: 24px;
+                height: 24px;
+                border: 3px solid var(--rh-gray);
+                border-top-color: var(--rh-red);
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            @keyframes reboot-progress {
+                from {
+                    width: 0%;
+                }
+
+                to {
+                    width: 100%;
+                }
+            }
+
+            .reboot-card:hover {
+                border-color: var(--rh-orange) !important;
+                background: var(--rh-gray) !important;
+            }
+
+            .reboot-card.confirming {
+                border-color: var(--rh-orange) !important;
+                background: rgba(240, 171, 0, 0.1) !important;
+            }
+
+            .reboot-target-card.confirming {
                 border-color: var(--rh-orange);
+                background: rgba(240, 171, 0, 0.1);
+                animation: pulse-border 1s infinite;
             }
 
-            50% {
-                border-color: rgba(240, 171, 0, 0.3);
+            @keyframes pulse-border {
+                0% {
+                    border-color: var(--rh-orange);
+                }
+
+                50% {
+                    border-color: rgba(240, 171, 0, 0.3);
+                }
+
+                100% {
+                    border-color: var(--rh-orange);
+                }
             }
 
-            100% {
+            .reboot-progress-container {
+                height: 4px;
+                background: var(--rh-gray);
+                border-radius: 2px;
+                margin-top: 0.75rem;
+                overflow: hidden;
+                display: none;
+            }
+
+            .reboot-target-card.rebooting .reboot-progress-container {
+                display: block;
+            }
+
+            .reboot-progress-bar {
+                height: 100%;
+                background: var(--rh-orange);
+                width: 0%;
+                transition: width 0.5s linear;
+            }
+
+            .grading-progress-bar {
+                height: 8px;
+                background: var(--rh-gray);
+                border-radius: 4px;
+                overflow: hidden;
+                margin-bottom: 1rem;
+            }
+
+            .grading-progress-bar .fill {
+                height: 100%;
+                background: linear-gradient(90deg, var(--rh-red), var(--rh-orange));
+                transition: width 0.3s;
+            }
+
+            .grading-status {
+                font-size: 0.9rem;
+                color: var(--rh-gray-light);
+                margin-bottom: 1rem;
+            }
+
+            .grading-task-list {
+                max-height: 300px;
+                overflow-y: auto;
+                border: 1px solid var(--rh-gray);
+                border-radius: 4px;
+            }
+
+            .grading-task-item {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.5rem 0.75rem;
+                border-bottom: 1px solid var(--rh-gray);
+                font-size: 0.85rem;
+            }
+
+            .grading-task-item:last-child {
+                border-bottom: none;
+            }
+
+            .grading-task-item .icon {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.7rem;
+                flex-shrink: 0;
+            }
+
+            .grading-task-item.pending .icon {
+                background: var(--rh-gray);
+                color: var(--rh-gray-light);
+            }
+
+            .grading-task-item.grading .icon {
+                background: var(--rh-orange);
+                animation: pulse 1s infinite;
+            }
+
+            .grading-task-item.passed .icon {
+                background: var(--rh-green);
+            }
+
+            .grading-task-item.failed .icon {
+                background: var(--rh-red);
+            }
+
+            .grading-task-item .task-name {
+                flex: 1;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            /* Reboot Modal */
+            .reboot-modal-content {
+                background: var(--rh-gray-dark);
+                border: 1px solid var(--rh-gray);
+                border-radius: 8px;
+                padding: 0;
+                width: 90%;
+                max-width: 600px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            }
+
+            .reboot-modal-header {
+                padding: 1.5rem;
+                background: var(--rh-black);
+                border-bottom: 1px solid var(--rh-gray);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .reboot-modal-header h2 {
+                margin: 0;
+                font-size: 1.25rem;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .reboot-modal-body {
+                padding: 2rem;
+            }
+
+            .reboot-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+
+            .reboot-target-card {
+                background: var(--rh-gray);
+                border: 2px solid transparent;
+                border-radius: 6px;
+                padding: 1.5rem;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.2s;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .reboot-target-card:hover {
+                background: #4a4d50;
+                transform: translateY(-2px);
+            }
+
+            .reboot-target-card.active {
                 border-color: var(--rh-orange);
-            }
-        }
-
-        .reboot-progress-container {
-            height: 4px;
-            background: var(--rh-gray);
-            border-radius: 2px;
-            margin-top: 0.75rem;
-            overflow: hidden;
-            display: none;
-        }
-
-        .reboot-target-card.rebooting .reboot-progress-container {
-            display: block;
-        }
-
-        .reboot-progress-bar {
-            height: 100%;
-            background: var(--rh-orange);
-            width: 0%;
-            transition: width 0.5s linear;
-        }
-
-        .grading-progress-bar {
-            height: 8px;
-            background: var(--rh-gray);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 1rem;
-        }
-
-        .grading-progress-bar .fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--rh-red), var(--rh-orange));
-            transition: width 0.3s;
-        }
-
-        .grading-status {
-            font-size: 0.9rem;
-            color: var(--rh-gray-light);
-            margin-bottom: 1rem;
-        }
-
-        .grading-task-list {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid var(--rh-gray);
-            border-radius: 4px;
-        }
-
-        .grading-task-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 0.75rem;
-            border-bottom: 1px solid var(--rh-gray);
-            font-size: 0.85rem;
-        }
-
-        .grading-task-item:last-child {
-            border-bottom: none;
-        }
-
-        .grading-task-item .icon {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            flex-shrink: 0;
-        }
-
-        .grading-task-item.pending .icon {
-            background: var(--rh-gray);
-            color: var(--rh-gray-light);
-        }
-
-        .grading-task-item.grading .icon {
-            background: var(--rh-orange);
-            animation: pulse 1s infinite;
-        }
-
-        .grading-task-item.passed .icon {
-            background: var(--rh-green);
-        }
-
-        .grading-task-item.failed .icon {
-            background: var(--rh-red);
-        }
-
-        .grading-task-item .task-name {
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Reboot Modal */
-        .reboot-modal-content {
-            background: var(--rh-gray-dark);
-            border: 1px solid var(--rh-gray);
-            border-radius: 8px;
-            padding: 0;
-            width: 90%;
-            max-width: 600px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .reboot-modal-header {
-            padding: 1.5rem;
-            background: var(--rh-black);
-            border-bottom: 1px solid var(--rh-gray);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .reboot-modal-header h2 {
-            margin: 0;
-            font-size: 1.25rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .reboot-modal-body {
-            padding: 2rem;
-        }
-
-        .reboot-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-        }
-
-        .reboot-target-card {
-            background: var(--rh-gray);
-            border: 2px solid transparent;
-            border-radius: 6px;
-            padding: 1.5rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .reboot-target-card:hover {
-            background: #4a4d50;
-            transform: translateY(-2px);
-        }
-
-        .reboot-target-card.active {
-            border-color: var(--rh-orange);
-            background: rgba(240, 171, 0, 0.1);
-        }
-
-        .reboot-target-card .icon {
-            font-size: 2rem;
-            margin-bottom: 0.75rem;
-            color: var(--rh-gray-light);
-            transition: color 0.2s;
-        }
-
-        .reboot-target-card:hover .icon {
-            color: var(--rh-white);
-        }
-
-        .reboot-target-card h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .reboot-target-card .status {
-            font-size: 0.85rem;
-            color: var(--rh-gray-light);
-            min-height: 1.2em;
-        }
-
-        .reboot-target-card.rebooting .icon {
-            animation: pulse-orange 1.5s infinite;
-            color: var(--rh-orange);
-        }
-
-        .reboot-target-card.success {
-            border-color: var(--rh-green);
-        }
-
-        .reboot-target-card.success .icon {
-            color: var(--rh-green);
-        }
-
-        .reboot-target-card.success .status {
-            color: var(--rh-green);
-        }
-
-        .reboot-target-card.error {
-            border-color: var(--rh-red);
-        }
-
-        .reboot-target-card.error .icon {
-            color: var(--rh-red);
-        }
-
-        .reboot-target-card.error .status {
-            color: var(--rh-red);
-        }
-
-        /* Reboot All Section */
-        .reboot-all-section {
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--rh-gray);
-            text-align: center;
-        }
-
-        @keyframes pulse-orange {
-            0% {
-                opacity: 1;
-                transform: scale(1);
+                background: rgba(240, 171, 0, 0.1);
             }
 
-            50% {
-                opacity: 0.6;
-                transform: scale(1.1);
+            .reboot-target-card .icon {
+                font-size: 2rem;
+                margin-bottom: 0.75rem;
+                color: var(--rh-gray-light);
+                transition: color 0.2s;
             }
 
-            100% {
-                opacity: 1;
-                transform: scale(1);
+            .reboot-target-card:hover .icon {
+                color: var(--rh-white);
             }
-        }
 
-        .task-jump-select {
-            width: 100%;
-            padding: 0.4rem;
-            background: var(--rh-black);
-            border: 1px solid var(--rh-gray);
-            border-radius: 4px;
-            color: var(--rh-white);
-            font-size: 0.8rem;
-        }
+            .reboot-target-card h3 {
+                font-size: 1.1rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .reboot-target-card .status {
+                font-size: 0.85rem;
+                color: var(--rh-gray-light);
+                min-height: 1.2em;
+            }
+
+            .reboot-target-card.rebooting .icon {
+                animation: pulse-orange 1.5s infinite;
+                color: var(--rh-orange);
+            }
+
+            .reboot-target-card.success {
+                border-color: var(--rh-green);
+            }
+
+            .reboot-target-card.success .icon {
+                color: var(--rh-green);
+            }
+
+            .reboot-target-card.success .status {
+                color: var(--rh-green);
+            }
+
+            .reboot-target-card.error {
+                border-color: var(--rh-red);
+            }
+
+            .reboot-target-card.error .icon {
+                color: var(--rh-red);
+            }
+
+            .reboot-target-card.error .status {
+                color: var(--rh-red);
+            }
+
+            /* Reboot All Section */
+            .reboot-all-section {
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid var(--rh-gray);
+                text-align: center;
+            }
+
+            @keyframes pulse-orange {
+                0% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+
+                50% {
+                    opacity: 0.6;
+                    transform: scale(1.1);
+                }
+
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+
+            .task-jump-select {
+                width: 100%;
+                padding: 0.4rem;
+                background: var(--rh-black);
+                border: 1px solid var(--rh-gray);
+                border-radius: 4px;
+                color: var(--rh-white);
+                font-size: 0.8rem;
+            }
+
+            /* Responsive VM Status */
+            @media (max-width: 600px) {
+                .vm-indicator span:not(.dot):not([id*="status"]) {
+                    display: none;
+                }
+
+                .vm-indicator {
+                    padding: 0.25rem 0.5rem;
+                }
+            }
+
+            .btn-icon-small {
+                width: 24px;
+                height: 24px;
+                padding: 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                background: transparent;
+                border: 1px solid var(--glass-border);
+                color: var(--text-muted);
+                cursor: pointer;
+                transition: all 0.2s;
+                margin-left: 0.5rem;
+            }
+
+            .btn-icon-small:hover {
+                color: var(--text-main);
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.2);
+            }
+
+            .btn-icon-small.spinning {
+                animation: spin 1s linear infinite;
+            }
     </style>
 </head>
 
@@ -1639,14 +1719,24 @@
         </div>
         <div class="header-center">
             <div class="vm-status">
-                <div class="vm-indicator">
+                <div class="vm-indicator" onclick="showVmInfoModal()" title="Click to view VM details">
                     <span class="dot" id="vm1-status"></span>
-                    <span id="vm1-name">node1</span>
+                    <div class="vm-info">
+                        <span class="vm-hostname" id="vm1-name">node1</span>
+                        <span class="vm-ip" id="vm1-ip-display">-</span>
+                    </div>
                 </div>
-                <div class="vm-indicator">
+                <div class="vm-indicator" onclick="showVmInfoModal()" title="Click to view VM details">
                     <span class="dot" id="vm2-status"></span>
-                    <span id="vm2-name">node2</span>
+                    <div class="vm-info">
+                        <span class="vm-hostname" id="vm2-name">node2</span>
+                        <span class="vm-ip" id="vm2-ip-display">-</span>
+                    </div>
                 </div>
+                <button class="btn-icon-small" id="refresh-conn-btn" onclick="quickTestConnection()"
+                    title="Test Connectivity">
+                    ↻
+                </button>
             </div>
             <div class="timer-display hidden" id="timer">03:00:00</div>
         </div>
@@ -1712,7 +1802,7 @@
         <!-- Main Content -->
         <main class="content">
             <!-- Welcome View (Revamped) -->
-            <div class="content-body" id="view-welcome"
+            <div class="content-body hidden" id="view-welcome"
                 style="align-items: center; justify-content: center; display: flex; text-align: center; padding-top: 3rem;">
 
                 <div style="max-width: 800px; width: 100%; animation: fadeInUp 0.5s ease-out;">
@@ -1729,6 +1819,31 @@
                             A professional-grade environment to test your Red Hat System Administrator skills. Real VMs,
                             real tasks, instant feedback.
                         </p>
+                    </div>
+
+                    <!-- Resume Session Banner (hidden by default) -->
+                    <div id="resume-session-banner" class="hidden"
+                        style="margin-bottom: 2rem; animation: fadeInUp 0.3s;">
+                        <div class="card"
+                            style="margin: 0; background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1px solid rgba(34, 197, 94, 0.4); cursor: pointer;"
+                            onclick="resumeSession()">
+                            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                                <div
+                                    style="width: 48px; height: 48px; background: rgba(34, 197, 94, 0.25); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #4ade80; font-size: 1.5rem; flex-shrink: 0;">
+                                    ▶</div>
+                                <div style="flex: 1;">
+                                    <h3
+                                        style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem; color: #4ade80;">
+                                        Resume Previous Session</h3>
+                                    <p id="resume-session-info" style="color: #9ca3af; font-size: 0.9rem; margin: 0;">-
+                                    </p>
+                                </div>
+                                <button class="btn btn-outline" onclick="event.stopPropagation(); clearSavedSession();"
+                                    style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af; font-size: 0.8rem; padding: 0.4rem 0.75rem;">
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Main Actions -->
@@ -1818,213 +1933,233 @@
                     <div class="mt-1" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         <button class="btn btn-primary" onclick="saveConfig()">Save Configuration</button>
                         <button class="btn btn-secondary" onclick="testConnection()">Test Connection</button>
+                        <button class="btn btn-outline" onclick="discoverAndUpdateIps()"
+                            style="border-color: var(--rh-green); color: var(--rh-green);">
+                            Auto-Discover IPs
+                        </button>
                         <button class="btn btn-outline" onclick="showRebootModal()"
                             style="border-color: var(--rh-orange); color: var(--rh-orange);">
-                            <span style="font-size: 1.1em;">↻</span> Reboot VMs
+                            Reboot VMs
+                        </button>
+
+                        <button class="btn btn-secondary" onclick="showView('welcome')"
+                            id="btn-back-setup-home">Back</button>
+                        <button class="btn btn-secondary" onclick="resumeSession()" id="btn-cancel-setup-session"
+                            style="display: none; border-color: var(--rh-red); color: var(--rh-red);">
+                            Cancel & Return
                         </button>
                     </div>
-                    <div id="connection-result" class="mt-1"></div>
+                    <span style="font-size: 1.1em;">↻</span> Reboot VMs
+                    </button>
                 </div>
-                <div class="mt-2">
-                    <button class="btn btn-success" onclick="showView('mode-select')">Continue to Practice</button>
+                <div id="connection-result" class="mt-1"></div>
+            </div>
+            <div class="mt-2" style="display: flex; gap: 0.75rem;">
+                <button class="btn btn-primary hidden" id="back-to-practice-btn" onclick="goBackToPractice()">Back
+                    to Current Session</button>
+            </div>
+    </div>
+
+    <!-- Mode Selection View -->
+    <div class="content-body hidden" id="view-mode-select">
+        <h1 class="mb-2">Select Mode</h1>
+        <div class="mode-cards">
+            <div class="mode-card" onclick="showView('practice-choice')">
+                <div class="icon">📚</div>
+                <h3>Practice Mode</h3>
+                <p>Select specific tasks and topics.<br>No time limit.</p>
+            </div>
+            <div class="mode-card" onclick="selectMode('exam')">
+                <div class="icon">⏱️</div>
+                <h3>Exam Mode</h3>
+                <p>Random selection of 13-20 tasks.<br>3 hour time limit.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Practice Choice View (All or Category) -->
+    <div class="content-body hidden" id="view-practice-choice">
+        <h1 class="mb-2">Practice Mode</h1>
+        <p style="color: var(--rh-gray-light); margin-bottom: 1.5rem;">Choose how you want to practice:</p>
+        <div class="mode-cards">
+            <div class="mode-card" onclick="selectMode('practice')">
+                <div class="icon">📋</div>
+                <h3>Select Tasks</h3>
+                <p>Choose specific tasks from a list.<br>Full control over what to practice.</p>
+            </div>
+            <div class="mode-card" onclick="showView('practice-category')">
+                <div class="icon">📂</div>
+                <h3>Practice by Category</h3>
+                <p>Focus on a specific RHCSA objective.<br>Great for targeted study.</p>
+            </div>
+        </div>
+        <button class="btn btn-secondary mt-2" onclick="showView('mode-select')">Back</button>
+    </div>
+
+    <!-- Practice by Category View -->
+    <div class="content-body hidden" id="view-practice-category">
+        <h1 class="mb-2">Select Category</h1>
+        <p style="color: var(--rh-gray-light); margin-bottom: 1.5rem;">Choose an RHCSA objective to practice:
+        </p>
+        <div class="category-grid" id="category-grid">
+            <div class="loading">Loading categories...</div>
+        </div>
+        <button class="btn btn-secondary mt-2" onclick="showView('practice-choice')">Back</button>
+    </div>
+
+    <!-- Practice Setup View -->
+    <div class="content-body hidden" id="view-practice-setup">
+        <div class="card">
+            <h2>Select Tasks to Practice</h2>
+            <div class="mb-1">
+                <button class="btn btn-secondary" onclick="selectAllTasks()">Select All</button>
+                <button class="btn btn-secondary" onclick="deselectAllTasks()">Clear</button>
+                <select id="category-filter" onchange="filterByCategory()"
+                    style="margin-left: 1rem; padding: 0.5rem; background: var(--rh-black); border: 1px solid var(--rh-gray); color: white; border-radius: 4px;">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+            <div class="task-checkbox-list" id="task-checkbox-list">
+                <div class="loading">Loading tasks...</div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <button class="btn btn-success" onclick="startPractice()" id="btn-start-practice">Start
+                Practice</button>
+            <button class="btn btn-secondary" onclick="showView('practice-choice')" id="btn-back-setup">Back</button>
+            <button class="btn btn-secondary" onclick="resumeSession()" id="btn-cancel-setup"
+                style="display: none; border-color: var(--rh-red); color: var(--rh-red);">Cancel & Return to
+                Session</button>
+        </div>
+    </div>
+
+    <!-- Exam Setup View -->
+    <div class="content-body hidden" id="view-exam-setup">
+        <div class="card">
+            <h2>Exam Simulation</h2>
+            <div class="alert alert-info">
+                <strong>Exam Rules:</strong> You will have 3 hours to complete randomly selected tasks.
+                Work on your VMs and submit when finished. All configurations must persist after reboot.
+            </div>
+            <div class="form-group" style="max-width: 200px;">
+                <label>Number of Tasks (13-20)</label>
+                <input type="number" id="exam-task-count" value="15" min="13" max="20">
+            </div>
+        </div>
+        <button class="btn btn-success" onclick="startExam()">Begin Exam</button>
+        <button class="btn btn-secondary" onclick="showView('mode-select')">Back</button>
+    </div>
+
+    <!-- Exam Running View -->
+    <div class="content-body hidden" id="view-exam-running">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb" style="margin-bottom: 1rem; font-size: 0.9rem;">
+            <a href="#" onclick="confirmAbandon(); return false;" style="color: var(--rh-gray-light);">Home</a>
+            <span style="color: var(--rh-gray-light); margin: 0 0.5rem;">/</span>
+            <span id="breadcrumb-mode">Practice</span>
+        </div>
+        <div class="exam-instructions">
+            <h3>Instructions</h3>
+            <ul>
+                <li>Complete the tasks listed in the sidebar on your virtual machines</li>
+                <li>All configurations must persist after system reboot</li>
+                <li>Do not disable SELinux or firewalld (50 point penalty each)</li>
+                <li>Click "Submit for Grading" when finished or when time expires</li>
+            </ul>
+        </div>
+        <div id="current-task-detail">
+            <p style="color: var(--rh-gray-light);">Select a task from the sidebar to view details.</p>
+        </div>
+        <!-- Task Navigation -->
+        <div class="task-nav" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <button class="btn btn-secondary" id="prev-task-btn" onclick="navigateTask(-1)" disabled>Previous</button>
+            <button class="btn btn-primary" id="next-task-btn" onclick="navigateTask(1)">Next</button>
+            <span id="task-nav-indicator"
+                style="margin-left: auto; color: var(--rh-gray-light); align-self: center;">Task 1 of 1</span>
+        </div>
+    </div>
+
+    <!-- Connecting / Intermediate View -->
+    <div class="content-body hidden" id="view-connecting"
+        style="align-items: center; justify-content: center; display: flex; flex-direction: column;">
+        <div style="text-align: center; max-width: 400px; width: 100%;">
+            <div class="spinner-large" style="margin: 0 auto 2rem;"></div>
+            <h2 style="margin-bottom: 1.5rem;">Initializing Environment</h2>
+
+            <div class="connection-steps"
+                style="text-align: left; background: var(--bg-card); padding: 1.5rem; border-radius: 8px; border: var(--glass-border);">
+                <div class="step-item pending" id="step-tasks">
+                    <span class="step-icon">○</span> Loading Tasks
+                </div>
+                <div class="step-item pending" id="step-config">
+                    <span class="step-icon">○</span> Checking Configuration
+                </div>
+                <div class="step-item pending" id="step-node1">
+                    <span class="step-icon">○</span> Connecting to Node 1
+                </div>
+                <div class="step-item pending" id="step-node2">
+                    <span class="step-icon">○</span> Connecting to Node 2
                 </div>
             </div>
 
-            <!-- Mode Selection View -->
-            <div class="content-body hidden" id="view-mode-select">
-                <h1 class="mb-2">Select Mode</h1>
-                <div class="mode-cards">
-                    <div class="mode-card" onclick="showView('practice-choice')">
-                        <div class="icon">📚</div>
-                        <h3>Practice Mode</h3>
-                        <p>Select specific tasks and topics.<br>No time limit.</p>
-                    </div>
-                    <div class="mode-card" onclick="selectMode('exam')">
-                        <div class="icon">⏱️</div>
-                        <h3>Exam Mode</h3>
-                        <p>Random selection of 13-20 tasks.<br>3 hour time limit.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Practice Choice View (All or Category) -->
-            <div class="content-body hidden" id="view-practice-choice">
-                <h1 class="mb-2">Practice Mode</h1>
-                <p style="color: var(--rh-gray-light); margin-bottom: 1.5rem;">Choose how you want to practice:</p>
-                <div class="mode-cards">
-                    <div class="mode-card" onclick="selectMode('practice')">
-                        <div class="icon">📋</div>
-                        <h3>Select Tasks</h3>
-                        <p>Choose specific tasks from a list.<br>Full control over what to practice.</p>
-                    </div>
-                    <div class="mode-card" onclick="showView('practice-category')">
-                        <div class="icon">📂</div>
-                        <h3>Practice by Category</h3>
-                        <p>Focus on a specific RHCSA objective.<br>Great for targeted study.</p>
-                    </div>
-                </div>
-                <button class="btn btn-secondary mt-2" onclick="showView('mode-select')">Back</button>
-            </div>
-
-            <!-- Practice by Category View -->
-            <div class="content-body hidden" id="view-practice-category">
-                <h1 class="mb-2">Select Category</h1>
-                <p style="color: var(--rh-gray-light); margin-bottom: 1.5rem;">Choose an RHCSA objective to practice:
+            <div id="connect-error-actions" class="hidden" style="margin-top: 2rem; animation: fadeInUp 0.3s;">
+                <p style="color: var(--error); margin-bottom: 1rem;" id="connect-error-msg">Connection failed.
                 </p>
-                <div class="category-grid" id="category-grid">
-                    <div class="loading">Loading categories...</div>
-                </div>
-                <button class="btn btn-secondary mt-2" onclick="showView('practice-choice')">Back</button>
+                <button class="btn btn-primary" onclick="showView('setup')">Configure VMs</button>
+                <button class="btn btn-secondary" onclick="showView('welcome')">Cancel</button>
             </div>
+        </div>
+    </div>
 
-            <!-- Practice Setup View -->
-            <div class="content-body hidden" id="view-practice-setup">
-                <div class="card">
-                    <h2>Select Tasks to Practice</h2>
-                    <div class="mb-1">
-                        <button class="btn btn-secondary" onclick="selectAllTasks()">Select All</button>
-                        <button class="btn btn-secondary" onclick="deselectAllTasks()">Clear</button>
-                        <select id="category-filter" onchange="filterByCategory()"
-                            style="margin-left: 1rem; padding: 0.5rem; background: var(--rh-black); border: 1px solid var(--rh-gray); color: white; border-radius: 4px;">
-                            <option value="">All Categories</option>
-                        </select>
-                    </div>
-                    <div class="task-checkbox-list" id="task-checkbox-list">
-                        <div class="loading">Loading tasks...</div>
-                    </div>
-                </div>
-                <button class="btn btn-success" onclick="startPractice()">Start Practice</button>
-                <button class="btn btn-secondary" onclick="showView('practice-choice')">Back</button>
+    <!-- Results View -->
+    <div class="content-body hidden" id="view-results">
+        <h1 class="mb-2">Exam Results</h1>
+        <div class="results-summary">
+            <div class="result-box" id="result-score-box">
+                <div class="value" id="result-score">0</div>
+                <div class="label">Points Earned</div>
             </div>
-
-            <!-- Exam Setup View -->
-            <div class="content-body hidden" id="view-exam-setup">
-                <div class="card">
-                    <h2>Exam Simulation</h2>
-                    <div class="alert alert-info">
-                        <strong>Exam Rules:</strong> You will have 3 hours to complete randomly selected tasks.
-                        Work on your VMs and submit when finished. All configurations must persist after reboot.
-                    </div>
-                    <div class="form-group" style="max-width: 200px;">
-                        <label>Number of Tasks (13-20)</label>
-                        <input type="number" id="exam-task-count" value="15" min="13" max="20">
-                    </div>
-                </div>
-                <button class="btn btn-success" onclick="startExam()">Begin Exam</button>
-                <button class="btn btn-secondary" onclick="showView('mode-select')">Back</button>
+            <div class="result-box">
+                <div class="value" id="result-total">0</div>
+                <div class="label">Total Points</div>
             </div>
-
-            <!-- Exam Running View -->
-            <div class="content-body hidden" id="view-exam-running" style="position: relative;">
-                <!-- Breadcrumb -->
-                <div class="breadcrumb" style="margin-bottom: 1rem; font-size: 0.9rem;">
-                    <a href="#" onclick="confirmAbandon(); return false;" style="color: var(--rh-gray-light);">Home</a>
-                    <span style="color: var(--rh-gray-light); margin: 0 0.5rem;">/</span>
-                    <span id="breadcrumb-mode">Practice</span>
-                </div>
-                <div class="exam-instructions">
-                    <h3>Instructions</h3>
-                    <ul>
-                        <li>Complete the tasks listed in the sidebar on your virtual machines</li>
-                        <li>All configurations must persist after system reboot</li>
-                        <li>Do not disable SELinux or firewalld (50 point penalty each)</li>
-                        <li>Click "Submit for Grading" when finished or when time expires</li>
-                    </ul>
-                </div>
-                <div id="current-task-detail">
-                    <p style="color: var(--rh-gray-light);">Select a task from the sidebar to view details.</p>
-                </div>
-                <!-- Task Navigation -->
-                <div class="task-nav" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                    <button class="btn btn-secondary" id="prev-task-btn" onclick="navigateTask(-1)"
-                        disabled>Previous</button>
-                    <button class="btn btn-primary" id="next-task-btn" onclick="navigateTask(1)">Next</button>
-                    <span id="task-nav-indicator"
-                        style="margin-left: auto; color: var(--rh-gray-light); align-self: center;">Task 1 of 1</span>
-                </div>
+            <div class="result-box">
+                <div class="value" id="result-pct">0%</div>
+                <div class="label">Percentage</div>
             </div>
-
-            <!-- Connecting / Intermediate View -->
-            <div class="content-body hidden" id="view-connecting"
-                style="align-items: center; justify-content: center; display: flex; flex-direction: column;">
-                <div style="text-align: center; max-width: 400px; width: 100%;">
-                    <div class="spinner-large" style="margin: 0 auto 2rem;"></div>
-                    <h2 style="margin-bottom: 1.5rem;">Initializing Environment</h2>
-
-                    <div class="connection-steps"
-                        style="text-align: left; background: var(--bg-card); padding: 1.5rem; border-radius: 8px; border: var(--glass-border);">
-                        <div class="step-item pending" id="step-tasks">
-                            <span class="step-icon">○</span> Loading Tasks
-                        </div>
-                        <div class="step-item pending" id="step-config">
-                            <span class="step-icon">○</span> Checking Configuration
-                        </div>
-                        <div class="step-item pending" id="step-node1">
-                            <span class="step-icon">○</span> Connecting to Node 1
-                        </div>
-                        <div class="step-item pending" id="step-node2">
-                            <span class="step-icon">○</span> Connecting to Node 2
-                        </div>
-                    </div>
-
-                    <div id="connect-error-actions" class="hidden" style="margin-top: 2rem; animation: fadeInUp 0.3s;">
-                        <p style="color: var(--error); margin-bottom: 1rem;" id="connect-error-msg">Connection failed.
-                        </p>
-                        <button class="btn btn-primary" onclick="showView('setup')">Configure VMs</button>
-                        <button class="btn btn-secondary" onclick="showView('welcome')">Cancel</button>
-                    </div>
-                </div>
+            <div class="result-box" id="result-status-box">
+                <div class="value" id="result-status">-</div>
+                <div class="label">Status</div>
             </div>
+        </div>
+        <div class="card">
+            <h2>Task Results</h2>
+            <div class="check-list" id="check-results"></div>
+        </div>
+        <button class="btn btn-primary" onclick="showView('mode-select')">Try Again</button>
+        <button class="btn btn-secondary" onclick="showView('stats')">View Statistics</button>
+    </div>
 
-            <!-- Results View -->
-            <div class="content-body hidden" id="view-results">
-                <h1 class="mb-2">Exam Results</h1>
-                <div class="results-summary">
-                    <div class="result-box" id="result-score-box">
-                        <div class="value" id="result-score">0</div>
-                        <div class="label">Points Earned</div>
-                    </div>
-                    <div class="result-box">
-                        <div class="value" id="result-total">0</div>
-                        <div class="label">Total Points</div>
-                    </div>
-                    <div class="result-box">
-                        <div class="value" id="result-pct">0%</div>
-                        <div class="label">Percentage</div>
-                    </div>
-                    <div class="result-box" id="result-status-box">
-                        <div class="value" id="result-status">-</div>
-                        <div class="label">Status</div>
-                    </div>
-                </div>
-                <div class="card">
-                    <h2>Task Results</h2>
-                    <div class="check-list" id="check-results"></div>
-                </div>
-                <button class="btn btn-primary" onclick="showView('mode-select')">Try Again</button>
-                <button class="btn btn-secondary" onclick="showView('stats')">View Statistics</button>
+    <!-- Statistics View -->
+    <div class="content-body hidden" id="view-stats">
+        <h1 class="mb-2">Performance Statistics</h1>
+
+        <div class="results-summary" id="stats-summary">
+            <div class="loading">Loading statistics...</div>
+        </div>
+        <div class="card">
+            <h2>Performance by Category</h2>
+            <div class="category-bars" id="category-stats"></div>
+            <div id="weak-areas" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--rh-gray);">
             </div>
-
-            <!-- Statistics View -->
-            <div class="content-body hidden" id="view-stats">
-                <h1 class="mb-2">Performance Statistics</h1>
-
-                <div class="results-summary" id="stats-summary">
-                    <div class="loading">Loading statistics...</div>
-                </div>
-                <div class="card">
-                    <h2>Performance by Category</h2>
-                    <div class="category-bars" id="category-stats"></div>
-                    <div id="weak-areas"
-                        style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--rh-gray);"></div>
-                </div>
-                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                    <button class="btn btn-secondary" onclick="showView('welcome')">Back to Home</button>
-                    <button class="btn btn-outline" onclick="clearAllResults()"
-                        style="border-color: var(--rh-red); color: var(--rh-red);">Clear All History</button>
-                </div>
-            </div>
-        </main>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <button class="btn btn-secondary" onclick="showView('welcome')">Back to Home</button>
+            <button class="btn btn-outline" onclick="clearAllResults()"
+                style="border-color: var(--rh-red); color: var(--rh-red);">Clear All History</button>
+        </div>
+    </div>
+    </main>
     </div>
 
     <!-- Reboot Modal -->
@@ -2073,6 +2208,70 @@
         </div>
     </div>
 
+    <!-- VM Info Modal -->
+    <div class="grading-modal hidden" id="vm-info-modal" onclick="if(event.target === this) hideVmInfoModal()">
+        <div class="reboot-modal-content" style="max-width: 500px;">
+            <div class="reboot-modal-header">
+                <h2>Virtual Machine Info</h2>
+                <button class="toast-close" onclick="hideVmInfoModal()">×</button>
+            </div>
+            <div class="reboot-modal-body" style="padding: 1.5rem;">
+                <div style="display: grid; gap: 1rem;">
+                    <div id="vm-info-node1"
+                        style="background: var(--rh-gray-dark); padding: 1rem; border-radius: 8px; border: 1px solid var(--rh-gray);">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                            <span class="dot" id="vm-info-status1"
+                                style="width: 10px; height: 10px; border-radius: 50%; background: var(--rh-gray-light);"></span>
+                            <span style="font-weight: 600; font-size: 1.1rem;" id="vm-info-name1">Node 1</span>
+                        </div>
+                        <div
+                            style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; font-size: 0.9rem;">
+                            <span style="color: var(--rh-gray-light);">IP Address:</span>
+                            <span id="vm-info-ip1" style="font-family: 'Consolas', monospace;">-</span>
+                            <span style="color: var(--rh-gray-light);">SSH Command:</span>
+                            <code id="vm-info-ssh1"
+                                style="font-size: 0.8rem; background: var(--rh-black); padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer;"
+                                onclick="copyToClipboard(this.innerText)">ssh root@...</code>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+                    <button class="btn btn-primary" onclick="hideVmInfoModal(); showView('setup')"
+                        style="font-size: 0.9em;">
+                        Edit Configuration
+                    </button>
+                </div>
+                onclick="copyToClipboard(this.textContent)" title="Click to copy">-</code>
+            </div>
+        </div>
+        <div id="vm-info-node2"
+            style="background: var(--rh-gray-dark); padding: 1rem; border-radius: 8px; border: 1px solid var(--rh-gray);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <span class="dot" id="vm-info-status2"
+                    style="width: 10px; height: 10px; border-radius: 50%; background: var(--rh-gray-light);"></span>
+                <span style="font-weight: 600; font-size: 1.1rem;" id="vm-info-name2">Node 2</span>
+            </div>
+            <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; font-size: 0.9rem;">
+                <span style="color: var(--rh-gray-light);">IP Address:</span>
+                <span id="vm-info-ip2" style="font-family: 'Consolas', monospace;">-</span>
+                <span style="color: var(--rh-gray-light);">SSH Command:</span>
+                <code id="vm-info-ssh2"
+                    style="font-size: 0.8rem; background: var(--rh-black); padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer;"
+                    onclick="copyToClipboard(this.textContent)" title="Click to copy">-</code>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+        <button class="btn btn-secondary" onclick="hideVmInfoModal(); showView('setup');">Edit
+            Configuration</button>
+        <button class="btn btn-outline" onclick="refreshVmInfo()"
+            style="border-color: var(--rh-cyan); color: var(--rh-cyan);">Refresh Status</button>
+        <button class="btn btn-outline" onclick="discoverAndUpdateIps()"
+            style="border-color: var(--rh-green); color: var(--rh-green);">Auto-Discover IPs</button>
+    </div>
+    </div>
+    </div>
+    </div>
 
     <script>
         // State
@@ -2086,6 +2285,8 @@
         let collapsedCategories = new Set();
         let taskResults = new Map(); // Track graded tasks: taskId -> {passed, graded}
         let gradingAborted = false; // Flag to cancel grading
+        let previousView = null; // Track previous view for back navigation
+        let cachedConfig = null; // Cache config for quick access
         const EXAM_DURATION = 3 * 60 * 60 * 1000; // 3 hours
 
         // Toast Notifications
@@ -2120,6 +2321,128 @@
             }
 
             return toast;
+        }
+
+        // Session Persistence Functions
+        const SESSION_KEY = 'rhcsa_session';
+
+        function saveSession() {
+            if (selectedTasks.length === 0) return;
+
+            const session = {
+                selectedTasks: selectedTasks,
+                currentMode: currentMode,
+                currentTaskIndex: currentTaskIndex,
+                taskResults: Array.from(taskResults.entries()),
+                timestamp: Date.now()
+            };
+            localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        }
+
+        function loadSavedSession() {
+            try {
+                const saved = localStorage.getItem(SESSION_KEY);
+                if (!saved) return null;
+                return JSON.parse(saved);
+            } catch (e) {
+                console.error('Failed to load session:', e);
+                return null;
+            }
+        }
+
+        function clearSavedSession() {
+            localStorage.removeItem(SESSION_KEY);
+            document.getElementById('resume-session-banner').classList.add('hidden');
+            showToast('info', 'Session Cleared', 'Previous session has been cleared.');
+        }
+
+        function checkForSavedSession() {
+            const session = loadSavedSession();
+            const banner = document.getElementById('resume-session-banner');
+            const info = document.getElementById('resume-session-info');
+
+            if (session && session.selectedTasks && session.selectedTasks.length > 0) {
+                // Calculate progress
+                const graded = session.taskResults ? session.taskResults.filter(([k, v]) => v && v.graded).length : 0;
+                const total = session.selectedTasks.length;
+                const modeLabel = session.currentMode === 'exam' ? 'Exam' : 'Practice';
+                const timeAgo = getTimeAgo(session.timestamp);
+
+                info.textContent = `${modeLabel} mode - ${graded}/${total} tasks graded - ${timeAgo}`;
+                banner.classList.remove('hidden');
+                return true;
+            } else {
+                banner.classList.add('hidden');
+                return false;
+            }
+        }
+
+        function getTimeAgo(timestamp) {
+            const seconds = Math.floor((Date.now() - timestamp) / 1000);
+            if (seconds < 60) return 'just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+            return `${Math.floor(seconds / 86400)}d ago`;
+        }
+
+        async function resumeSession() {
+            // Ensure tasks are loaded
+            if (allTasks.length === 0) {
+                await loadTasks();
+            }
+
+            const session = loadSavedSession();
+            if (!session || !session.selectedTasks) {
+                showToast('error', 'No Session', 'Could not find a saved session to resume.');
+                return;
+            }
+
+            // Restore state
+            selectedTasks = session.selectedTasks;
+            currentMode = session.currentMode || 'practice';
+            currentTaskIndex = session.currentTaskIndex || 0;
+            taskResults = new Map(session.taskResults || []);
+
+            // Sanity check
+            if (!selectedTasks || selectedTasks.length === 0) {
+                showToast('error', 'Session Error', 'Saved session is empty. Starting fresh.');
+                clearSavedSession();
+                showView('mode-select');
+                return;
+            }
+            // Ensure index is valid
+            if (currentTaskIndex >= selectedTasks.length) currentTaskIndex = 0;
+
+            // Show the practice view
+            showView('exam-running');
+            const examSidebar = document.getElementById('exam-sidebar');
+            examSidebar.classList.remove('hidden');
+
+            document.getElementById('breadcrumb-mode').textContent = currentMode === 'exam' ? 'Exam' : 'Practice';
+
+            if (currentMode === 'exam') {
+                document.getElementById('timer').classList.remove('hidden');
+            }
+
+            // Populate sidebar and show current task
+            renderTaskSidebar();
+            updateGradedCount();
+
+            // Restore visual state for graded tasks
+            taskResults.forEach((result, taskId) => {
+                const taskItem = document.querySelector(`.task-item[data-id="${taskId}"]`);
+                if (taskItem && result.graded) {
+                    taskItem.classList.remove('task-passed', 'task-failed');
+                    taskItem.classList.add(result.passed ? 'task-passed' : 'task-failed');
+                }
+            });
+
+            if (selectedTasks[currentTaskIndex]) {
+                showTaskDetail(selectedTasks[currentTaskIndex].id);
+            }
+
+            updateTaskNavigation();
+            showToast('success', 'Session Resumed', `Resumed ${currentMode} session with ${selectedTasks.length} tasks.`);
         }
 
         // How To Section Toggle
@@ -2317,20 +2640,38 @@
 
         // View Management
         function goHome() {
-            // If in exam mode, confirm before leaving
+            // No confirmation needed as progress is preserved
             const examSidebar = document.getElementById('exam-sidebar');
             if (!examSidebar.classList.contains('hidden')) {
-                if (!confirm('Leave current session and go to home? Your progress will be preserved.')) {
-                    return;
-                }
                 stopTimer();
             }
             showView('welcome');
         }
 
         function showView(viewId) {
+            // Track previous view for back navigation
+            const currentView = document.querySelector('.content-body:not(.hidden)');
+            if (currentView) {
+                previousView = currentView.id.replace('view-', '');
+            }
+
+            // Update cancel button visibility in setup view
+            if (viewId === 'setup') {
+                const session = loadSavedSession();
+                const hasSession = session && session.selectedTasks && session.selectedTasks.length > 0;
+
+                const cancelBtn = document.getElementById('btn-cancel-setup-session');
+                const backBtn = document.getElementById('btn-back-setup-home');
+
+                if (cancelBtn) cancelBtn.style.display = hasSession ? 'inline-block' : 'none';
+                if (backBtn) backBtn.style.display = hasSession ? 'none' : 'inline-block';
+            }
+
             document.querySelectorAll('.content-body').forEach(v => v.classList.add('hidden'));
             document.getElementById(`view-${viewId}`).classList.remove('hidden');
+
+            // Persist view choice
+            localStorage.setItem('lastView', viewId);
 
             // Hide exam UI elements when not in exam
             if (viewId !== 'exam-running') {
@@ -2338,10 +2679,32 @@
                 document.getElementById('timer').classList.add('hidden');
             }
 
+            // Show/hide back to practice button in setup view
+            const backToPracticeBtn = document.getElementById('back-to-practice-btn');
+            if (backToPracticeBtn) {
+                // Show if we came from exam-running (active practice/exam session)
+                const hasActiveSession = !document.getElementById('exam-sidebar').classList.contains('hidden') ||
+                    previousView === 'exam-running';
+                backToPracticeBtn.classList.toggle('hidden', !hasActiveSession);
+            }
+
             // Load data for specific views
             if (viewId === 'practice-setup') loadTasks();
             if (viewId === 'practice-category') populateCategoryGrid();
             if (viewId === 'stats') loadStats();
+            if (viewId === 'welcome') checkForSavedSession();
+        }
+
+        function goBackToPractice() {
+            if (selectedTasks.length > 0) {
+                showView('exam-running');
+                document.getElementById('exam-sidebar').classList.remove('hidden');
+                if (currentMode === 'exam') {
+                    document.getElementById('timer').classList.remove('hidden');
+                }
+            } else {
+                showView('welcome');
+            }
         }
 
         // Task Navigation
@@ -2351,6 +2714,7 @@
                 currentTaskIndex = newIndex;
                 showTaskDetail(selectedTasks[currentTaskIndex].id);
                 updateTaskNavigation();
+                saveSession(); // Persist current position
 
                 // Update sidebar highlight
                 document.querySelectorAll('.task-list-item').forEach((el, i) => {
@@ -2426,6 +2790,8 @@
             try {
                 const res = await fetch('/api/config');
                 const config = await res.json();
+                cachedConfig = config; // Cache for quick access
+
                 document.getElementById('node1').value = config.node1 || 'rhcsa1';
                 document.getElementById('node1_ip').value = config.node1_ip || '';
                 document.getElementById('node2').value = config.node2 || 'rhcsa2';
@@ -2435,12 +2801,137 @@
                 pwField.value = '';
                 pwField.placeholder = config.has_password ? '••••••• (password set)' : 'VM root password';
 
+                // Update header VM indicators
                 document.getElementById('vm1-name').textContent = config.node1 || 'node1';
                 document.getElementById('vm2-name').textContent = config.node2 || 'node2';
+                document.getElementById('vm1-ip-display').textContent = config.node1_ip || '-';
+                document.getElementById('vm2-ip-display').textContent = config.node2_ip || '-';
             } catch (e) {
                 console.error('Failed to load config:', e);
             }
         }
+
+        // VM Info Modal Functions
+        function showVmInfoModal() {
+            const modal = document.getElementById('vm-info-modal');
+            modal.classList.remove('hidden');
+            updateVmInfoModal();
+        }
+
+        function hideVmInfoModal() {
+            document.getElementById('vm-info-modal').classList.add('hidden');
+        }
+
+        function updateVmInfoModal() {
+            const config = cachedConfig || {};
+            const node1Name = config.node1 || 'node1';
+            const node2Name = config.node2 || 'node2';
+            const node1Ip = config.node1_ip || '-';
+            const node2Ip = config.node2_ip || '-';
+
+            document.getElementById('vm-info-name1').textContent = node1Name;
+            document.getElementById('vm-info-name2').textContent = node2Name;
+            document.getElementById('vm-info-ip1').textContent = node1Ip;
+            document.getElementById('vm-info-ip2').textContent = node2Ip;
+
+            // SSH commands
+            const ssh1 = node1Ip !== '-' ? `ssh root@${node1Ip}` : '-';
+            const ssh2 = node2Ip !== '-' ? `ssh root@${node2Ip}` : '-';
+            document.getElementById('vm-info-ssh1').textContent = ssh1;
+            document.getElementById('vm-info-ssh2').textContent = ssh2;
+
+            // Copy status from header indicators
+            const status1 = document.getElementById('vm1-status').className;
+            const status2 = document.getElementById('vm2-status').className;
+            document.getElementById('vm-info-status1').className = status1;
+            document.getElementById('vm-info-status2').className = status2;
+        }
+
+        async function refreshVmInfo() {
+            // Test connection and update status
+            try {
+                const res = await fetch('/api/test-connection', { method: 'POST' });
+                const data = await res.json();
+
+                document.getElementById('vm1-status').className = 'dot ' + (data.node1 ? 'ok' : 'fail');
+                document.getElementById('vm2-status').className = 'dot ' + (data.node2 ? 'ok' : 'fail');
+
+                updateVmInfoModal();
+                showToast('info', 'Status Refreshed', `Node 1: ${data.node1 ? 'Online' : 'Offline'}, Node 2: ${data.node2 ? 'Online' : 'Offline'}`);
+            } catch (e) {
+                showToast('error', 'Refresh Failed', 'Could not check VM status');
+            }
+        }
+
+        function copyToClipboard(text) {
+            if (text === '-') return;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('success', 'Copied', text);
+            }).catch(() => {
+                showToast('error', 'Copy Failed', 'Could not copy to clipboard');
+            });
+        }
+
+        async function discoverAndUpdateIps() {
+            showToast('info', 'Discovering...', 'Attempting to discover VM IPs via virsh...');
+
+            try {
+                const res = await fetch('/api/discover-ips', { method: 'POST' });
+                const data = await res.json();
+
+                let message = '';
+
+                if (data.node1_ip || data.node2_ip) {
+                    // Update config with discovered IPs
+                    const config = {
+                        node1: cachedConfig?.node1 || document.getElementById('node1')?.value || 'rhcsa1',
+                        node1_ip: data.node1_ip || cachedConfig?.node1_ip || '',
+                        node2: cachedConfig?.node2 || document.getElementById('node2')?.value || 'rhcsa2',
+                        node2_ip: data.node2_ip || cachedConfig?.node2_ip || '',
+                        root_password: '' // Don't overwrite password
+                    };
+
+                    await fetch('/api/config', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(config)
+                    });
+
+                    // Update local state
+                    cachedConfig = { ...cachedConfig, ...config };
+
+                    // Update header displays
+                    if (data.node1_ip) {
+                        document.getElementById('vm1-ip-display').textContent = data.node1_ip;
+                        // Update form field if on setup page
+                        const node1IpField = document.getElementById('node1_ip');
+                        if (node1IpField) node1IpField.value = data.node1_ip;
+                        message += `Node 1: ${data.node1_ip}`;
+                    }
+                    if (data.node2_ip) {
+                        document.getElementById('vm2-ip-display').textContent = data.node2_ip;
+                        // Update form field if on setup page
+                        const node2IpField = document.getElementById('node2_ip');
+                        if (node2IpField) node2IpField.value = data.node2_ip;
+                        message += message ? ', ' : '';
+                        message += `Node 2: ${data.node2_ip}`;
+                    }
+
+                    updateVmInfoModal();
+                    showToast('success', 'IPs Discovered', `${message} (via ${data.method})`);
+
+                    // Also refresh status
+                    refreshVmInfo();
+                } else {
+                    showToast('warning', 'No IPs Found', 'Could not discover VM IPs. Make sure VMs are running and virsh is available.');
+                }
+            } catch (e) {
+                console.error('IP discovery failed:', e);
+                showToast('error', 'Discovery Failed', 'Could not discover IPs. Check if virsh is available.');
+            }
+        }
+
+
 
         async function saveConfig() {
             const config = {
@@ -2457,14 +2948,56 @@
                 body: JSON.stringify(config)
             });
 
+            // Update cache and header displays
+            cachedConfig = config;
             document.getElementById('vm1-name').textContent = config.node1;
             document.getElementById('vm2-name').textContent = config.node2;
+            document.getElementById('vm1-ip-display').textContent = config.node1_ip || '-';
+            document.getElementById('vm2-ip-display').textContent = config.node2_ip || '-';
 
             document.getElementById('connection-result').innerHTML =
                 '<div class="alert alert-info">Configuration saved.</div>';
         }
 
+        // Quick Connectivity Test (Header)
+        async function quickTestConnection() {
+            const btn = document.getElementById('refresh-conn-btn');
+            if (btn.classList.contains('spinning')) return; // Already running
+
+            btn.classList.add('spinning');
+
+            // Set dots to gray/loading
+            document.getElementById('vm1-status').className = 'dot';
+            document.getElementById('vm2-status').className = 'dot';
+            document.getElementById('vm1-status').style.backgroundColor = 'var(--text-muted)';
+            document.getElementById('vm2-status').style.backgroundColor = 'var(--text-muted)';
+
+            try {
+                const res = await fetch('/api/test-connection', { method: 'POST' });
+                const data = await res.json();
+
+                // Clear manual styles
+                document.getElementById('vm1-status').style.backgroundColor = '';
+                document.getElementById('vm2-status').style.backgroundColor = '';
+
+                document.getElementById('vm1-status').className = 'dot ' + (data.node1 ? 'ok' : 'fail');
+                document.getElementById('vm2-status').className = 'dot ' + (data.node2 ? 'ok' : 'fail');
+
+                if (data.node1 && data.node2) {
+                    showToast('success', 'Connected', 'VM connection verified.');
+                } else {
+                    showToast('warning', 'Connection Issue', 'One or more VMs are unreachable.');
+                }
+
+            } catch (e) {
+                showToast('error', 'Error', 'Failed to test connectivity.');
+            } finally {
+                setTimeout(() => btn.classList.remove('spinning'), 500);
+            }
+        }
+
         async function testConnection() {
+            // Re-using the implementation below for the main Setup page "Test Connection" button
             const result = document.getElementById('connection-result');
             const node1Name = document.getElementById('node1').value || 'Node 1';
             const node2Name = document.getElementById('node2').value || 'Node 2';
@@ -2529,10 +3062,18 @@
             });
             document.getElementById('status-both').textContent = '';
             pendingReboot = null;
+
+            // Add ESC listener
+            document.addEventListener('keydown', handleRebootEsc);
         }
 
         function hideRebootModal() {
             document.getElementById('reboot-modal').classList.add('hidden');
+            document.removeEventListener('keydown', handleRebootEsc);
+        }
+
+        function handleRebootEsc(e) {
+            if (e.key === 'Escape') hideRebootModal();
         }
 
         function resetCardState(node) {
@@ -2694,6 +3235,7 @@
         }
 
         // Tasks
+        // Tasks
         async function loadTasks() {
             try {
                 const res = await fetch('/api/tasks');
@@ -2706,8 +3248,10 @@
                     categories.map(c => `<option value="${c}">${c}</option>`).join('');
 
                 renderTaskCheckboxes(allTasks);
+                return true;
             } catch (e) {
                 console.error('Failed to load tasks:', e);
+                return false;
             }
         }
 
@@ -2803,6 +3347,9 @@
                 showTaskDetail(tasks[0].id);
                 updateTaskNavigation();
             }
+
+            // Save session for resume capability
+            saveSession();
         }
 
         function renderTaskSidebar() {
@@ -3021,7 +3568,7 @@
 
         function updateTaskStatus(taskId, passed, points = 0, maxPoints = 0) {
             // Track result
-            taskResults.set(taskId, { passed, points, maxPoints });
+            taskResults.set(taskId, { passed, points, maxPoints, graded: true });
 
             // Update sidebar task item to show pass/fail status
             const taskItem = document.querySelector(`.task-item[data-id="${taskId}"]`);
@@ -3030,8 +3577,9 @@
                 taskItem.classList.add(passed ? 'task-passed' : 'task-failed');
             }
 
-            // Update graded count
+            // Update graded count and save session
             updateGradedCount();
+            saveSession();
         }
 
         // Timer
@@ -3232,7 +3780,7 @@
                     taskEl.querySelector('.icon').textContent = passed ? '✓' : '✗';
 
                     // Track result
-                    taskResults.set(task.id, { passed, points, maxPoints });
+                    taskResults.set(task.id, { passed, points, maxPoints, graded: true });
                     results.push({
                         task: task.id,
                         check: task.description,
@@ -3323,6 +3871,7 @@
             await new Promise(r => setTimeout(r, 500));
             modal.classList.add('hidden');
 
+            sessionStorage.clear(); // Clear session on completion
             displayResults(finalResult);
         }
 
@@ -3485,7 +4034,24 @@
         }
 
         // Init
-        loadConfig();
+        (async function init() {
+            try {
+                loadConfig();
+                await loadTasks();
+
+                // Check for saved session and auto-resume if found
+                const hasSession = checkForSavedSession();
+                if (hasSession) {
+                    // Auto-resume the session
+                    await resumeSession();
+                } else {
+                    showView('welcome');
+                }
+            } catch (e) {
+                console.error("Initialization failed", e);
+                showView('welcome');
+            }
+        })();
     </script>
 </body>
 
