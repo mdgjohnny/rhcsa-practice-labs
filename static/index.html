@@ -352,11 +352,12 @@
 
         <!-- VIEW: Exam/Practice Running (Active Session) -->
         <!-- VIEW: Exam/Practice Running (Active Session) -->
-        <div id="view-exam-running" class="view flex-1 w-full animate-fade-in">
-            <div class="flex flex-1 h-full overflow-hidden">
+        <div id="view-exam-running" class="view w-full animate-fade-in" style="height: calc(100vh - 4rem); max-height: calc(100vh - 4rem);">
+            <div class="flex h-full overflow-hidden">
                 <!-- Sidebar -->
-                <aside id="exam-sidebar" class="hidden w-72 bg-background-dark border-r border-border-dark flex-col shrink-0">
-                    <div class="p-4 border-b border-border-dark">
+                <aside id="exam-sidebar" class="hidden w-72 bg-background-dark border-r border-border-dark flex flex-col shrink-0 overflow-hidden">
+                    <!-- Header with progress - fixed -->
+                    <div class="p-4 border-b border-border-dark shrink-0">
                         <div class="flex items-center justify-between mb-2">
                             <h1 class="text-gray-400 text-xs uppercase font-bold tracking-wider">Task List</h1>
                             <span id="task-progress-text" class="text-xs text-gray-400">0 of 0</span>
@@ -365,25 +366,29 @@
                             <div id="task-progress-bar" class="bg-primary h-full transition-all duration-300" style="width: 0%"></div>
                         </div>
                     </div>
-                    <!-- Filter/Sort Controls -->
-                    <div class="p-2 border-b border-border-dark space-y-2">
+                    <!-- Filter Controls - fixed -->
+                    <div class="p-2 border-b border-border-dark space-y-2 shrink-0">
                         <div class="relative">
                             <span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-[18px]">search</span>
-                            <input id="sidebar-task-search" type="text" placeholder="Filter tasks..." 
+                            <input id="sidebar-task-search" type="text" placeholder="Search tasks..." 
                                    oninput="filterSidebarTasks()" 
                                    class="w-full pl-8 pr-3 py-2 text-sm bg-surface-dark border border-border-dark rounded-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"/>
                         </div>
-                        <div class="flex gap-1">
-                            <button onclick="filterSidebarByStatus('all')" id="filter-all" class="flex-1 px-2 py-1.5 text-xs font-medium rounded-sm bg-primary text-white transition-colors">All</button>
-                            <button onclick="filterSidebarByStatus('pending')" id="filter-pending" class="flex-1 px-2 py-1.5 text-xs font-medium rounded-sm bg-surface-dark text-gray-400 hover:text-white border border-border-dark transition-colors">Todo</button>
-                            <button onclick="filterSidebarByStatus('passed')" id="filter-passed" class="flex-1 px-2 py-1.5 text-xs font-medium rounded-sm bg-surface-dark text-gray-400 hover:text-white border border-border-dark transition-colors">Pass</button>
-                            <button onclick="filterSidebarByStatus('failed')" id="filter-failed" class="flex-1 px-2 py-1.5 text-xs font-medium rounded-sm bg-surface-dark text-gray-400 hover:text-white border border-border-dark transition-colors">Fail</button>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-[18px]">filter_list</span>
+                            <select id="sidebar-category-filter" onchange="filterSidebarTasks()" 
+                                    class="w-full pl-8 pr-8 py-2 text-sm bg-surface-dark border border-border-dark rounded-sm text-white focus:outline-none focus:border-primary transition-colors appearance-none cursor-pointer">
+                                <option value="">All Categories</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 text-[18px] pointer-events-none">expand_more</span>
                         </div>
                     </div>
-                    <div id="task-list" class="flex-1 overflow-y-auto p-2 space-y-1">
+                    <!-- Task list - scrollable -->
+                    <div id="task-list" class="flex-1 overflow-y-auto p-2 space-y-1 min-h-0">
                         <!-- Tasks populated by JS -->
                     </div>
-                    <div class="p-4 border-t border-border-dark space-y-2">
+                    <!-- Bottom actions - fixed -->
+                    <div class="p-3 border-t border-border-dark space-y-2 shrink-0 bg-background-dark">
                         <button onclick="submitForGrading()" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-sm bg-primary hover:bg-primary-hover text-white font-bold text-sm transition-all shadow-sm shadow-red-900/30">
                             <span class="material-symbols-outlined text-lg">flag</span> Finish &amp; Grade
                         </button>
@@ -770,6 +775,7 @@
             taskResults = new Map(session.taskResults || []);
             
             document.getElementById('breadcrumb-mode').textContent = currentMode === 'exam' ? 'Exam' : 'Practice';
+            populateSidebarCategoryFilter();
             renderTaskList();
             showTaskDetail(selectedTasks[currentTaskIndex]?.id);
             updateTaskNavigation();
@@ -1071,6 +1077,7 @@
             taskResults.clear();
             currentTaskIndex = 0;
             document.getElementById('breadcrumb-mode').textContent = `Practice: ${category}`;
+            populateSidebarCategoryFilter();
             renderTaskList();
             showTaskDetail(selectedTasks[0].id);
             updateTaskNavigation();
@@ -1098,6 +1105,7 @@
             taskResults.clear();
             currentTaskIndex = 0;
             document.getElementById('breadcrumb-mode').textContent = 'Practice';
+            populateSidebarCategoryFilter();
             renderTaskList();
             showTaskDetail(selectedTasks[0].id);
             updateTaskNavigation();
@@ -1115,6 +1123,7 @@
                 examStartTime = Date.now();
                 startTimer();
                 document.getElementById('breadcrumb-mode').textContent = 'Exam';
+                populateSidebarCategoryFilter();
                 renderTaskList();
                 showTaskDetail(selectedTasks[0].id);
                 updateTaskNavigation();
@@ -1166,18 +1175,16 @@
             if (progressBar) progressBar.style.width = `${(gradedCount / selectedTasks.length) * 100}%`;
             if (progressText) progressText.textContent = `${gradedCount} of ${selectedTasks.length}`;
             
-            // Get search filter
+            // Get filters
             const searchInput = document.getElementById('sidebar-task-search');
             const searchTerm = searchInput?.value?.toLowerCase() || '';
+            const categorySelect = document.getElementById('sidebar-category-filter');
+            const categoryFilter = categorySelect?.value || '';
             
             // Filter tasks
             const filteredTasks = selectedTasks.map((task, i) => ({ task, index: i })).filter(({ task, index }) => {
-                const result = taskResults.get(task.id);
-                
-                // Status filter
-                if (sidebarStatusFilter === 'pending' && result?.graded) return false;
-                if (sidebarStatusFilter === 'passed' && (!result?.graded || !result?.passed)) return false;
-                if (sidebarStatusFilter === 'failed' && (!result?.graded || result?.passed)) return false;
+                // Category filter
+                if (categoryFilter && task.category !== categoryFilter) return false;
                 
                 // Search filter
                 if (searchTerm) {
@@ -1264,28 +1271,19 @@
         }
         
         // Sidebar filtering
-        let sidebarStatusFilter = 'all';
-        
         function filterSidebarTasks() {
             renderTaskList();
         }
         
-        function filterSidebarByStatus(status) {
-            sidebarStatusFilter = status;
+        function populateSidebarCategoryFilter() {
+            const select = document.getElementById('sidebar-category-filter');
+            if (!select) return;
             
-            // Update button styles
-            ['all', 'pending', 'passed', 'failed'].forEach(s => {
-                const btn = document.getElementById(`filter-${s}`);
-                if (btn) {
-                    if (s === status) {
-                        btn.className = 'flex-1 px-2 py-1.5 text-xs font-medium rounded-sm bg-primary text-white transition-colors';
-                    } else {
-                        btn.className = 'flex-1 px-2 py-1.5 text-xs font-medium rounded-sm bg-surface-dark text-gray-400 hover:text-white border border-border-dark transition-colors';
-                    }
-                }
-            });
+            // Get unique categories from selected tasks
+            const categories = [...new Set(selectedTasks.map(t => t.category).filter(Boolean))].sort();
             
-            renderTaskList();
+            select.innerHTML = '<option value="">All Categories</option>' + 
+                categories.map(c => `<option value="${c}">${c.replace(/-/g, ' ')}</option>`).join('');
         }
 
         function selectTask(index) {
