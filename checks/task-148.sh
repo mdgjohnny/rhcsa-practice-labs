@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a logical volume called lvol1 of size 280MB in vgtest volume group. Mount the ext4 file system persistently to /mnt/mnt1
+# Task: Create 280MB LV lvol1 in vgtest, format ext4, mount on /mnt/mnt1
 # Category: file-systems
 # Target: node1
 

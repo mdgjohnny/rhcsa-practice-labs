@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a directory with the name /users and ensure it contains the subdirectories linda and anna. Export this directory by using an NFS server
+# Task: Create /users with linda and anna subdirectories, export via NFS
 # Category: networking
 # Target: node1
 

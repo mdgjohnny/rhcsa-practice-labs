@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Set up an NFS server that shares the `/home` directory on `node2`
+# Task: Configure NFS server sharing /home on node2
 # Category: networking
 # Target: node2
 

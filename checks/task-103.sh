@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Configure this container such that it is automatically started on system boot as a system user service
+# Task: Configure container from task-102 as a systemd user service
 # Category: operate-systems
 # Target: node1
 

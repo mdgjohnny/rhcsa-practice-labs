@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Optimize your server with the appropriate profile that optimizes throughput
+# Task: Apply tuned profile for throughput optimization
 # Category: operate-systems
 # Target: node1
 

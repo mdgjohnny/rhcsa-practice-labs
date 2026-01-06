@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Find all files that are owned by user edwin and copy them to the directory/ rootedwinfiles
+# Task: Find files owned by edwin, copy to /root/edwinfiles
 # Category: essential-tools
 # Target: node1
 

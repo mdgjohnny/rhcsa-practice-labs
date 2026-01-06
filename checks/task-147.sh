@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Attach the RHEL 9 ISO image to the VM and mount it persistently to /mnt/cdrom. Define access to both repositories and confirm
+# Task: Mount RHEL 9 ISO persistently on /mnt/cdrom, configure both repos
 # Category: file-systems
 # Target: both
 

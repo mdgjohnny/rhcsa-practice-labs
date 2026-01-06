@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Change the primary command prompt for the root user to display the hostname, username, and current working directory information in that order. Update the per-user initialization file for permanence
+# Task: Configure root prompt to show hostname, username, and working directory
 # Category: networking
 # Target: node1
 

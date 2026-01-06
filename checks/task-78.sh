@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: From your home directory, type the command `ls -al wergihl *` and ensure that errors as well as regular output are redirected to a file with the name `/tmp/lsoutput`
+# Task: Redirect both stdout and stderr of 'ls -al wergihl *' to /tmp/lsoutput
 # Category: essential-tools
 # Target: node1
 

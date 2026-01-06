@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Using a manual method , configure a network connection on the primary network device with IP address 192.168.0.241/24, gateway 192.168.0.1, and nameserver
+# Task: Configure network manually: IP 192.168.0.241/24, gateway 192.168.0.1, DNS 192.168.0.1
 # Category: networking
 # Target: node1
 

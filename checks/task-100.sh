@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create user bob and set this user's shell so that this user can only change the password and cannot do anything else
+# Task: Create user bob with restricted shell (password change only)
 # Category: users-groups
 # Target: node1
 

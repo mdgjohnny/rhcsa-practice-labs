@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create users laura and linda and make them members of the group livingopensource as a secondary group membership. Also, create users lisa and lori and make them members of the group operations as a secondary group
+# Task: Create users laura/linda in group livingopensource, lisa/lori in group operations
 # Category: users-groups
 # Target: node1
 

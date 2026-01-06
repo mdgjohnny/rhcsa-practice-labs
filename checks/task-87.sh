@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Configure `node1` to access the NFS-shared home directory using automount using a `wildcard` automount
+# Task: Configure wildcard autofs on node1 for NFS-shared home directories
 # Category: networking
 # Target: node1
 

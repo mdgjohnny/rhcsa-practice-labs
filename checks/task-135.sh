@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Add a 10-GiB disk to your virtual machine. On this disk, create a Stratis pool and volume. Use the name stratisvol for the volume, and mount it persistently on the directory /stratis
+# Task: Create Stratis pool and volume 'stratisvol' on 10GiB disk, mount on /stratis
 # Category: local-storage
 # Target: node1
 

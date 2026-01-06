@@ -365,6 +365,21 @@
                             <div id="task-progress-bar" class="bg-primary h-full transition-all duration-300" style="width: 0%"></div>
                         </div>
                     </div>
+                    <!-- Filter/Sort Controls -->
+                    <div class="p-2 border-b border-border-dark space-y-2">
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-[18px]">search</span>
+                            <input id="sidebar-task-search" type="text" placeholder="Filter tasks..." 
+                                   oninput="filterSidebarTasks()" 
+                                   class="w-full pl-8 pr-3 py-2 text-sm bg-surface-dark border border-border-dark rounded-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"/>
+                        </div>
+                        <div class="flex gap-1">
+                            <button onclick="filterSidebarByStatus('all')" id="filter-all" class="flex-1 px-2 py-1.5 text-xs font-medium rounded-sm bg-primary text-white transition-colors">All</button>
+                            <button onclick="filterSidebarByStatus('pending')" id="filter-pending" class="flex-1 px-2 py-1.5 text-xs font-medium rounded-sm bg-surface-dark text-gray-400 hover:text-white border border-border-dark transition-colors">Todo</button>
+                            <button onclick="filterSidebarByStatus('passed')" id="filter-passed" class="flex-1 px-2 py-1.5 text-xs font-medium rounded-sm bg-surface-dark text-gray-400 hover:text-white border border-border-dark transition-colors">Pass</button>
+                            <button onclick="filterSidebarByStatus('failed')" id="filter-failed" class="flex-1 px-2 py-1.5 text-xs font-medium rounded-sm bg-surface-dark text-gray-400 hover:text-white border border-border-dark transition-colors">Fail</button>
+                        </div>
+                    </div>
                     <div id="task-list" class="flex-1 overflow-y-auto p-2 space-y-1">
                         <!-- Tasks populated by JS -->
                     </div>
@@ -1151,7 +1166,37 @@
             if (progressBar) progressBar.style.width = `${(gradedCount / selectedTasks.length) * 100}%`;
             if (progressText) progressText.textContent = `${gradedCount} of ${selectedTasks.length}`;
             
-            container.innerHTML = selectedTasks.map((task, i) => {
+            // Get search filter
+            const searchInput = document.getElementById('sidebar-task-search');
+            const searchTerm = searchInput?.value?.toLowerCase() || '';
+            
+            // Filter tasks
+            const filteredTasks = selectedTasks.map((task, i) => ({ task, index: i })).filter(({ task, index }) => {
+                const result = taskResults.get(task.id);
+                
+                // Status filter
+                if (sidebarStatusFilter === 'pending' && result?.graded) return false;
+                if (sidebarStatusFilter === 'passed' && (!result?.graded || !result?.passed)) return false;
+                if (sidebarStatusFilter === 'failed' && (!result?.graded || result?.passed)) return false;
+                
+                // Search filter
+                if (searchTerm) {
+                    const desc = (task.description || task.id).toLowerCase();
+                    const cat = (task.category || '').toLowerCase();
+                    if (!desc.includes(searchTerm) && !cat.includes(searchTerm) && !task.id.toLowerCase().includes(searchTerm)) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+            
+            if (filteredTasks.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-sm text-center py-4">No matching tasks</p>';
+                return;
+            }
+            
+            container.innerHTML = filteredTasks.map(({ task, index: i }) => {
                 const result = taskResults.get(task.id);
                 const isActive = i === currentTaskIndex;
                 
@@ -1216,6 +1261,31 @@
                 // Show abbreviated dots with current position indicator
                 dotsContainer.innerHTML = `<span class="text-xs text-gray-400 font-mono">${currentTaskIndex + 1} / ${totalTasks}</span>`;
             }
+        }
+        
+        // Sidebar filtering
+        let sidebarStatusFilter = 'all';
+        
+        function filterSidebarTasks() {
+            renderTaskList();
+        }
+        
+        function filterSidebarByStatus(status) {
+            sidebarStatusFilter = status;
+            
+            // Update button styles
+            ['all', 'pending', 'passed', 'failed'].forEach(s => {
+                const btn = document.getElementById(`filter-${s}`);
+                if (btn) {
+                    if (s === status) {
+                        btn.className = 'flex-1 px-2 py-1.5 text-xs font-medium rounded-sm bg-primary text-white transition-colors';
+                    } else {
+                        btn.className = 'flex-1 px-2 py-1.5 text-xs font-medium rounded-sm bg-surface-dark text-gray-400 hover:text-white border border-border-dark transition-colors';
+                    }
+                }
+            });
+            
+            renderTaskList();
         }
 
         function selectTask(index) {

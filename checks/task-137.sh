@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a configuration that allows user laura to run all administrative commands using sudo
+# Task: Grant user laura full sudo privileges
 # Category: users-groups
 # Target: node1
 

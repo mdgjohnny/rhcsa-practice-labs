@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Set default values for new users. A user should get a warning three days before expiration of the current password. Also, new passwords should have a maximum lifetime of 120 days
+# Task: Set password policy: 3 day warning before expiry, 120 day maximum lifetime
 # Category: users-groups
 # Target: node1
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a 500-MiB partition on your second hard disk, and format it with the Ext4 file system. Mount it persistently on the directory /mydata, using the label mydata
+# Task: Create 500MiB ext4 partition on second disk, mount on /mydata with label mydata
 # Category: file-systems
 # Target: node1
 

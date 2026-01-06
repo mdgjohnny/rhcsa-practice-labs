@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Set the default boot target to multi-user
+# Task: Set default boot target to multi-user
 # Category: operate-systems
 # Target: node1
 

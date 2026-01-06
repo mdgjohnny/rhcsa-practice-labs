@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Configure your system to automatically start a mariadb container. This container should expose its services at port 3306 and use the directory /var/mariadb-container on the host for persistent storage of files it writes to the /var directory
+# Task: Create mariadb container on port 3306 with /var/mariadb-container bind mount
 # Category: containers
 # Target: node1
 

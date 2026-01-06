@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Configure your system such that the container created in step 15 is automatically started as a Systemd user container
+# Task: Configure mariadb container as systemd user service
 # Category: containers
 # Target: node1
 

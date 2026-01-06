@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Find all files that are owned by user linda and copy them to the file /tmp/lindafiles/
+# Task: Find all files owned by linda and copy to /tmp/lindafiles/
 # Category: essential-tools
 # Target: node1
 

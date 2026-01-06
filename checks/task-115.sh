@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Configure a container that runs the docker.io/library/mysql:latest image and ensure it meets the following conditions
+# Task: Configure MySQL container from docker.io/library/mysql:latest
 # Category: containers
 # Target: node1
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Set default values for new users. Ensure that an empty file with the name NEWFILE is copied to the home directory of each new user that is created
+# Task: Configure /etc/skel to copy NEWFILE to new user home directories
 # Category: users-groups
 # Target: node1
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a 2-GiB volume group with the name myvg, using 8-MiB physical extents. In this volume group, create a 500-MiB logical volume with the name mydata, and mount it persistently on the directory /mydata
+# Task: Create 2GiB VG myvg (8MiB PE), 500MiB LV mydata, mount on /mydata
 # Category: file-systems
 # Target: node1
 

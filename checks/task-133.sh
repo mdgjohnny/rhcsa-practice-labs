@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Find all files that have the SUID permission set, and write the result to the file /root/suidfiles
+# Task: Find all SUID files and save list to /root/suidfiles
 # Category: users-groups
 # Target: node1
 

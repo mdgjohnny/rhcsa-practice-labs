@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a directory hierarchy /dir1/dir2/dir3/dir4 and apply SELinux contexts of /etc on it recursively
+# Task: Create /dir1/dir2/dir3/dir4 with SELinux contexts from /etc
 # Category: security
 # Target: node1
 

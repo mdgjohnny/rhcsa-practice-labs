@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Install a web server and ensure that it is started automatically
+# Task: Install and enable httpd web server
 # Category: deploy-maintain
 # Target: node1
 

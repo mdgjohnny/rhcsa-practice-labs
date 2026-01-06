@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a logical volume called lvswap of size 280MB in vgtest volume group. Initialize the logical volume for swap use. Use the UUID and place an entry for persistence
+# Task: Create 280MB swap LV lvswap in vgtest, mount persistently by UUID
 # Category: file-systems
 # Target: node1
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create users linda and anna and set their home directories to /home/users/ linda and /home/users/anna. Make sure that while these users access their home directory, autofs is used to mount the NFS shares /users/linda and /users/anna from the same server Create user student with password password, and user root with password password
+# Task: Create users linda and anna with autofs-mounted NFS home directories under /home/users
 # Category: users-groups
 # Target: node1
 

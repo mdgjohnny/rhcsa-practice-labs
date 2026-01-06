@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Using a manual method , set the system hostname to rhcsa1.example.com and alias rhcsa1. Make sure that the new hostname is reflected in the command prompt
+# Task: Set hostname to rhcsa1.example.com with alias rhcsa1
 # Category: networking
 # Target: node1
 

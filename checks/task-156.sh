@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Write a bash shell script to create three user accounts— user555, user666, and user777—with no login shell and passwords matching their usernames. The script should also extract the three usernames from the /etc/passwd file and redirect them into /var/tmp/newusers
+# Task: Write script to create user555/666/777 with no shell, passwords matching usernames
 # Category: users-groups
 # Target: node1
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Install an HTTP web server and configure it to listen on port 8080
+# Task: Install httpd and configure to listen on port 8080
 # Category: deploy-maintain
 # Target: node1
 

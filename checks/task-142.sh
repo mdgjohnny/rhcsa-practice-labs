@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Perform a case-insensitive search for all lines in the /usr/share/dict/linux.words file that begin with the pattern "essential" Redirect the output to /var/tmp/pattern.txt file. Make sure that empty lines are omitted
+# Task: Search /usr/share/dict/linux.words for lines starting with 'essential' (case-insensitive), save to /var/tmp/pattern.txt
 # Category: essential-tools
 # Target: node1
 

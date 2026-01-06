@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: User root is allowed to connect through SSH
+# Task: Enable root SSH login
 # Category: networking
 # Target: node1
 

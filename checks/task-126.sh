@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Configure a web server to use the nondefault document root /webfiles. In this directory, create a file index.html that has the contents hello world and then test that it works
+# Task: Configure httpd with document root /webfiles, create index.html with 'hello world'
 # Category: operate-systems
 # Target: node1
 

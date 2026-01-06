@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Modify your shell environment so that on every subshell that is started, a variable is set. The name of the variable should be COLOR, and the value should be set to red. Verify that it is working
+# Task: Set COLOR=red environment variable for all subshells
 # Category: essential-tools
 # Target: node1
 

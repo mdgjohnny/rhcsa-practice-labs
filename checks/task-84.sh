@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a sudo configuration that allows user bill to manage user properties and passwords, but which does not allow this user to change the password for the root user
+# Task: Configure sudo for bill to manage users but not change root password
 # Category: users-groups
 # Target: node1
 

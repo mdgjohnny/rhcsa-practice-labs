@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: All new users should have a file named CONGRATS in their home folder
+# Task: Configure /etc/skel so new users get a CONGRATS file in home directory
 # Category: users-groups
 # after user creation
 

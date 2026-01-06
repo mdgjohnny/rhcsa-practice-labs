@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create users lori and laura and make them members of the secondary group sales. Ensure that user lori uses UID 2000 and user laura uses UID 2001
+# Task: Create users lori (UID 2000) and laura (UID 2001) in sales group
 # Category: users-groups
 # Target: node1
 

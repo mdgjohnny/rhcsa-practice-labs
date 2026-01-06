@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Change group membership on /mnt/mnt1 to group10. Set read/write/execute permissions on /mnt/mnt1 for group members and revoke all permissions for public
+# Task: Set /mnt/mnt1 group to group10 with rwx for group, no access for others
 # Category: users-groups
 # Target: node1
 

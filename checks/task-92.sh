@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Reboot your server. Assume that you don't know the root password, and use the appropriate mode to enter a root shell that doesn't require a password. Set the root password to mypassword
+# Task: Reset root password to 'mypassword' using recovery mode
 # Category: operate-systems
 # Target: node1
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create user accounts called user10, user20, and user30. Set their passwords to Temp1234. Make user10 and user30 accounts to expire on December 31, 2023
+# Task: Create users user10/user20/user30 with password Temp1234, expire user10/user30 on Dec 31, 2023
 # Category: users-groups
 # Target: node1
 

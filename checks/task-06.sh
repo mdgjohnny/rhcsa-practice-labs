@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Checks whether HTTP port 8081/TCP has been added to the SELinux policy
+# Task: Add HTTP port 8081/TCP to SELinux policy
 # Category: security
 # DB persistently
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Allow user20 to use sudo without being prompted for their password.)
+# Task: Configure passwordless sudo for user20
 # Category: users-groups
 # Target: node1
 

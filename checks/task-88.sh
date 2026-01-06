@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Change the Apache document root to /web. In this directory, create a file with the name index.html and give it the content welcome to my web server. Restart the httpd process and try to access the web server. This will not work. Fix the problem
+# Task: Change Apache document root to /web with index.html 'welcome to my web server', fix SELinux
 # Category: deploy-maintain
 # Target: node1
 

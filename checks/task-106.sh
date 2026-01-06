@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a 1-GB partition on /dev/sdb. Format it with the vfat file system Mount it persistently on the directory /mydata, using the label mylabel
+# Task: Create 1GB vfat partition on /dev/sdb, mount persistently on /mydata with label mylabel
 # Category: file-systems
 # Target: node1
 

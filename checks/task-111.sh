@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Resize the LVM logical volume that contains the root file system and add 1 GiB. Perform all tasks necessary to do so
+# Task: Extend root LVM logical volume by 1GiB
 # Category: file-systems
 # Target: node1
 

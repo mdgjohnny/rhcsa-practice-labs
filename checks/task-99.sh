@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Add a new 10-GiB virtual disk to your virtual machine. On this disk, add a Stratis volume and mount it persistently
+# Task: Create Stratis volume on new 10GiB disk, mount persistently
 # Category: local-storage
 # Target: node1
 

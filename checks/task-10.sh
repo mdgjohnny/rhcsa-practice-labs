@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: All user passwords should expire after 90 days and be at least 9 characters
+# Task: Set password policy: expire after 90 days, minimum 9 characters
 # Category: users-groups
 
 

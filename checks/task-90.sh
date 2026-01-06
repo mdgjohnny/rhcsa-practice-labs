@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create user student with password password, and user root with password password
+# Task: Create user student and root with password 'password'
 # Category: users-groups
 # Target: node1
 

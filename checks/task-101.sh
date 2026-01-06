@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Install the vsftpd service and ensure that it is started automatically at reboot
+# Task: Install and enable vsftpd service to start at boot
 # Category: operate-systems
 # Target: node1
 

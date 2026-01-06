@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create users linda and anna and make them members of the group sales as a secondary group membership. Also, create users serene and alex and make them members of the group account as a secondary group
+# Task: Create users linda/anna in sales group, serene/alex in account group
 # Category: users-groups
 # Target: node1
 

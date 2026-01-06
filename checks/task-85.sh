@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a mariadb container that meets the following requirements The container must be accessible at port 3206 The MYSQL_ROOT_PASSWORD must be set to "password" A database with the name mydb is created A bind-mounted directory is accessible: the directory `/opt/mariadb` on the host must be mapped to `/var/lib/mysql` in the container
+# Task: Create mariadb container on port 3206, MYSQL_ROOT_PASSWORD=password, mydb database, /opt/mariadb mount
 # Category: containers
 # Target: node1
 

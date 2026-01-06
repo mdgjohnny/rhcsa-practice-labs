@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Ensure that `node1` does not show a graphical interface anymore, but just a text-based login prompt. From tty6, switch back to the graphical interface
+# Task: Disable graphical interface, enable text login (tty6 switches back)
 # Category: operate-systems
 # Target: node1
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Set up a shared group environment in the directory `/shared` that meets the following requirements Create two groups: `sales` and `account` Create users `joana`, `john`, `laura`, and `beatrix` Make sure they have their primary group set to a private group that has the name of the current user Make joanna and john members of the group sales, and laura and beatrix members of the group account
+# Task: Create sales/account groups with joana/john in sales, laura/beatrix in account
 # Category: users-groups
 # Target: node1
 

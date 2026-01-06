@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a container that runs an HTTP server. Ensure that it mounts the host directory /httproot on the directory /var/www/html
+# Task: Create HTTP container mounting /httproot to /var/www/html
 # Category: containers
 # Target: node1
 

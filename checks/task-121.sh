@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a 4-GiB volume group, using a physical extent size of 2 MiB. In this volume group, create a 1-GiB logical volume with the name myfiles, format it with the Ext3 file system, and mount it persistently on /myfiles
+# Task: Create 4GiB VG (2MiB PE), 1GiB LV myfiles with ext3, mount on /myfiles
 # Category: file-systems
 # Target: node1
 

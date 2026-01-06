@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a group sysadmins. Make users linda and anna members of this group and ensure that all members of this group can run all administrative commands using sudo
+# Task: Create sysadmins group with linda/anna, grant sudo access
 # Category: users-groups
 # Target: node1
 

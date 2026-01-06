@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a directory /users/ and in this directory create the directories user1 through user5 using one command
+# Task: Create /users/user1 through /users/user5 directories
 # Category: users-groups
 # Target: node1
 

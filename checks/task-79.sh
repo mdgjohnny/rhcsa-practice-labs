@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: As the user `student`, open a root shell and create one archive file that contains the contents of the /home directory and the /etc directory. Use the name `/root/essentials.tar` for the archive file. Copy this archive to the `/tmp` directory. Also create a hard link to this file in the `/` directory
+# Task: Create /root/essentials.tar with /home and /etc, copy to /tmp, hard link to /
 # Category: essential-tools
 # Target: node1
 
