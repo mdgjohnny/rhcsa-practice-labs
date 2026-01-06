@@ -351,66 +351,93 @@
         </div>
 
         <!-- VIEW: Exam/Practice Running (Active Session) -->
+        <!-- VIEW: Exam/Practice Running (Active Session) -->
         <div id="view-exam-running" class="view flex-1 w-full animate-fade-in">
-            <div class="flex flex-1 h-full">
+            <div class="flex flex-1 h-full overflow-hidden">
                 <!-- Sidebar -->
-                <aside id="exam-sidebar" class="hidden w-80 bg-surface-dark border-r border-white/5 flex-col">
-                    <div class="p-4 border-b border-white/5">
-                        <h3 class="font-bold text-sm text-gray-400 uppercase tracking-wider">Tasks</h3>
+                <aside id="exam-sidebar" class="hidden w-72 bg-background-dark border-r border-border-dark flex-col shrink-0">
+                    <div class="p-4 border-b border-border-dark">
+                        <div class="flex items-center justify-between mb-2">
+                            <h1 class="text-gray-400 text-xs uppercase font-bold tracking-wider">Task List</h1>
+                            <span id="task-progress-text" class="text-xs text-gray-400">0 of 0</span>
+                        </div>
+                        <div class="w-full bg-surface-dark h-1.5 rounded-full overflow-hidden">
+                            <div id="task-progress-bar" class="bg-primary h-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
                     </div>
                     <div id="task-list" class="flex-1 overflow-y-auto p-2 space-y-1">
                         <!-- Tasks populated by JS -->
                     </div>
-                    <div class="p-4 border-t border-white/5 space-y-2">
-                        <button onclick="submitForGrading()" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary hover:bg-primary-hover text-white font-bold text-sm transition-all">
-                            <span class="material-symbols-outlined text-lg">check_circle</span> Submit for Grading
+                    <div class="p-4 border-t border-border-dark space-y-2">
+                        <button onclick="submitForGrading()" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-sm bg-primary hover:bg-primary-hover text-white font-bold text-sm transition-all shadow-sm shadow-red-900/30">
+                            <span class="material-symbols-outlined text-lg">flag</span> Finish &amp; Grade
                         </button>
-                        <button onclick="confirmAbandon()" class="w-full px-4 py-2 rounded-lg border border-white/10 text-gray-400 hover:text-white hover:border-white/20 text-sm transition-all">
+                        <button onclick="confirmAbandon()" class="w-full px-4 py-2 rounded-sm border border-border-dark text-gray-400 hover:text-white hover:border-gray-500 text-sm transition-all">
                             Abandon Session
                         </button>
                     </div>
                 </aside>
 
                 <!-- Main Content -->
-                <div class="flex-1 flex flex-col p-8 overflow-y-auto">
-                    <div class="max-w-4xl mx-auto w-full">
-                        <!-- Breadcrumb -->
-                        <div class="flex items-center gap-2 text-sm text-gray-400 mb-6">
-                            <button onclick="confirmAbandon()" class="hover:text-white transition-colors">Home</button>
-                            <span>/</span>
-                            <span id="breadcrumb-mode" class="text-white">Practice</span>
-                        </div>
-
-                        <!-- Instructions -->
-                        <div class="bg-surface-dark rounded-xl border border-white/5 p-6 mb-6">
-                            <h3 class="font-bold mb-3 flex items-center gap-2">
-                                <span class="material-symbols-outlined text-primary">info</span> Instructions
-                            </h3>
-                            <ul class="text-sm text-gray-400 space-y-2">
-                                <li>• Complete the tasks on your virtual machines</li>
-                                <li>• All configurations must persist after reboot</li>
-                                <li>• Do not disable SELinux or firewalld</li>
-                                <li>• Click "Submit for Grading" when finished</li>
-                            </ul>
-                        </div>
-
-                        <!-- Current Task Detail -->
-                        <div id="current-task-detail" class="bg-surface-dark rounded-xl border border-white/5 p-6 mb-6">
-                            <p class="text-gray-400">Select a task from the sidebar to view details.</p>
-                        </div>
-
-                        <!-- Task Navigation -->
-                        <div class="flex items-center gap-4">
-                            <button id="prev-task-btn" onclick="navigateTask(-1)" disabled class="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">
-                                ← Previous
-                            </button>
-                            <button id="next-task-btn" onclick="navigateTask(1)" class="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">
-                                Next →
-                            </button>
-                            <span id="task-nav-indicator" class="ml-auto text-sm text-gray-400">Task 1 of 1</span>
+                <main class="flex-1 flex flex-col relative bg-background-dark min-w-0">
+                    <!-- Sticky Header -->
+                    <div class="sticky top-0 z-10 bg-background-dark/95 backdrop-blur-sm border-b border-border-dark px-6 py-4">
+                        <div class="max-w-5xl mx-auto w-full">
+                            <!-- Breadcrumb -->
+                            <div class="flex flex-wrap items-center gap-2 mb-4">
+                                <button onclick="confirmAbandon()" class="text-gray-400 hover:text-primary transition-colors text-sm font-medium leading-normal flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[16px]">home</span> <span id="breadcrumb-mode">Practice</span>
+                                </button>
+                                <span class="text-gray-400 text-sm font-medium leading-normal">/</span>
+                                <span id="breadcrumb-category" class="text-gray-400 text-sm font-medium leading-normal">Tasks</span>
+                                <span class="text-gray-400 text-sm font-medium leading-normal">/</span>
+                                <span id="breadcrumb-task" class="text-white text-sm font-medium leading-normal bg-surface-dark px-2 py-0.5 rounded-sm border border-border-dark">Task 1</span>
+                            </div>
+                            <!-- Exam Constraints (collapsible) -->
+                            <details id="exam-constraints" class="group rounded-sm border border-red-900/30 bg-red-900/5 open:bg-surface-dark open:border-border-dark transition-all duration-300">
+                                <summary class="flex cursor-pointer items-center justify-between gap-4 px-4 py-2.5 select-none hover:bg-surface-dark transition-colors">
+                                    <div class="flex items-center gap-2 text-red-400">
+                                        <span class="material-symbols-outlined text-[20px]">warning</span>
+                                        <p class="text-sm font-medium leading-normal text-white">Important Exam Constraints</p>
+                                    </div>
+                                    <span class="material-symbols-outlined text-gray-400 group-open:rotate-180 transition-transform text-[20px]">expand_more</span>
+                                </summary>
+                                <div class="px-4 pb-3 pt-1 border-t border-border-dark/50 mt-1">
+                                    <p class="text-gray-400 text-sm font-normal leading-relaxed">
+                                        All configurations must be persistent across reboots unless stated otherwise. Do not disable <span class="text-white font-mono bg-black px-1 rounded-sm border border-border-dark">SELinux</span> or <span class="text-white font-mono bg-black px-1 rounded-sm border border-border-dark">firewalld</span>.
+                                    </p>
+                                </div>
+                            </details>
                         </div>
                     </div>
-                </div>
+
+                    <!-- Scrollable Task Content -->
+                    <div class="flex-1 overflow-y-auto px-6 py-6 scroll-smooth">
+                        <div class="max-w-5xl mx-auto w-full flex flex-col gap-6 pb-24">
+                            <!-- Current Task Detail -->
+                            <div id="current-task-detail">
+                                <p class="text-gray-400">Select a task from the sidebar to view details.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fixed Bottom Navigation -->
+                    <div class="border-t border-border-dark bg-background-dark p-4 z-20">
+                        <div class="max-w-5xl mx-auto w-full flex justify-between items-center">
+                            <button id="prev-task-btn" onclick="navigateTask(-1)" disabled class="flex items-center gap-2 text-gray-400 hover:text-white px-4 py-2 rounded-sm hover:bg-surface-dark transition-colors text-sm font-medium border border-transparent hover:border-border-dark disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-transparent">
+                                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                                Previous Task
+                            </button>
+                            <div class="hidden sm:flex gap-2" id="task-dots">
+                                <!-- Dots populated by JS -->
+                            </div>
+                            <button id="next-task-btn" onclick="navigateTask(1)" class="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-sm transition-all shadow-lg shadow-red-900/20 text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed">
+                                Next Task
+                                <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                            </button>
+                        </div>
+                    </div>
+                </main>
             </div>
         </div>
 
@@ -1116,25 +1143,79 @@
         // Task List & Detail
         function renderTaskList() {
             const container = document.getElementById('task-list');
+            const gradedCount = Array.from(taskResults.values()).filter(r => r?.graded).length;
+            
+            // Update progress bar
+            const progressBar = document.getElementById('task-progress-bar');
+            const progressText = document.getElementById('task-progress-text');
+            if (progressBar) progressBar.style.width = `${(gradedCount / selectedTasks.length) * 100}%`;
+            if (progressText) progressText.textContent = `${gradedCount} of ${selectedTasks.length}`;
+            
             container.innerHTML = selectedTasks.map((task, i) => {
                 const result = taskResults.get(task.id);
-                let statusClass = 'border-white/10';
-                let statusIcon = '';
+                const isActive = i === currentTaskIndex;
+                
+                // Determine status icon and styles
+                let icon, iconClass, itemClass, statusText = '';
                 if (result?.graded) {
-                    statusClass = result.passed ? 'border-emerald-500 bg-emerald-500/5' : 'border-red-500 bg-red-500/5';
-                    statusIcon = result.passed ? 
-                        '<span class="material-symbols-outlined text-emerald-500 text-sm">check_circle</span>' :
-                        '<span class="material-symbols-outlined text-red-500 text-sm">cancel</span>';
+                    if (result.passed) {
+                        icon = 'check_circle';
+                        iconClass = 'text-green-500';
+                        itemClass = 'border-l-2 border-transparent hover:border-gray-500';
+                    } else {
+                        icon = 'cancel';
+                        iconClass = 'text-red-500';
+                        itemClass = 'border-l-2 border-transparent hover:border-gray-500';
+                    }
+                } else if (isActive) {
+                    icon = 'play_circle';
+                    iconClass = 'fill text-primary';
+                    itemClass = 'bg-surface-dark border-l-4 border-primary shadow-lg shadow-black/20';
+                    statusText = '<span class="text-xs text-primary font-medium">In Progress</span>';
+                } else {
+                    icon = 'radio_button_unchecked';
+                    iconClass = 'text-gray-500';
+                    itemClass = 'border-l-2 border-transparent hover:border-gray-500';
                 }
+                
+                // Truncate task description for sidebar
+                const shortDesc = (task.description || task.id).length > 30 
+                    ? (task.description || task.id).substring(0, 27) + '...' 
+                    : (task.description || task.id);
+                
                 return `
                     <button onclick="selectTask(${i})" 
-                            class="task-list-item w-full flex items-center gap-3 px-3 py-2 rounded-lg border ${statusClass} hover:bg-white/5 text-left transition-all ${i === currentTaskIndex ? 'bg-white/10' : ''}">
-                        <span class="text-xs text-gray-500 w-6">${String(i + 1).padStart(2, '0')}</span>
-                        <span class="flex-1 text-sm truncate">${task.description || task.id}</span>
-                        ${statusIcon}
+                            class="w-full flex items-center gap-3 px-3 py-3 rounded-sm hover:bg-surface-dark group transition-all text-left ${itemClass}">
+                        <span class="material-symbols-outlined ${iconClass} text-[20px]">${icon}</span>
+                        <div class="flex flex-col gap-1 min-w-0">
+                            <span class="${isActive ? 'text-white font-bold' : 'text-gray-400 group-hover:text-white font-medium'} text-sm leading-none truncate transition-colors">${i + 1}. ${shortDesc}</span>
+                            ${statusText}
+                        </div>
                     </button>
                 `;
             }).join('');
+            
+            // Update navigation dots
+            updateTaskDots();
+        }
+        
+        function updateTaskDots() {
+            const dotsContainer = document.getElementById('task-dots');
+            if (!dotsContainer) return;
+            
+            // Only show up to 7 dots
+            const maxDots = 7;
+            const totalTasks = selectedTasks.length;
+            
+            if (totalTasks <= maxDots) {
+                dotsContainer.innerHTML = selectedTasks.map((_, i) => {
+                    const isActive = i === currentTaskIndex;
+                    return `<button onclick="selectTask(${i})" class="size-2 rounded-full ${isActive ? 'bg-primary' : 'bg-surface-dark border border-border-dark hover:bg-primary/50'} transition-colors"></button>`;
+                }).join('');
+            } else {
+                // Show abbreviated dots with current position indicator
+                dotsContainer.innerHTML = `<span class="text-xs text-gray-400 font-mono">${currentTaskIndex + 1} / ${totalTasks}</span>`;
+            }
         }
 
         function selectTask(index) {
@@ -1151,35 +1232,105 @@
             
             const result = taskResults.get(taskId);
             const container = document.getElementById('current-task-detail');
+            const taskIndex = selectedTasks.findIndex(t => t.id === taskId);
+            
+            // Update breadcrumbs
+            const breadcrumbCategory = document.getElementById('breadcrumb-category');
+            const breadcrumbTask = document.getElementById('breadcrumb-task');
+            if (breadcrumbCategory) breadcrumbCategory.textContent = task.category || 'Tasks';
+            if (breadcrumbTask) breadcrumbTask.textContent = `Task ${taskIndex + 1}`;
+            
+            // Determine target host display
+            const targetHost = task.target === 'node1' ? 'rhcsa1 (node1)' : 
+                              task.target === 'node2' ? 'rhcsa2 (node2)' : 
+                              task.target === 'both' ? 'Both nodes' : task.target || 'node1';
+            
+            // Build result status HTML
+            let resultHtml = '';
+            if (result?.graded) {
+                const statusColor = result.passed ? 'green' : 'red';
+                const statusIcon = result.passed ? 'check_circle' : 'cancel';
+                const statusText = result.passed ? 'Task Completed Successfully' : 'Task Failed';
+                resultHtml = `
+                    <div class="mt-6 p-4 rounded-sm border-l-4 ${result.passed ? 'border-l-green-500 bg-green-500/5 border-y border-r border-green-500/20' : 'border-l-red-500 bg-red-500/5 border-y border-r border-red-500/20'}">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined ${result.passed ? 'text-green-500' : 'text-red-500'} text-2xl">${statusIcon}</span>
+                            <div>
+                                <p class="font-bold ${result.passed ? 'text-green-400' : 'text-red-400'}">${statusText}</p>
+                                <p class="text-sm text-gray-400">${result.points || 0} of ${task.points || 1} points earned</p>
+                            </div>
+                        </div>
+                        ${result.message ? `<p class="text-sm text-gray-400 mt-3 pl-9">${result.message}</p>` : ''}
+                    </div>
+                `;
+            }
             
             container.innerHTML = `
-                <div class="flex items-start justify-between gap-4 mb-4">
-                    <h2 class="text-xl font-bold">${task.description || task.id}</h2>
-                    <span class="px-2 py-1 rounded text-xs font-medium bg-white/5">${task.points || 1} pts</span>
-                </div>
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <span class="px-2 py-1 rounded text-xs bg-purple-500/10 text-purple-400">${task.category || 'General'}</span>
-                    <span class="px-2 py-1 rounded text-xs bg-blue-500/10 text-blue-400">${task.target || 'node1'}</span>
-                </div>
-                ${task.details ? `<p class="text-gray-400 text-sm mb-4">${task.details}</p>` : ''}
-                <div class="flex gap-3 mt-6">
-                    <button onclick="gradeTask('${taskId}')" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-bold transition-all">
-                        <span class="material-symbols-outlined text-lg">check</span> Check Task
-                    </button>
-                </div>
-                ${result?.graded ? `
-                    <div class="mt-4 p-3 rounded-lg ${result.passed ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-red-500/10 border border-red-500/20'}">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined ${result.passed ? 'text-emerald-500' : 'text-red-500'}">
-                                ${result.passed ? 'check_circle' : 'cancel'}
-                            </span>
-                            <span class="font-medium ${result.passed ? 'text-emerald-400' : 'text-red-400'}">
-                                ${result.passed ? 'Passed' : 'Failed'} - ${result.points || 0}/${task.points || 1} points
-                            </span>
-                        </div>
-                        ${result.message ? `<p class="text-sm text-gray-400 mt-2">${result.message}</p>` : ''}
+                <!-- Task Header -->
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">${task.description || task.id}</h1>
+                        <p class="text-gray-400 text-lg">Task ${taskIndex + 1} of ${selectedTasks.length}</p>
                     </div>
-                ` : ''}
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-sm bg-surface-dark border border-border-dark text-xs font-medium text-white uppercase tracking-wider">
+                            <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                            ${task.category || 'General'}
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-sm bg-primary/10 border border-primary/20 text-xs font-bold text-primary uppercase tracking-wider">
+                            ${task.points || 1} Points
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Target Info Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="bg-surface-dark border-l-2 border-l-red-500 border-y border-r border-border-dark rounded-r-sm p-5 flex items-start gap-4 shadow-sm">
+                        <div class="p-2.5 bg-background-dark rounded-sm shrink-0 text-white border border-border-dark">
+                            <span class="material-symbols-outlined">dns</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Target Host</h3>
+                            <p class="text-white font-mono text-base">${targetHost}</p>
+                        </div>
+                    </div>
+                    <div class="bg-surface-dark border-l-2 border-l-red-500 border-y border-r border-border-dark rounded-r-sm p-5 flex items-start gap-4 shadow-sm">
+                        <div class="p-2.5 bg-background-dark rounded-sm shrink-0 text-white border border-border-dark">
+                            <span class="material-symbols-outlined">verified_user</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Verification</h3>
+                            <p class="text-white font-mono text-base">Automated Check</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="border-border-dark mb-6"/>
+                
+                <!-- Task Description -->
+                <div class="prose prose-invert prose-lg max-w-none">
+                    <h3 class="text-white text-xl font-bold mb-4 flex items-center gap-2 border-l-4 border-primary pl-3">
+                        Description
+                    </h3>
+                    <p class="text-gray-300 leading-relaxed mb-6">
+                        ${task.details || task.description || 'Complete this task according to the requirements.'}
+                    </p>
+                </div>
+                
+                <!-- Action Button -->
+                <div class="flex gap-3 mt-8">
+                    <button onclick="gradeTask('${taskId}')" class="flex items-center gap-2 px-6 py-3 rounded-sm bg-primary hover:bg-primary-hover text-white font-bold transition-all shadow-lg shadow-red-900/20">
+                        <span class="material-symbols-outlined">check_circle</span> Check Task
+                    </button>
+                    ${!result?.graded ? `
+                    <button onclick="navigateTask(1)" class="flex items-center gap-2 px-6 py-3 rounded-sm bg-surface-dark hover:bg-white/10 border border-border-dark text-white font-medium transition-all">
+                        Skip for now
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                    ` : ''}
+                </div>
+                
+                ${resultHtml}
             `;
         }
 
@@ -1191,9 +1342,14 @@
         }
 
         function updateTaskNavigation() {
-            document.getElementById('prev-task-btn').disabled = currentTaskIndex === 0;
-            document.getElementById('next-task-btn').disabled = currentTaskIndex === selectedTasks.length - 1;
-            document.getElementById('task-nav-indicator').textContent = `Task ${currentTaskIndex + 1} of ${selectedTasks.length}`;
+            const prevBtn = document.getElementById('prev-task-btn');
+            const nextBtn = document.getElementById('next-task-btn');
+            
+            if (prevBtn) prevBtn.disabled = currentTaskIndex === 0;
+            if (nextBtn) nextBtn.disabled = currentTaskIndex === selectedTasks.length - 1;
+            
+            // Update dots
+            updateTaskDots();
         }
 
         // Grading
