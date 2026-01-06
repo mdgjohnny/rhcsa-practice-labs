@@ -946,10 +946,12 @@
 
         function selectAllTasks() {
             document.querySelectorAll('.task-checkbox').forEach(cb => cb.checked = true);
+            updateSelectedCount();
         }
 
         function deselectAllTasks() {
             document.querySelectorAll('.task-checkbox').forEach(cb => cb.checked = false);
+            updateSelectedCount();
         }
 
         function getSelectedTaskIds() {
