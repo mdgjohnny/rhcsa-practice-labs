@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Task: Find all files that have the SUID permission set, and write the result to the file /root/suidfiles
+# Category: users-groups
+# Target: node1
+
+# Check if the output file exists
+check \'run_ssh "$NODE1_IP" "test -f /root/suidfiles"\' \
+    "File /root/suidfiles exists" \
+    "File /root/suidfiles does not exist"
+
+# Check if file contains SUID files (should have entries like /usr/bin/passwd)
+check \'run_ssh "$NODE1_IP" "grep -q "/usr/bin/passwd\|/usr/bin/sudo\|/bin/su" /root/suidfiles 2>/dev/null"\' \
+    "/root/suidfiles contains common SUID files" \
+    "/root/suidfiles appears empty or incomplete"

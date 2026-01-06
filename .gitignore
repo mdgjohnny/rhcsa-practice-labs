@@ -1,0 +1,17 @@
+# Logs
+*.log
+
+# Local configuration (contains passwords)
+config
+*.bak
+
+# Database
+results.db
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Agent Artifacts
+CLAUDE.md

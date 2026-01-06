@@ -1,0 +1,2341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RHCSA Practice Labs</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        :root {
+            /* Palette - Premium Dark */
+            --bg-body: #0a0a0b;
+            --bg-card: #141416;
+            --bg-card-glass: rgba(26, 26, 29, 0.7);
+
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --primary-hover: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+
+            --success: #22c55e;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+
+            /* RH Legacy (kept for specific specific target pills but muted) */
+            --rh-red: #ef4444;
+            --rh-green: #22c55e;
+            --rh-orange: #f59e0b;
+            --rh-blue: #3b82f6;
+            --rh-cyan: #06b6d4;
+            --rh-black: #0a0a0b;
+            --rh-gray-dark: #18181b;
+            --rh-gray: #27272a;
+            --rh-gray-light: #71717a;
+            --rh-white: #ffffff;
+
+            /* Effects */
+            --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+            --glass-shine: rgba(255, 255, 255, 0.03);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+            /* Toast Notifications - Re-added below vars */
+            .toast-container {
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                max-width: 400px;
+            }
+
+            .toast {
+                padding: 1rem 1.25rem;
+                border-radius: 8px;
+                background: rgba(20, 20, 22, 0.95);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: var(--shadow-lg);
+                display: flex;
+                align-items: flex-start;
+                gap: 1rem;
+                animation: slideIn 0.3s ease-out;
+                color: var(--text-main);
+            }
+
+            .toast.success {
+                border-left: 4px solid var(--success);
+            }
+
+            .toast.error {
+                border-left: 4px solid var(--error);
+            }
+
+            .toast.warning {
+                border-left: 4px solid var(--warning);
+            }
+
+            .toast.info {
+                border-left: 4px solid var(--info);
+            }
+
+            .toast-title {
+                font-weight: 600;
+                font-size: 0.95rem;
+                margin-bottom: 0.15rem;
+            }
+
+            .toast-message {
+                font-size: 0.9rem;
+                color: var(--text-muted);
+            }
+
+            .toast-close {
+                background: none;
+                border: none;
+                color: var(--text-muted);
+                cursor: pointer;
+                padding: 0.25rem;
+                transition: color 0.2s;
+            }
+
+            .toast-close:hover {
+                color: var(--text-main);
+            }
+
+
+            /* Toast Notifications */
+            .toast-container {
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                max-width: 400px;
+            }
+
+            .toast {
+                padding: 1rem 1.25rem;
+                border-radius: 6px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+                display: flex;
+                align-items: flex-start;
+                gap: 0.75rem;
+                animation: slideIn 0.3s ease-out;
+                position: relative;
+            }
+
+            .toast.success {
+                background: var(--rh-green);
+                border-left: 4px solid #2d6327;
+            }
+
+            .toast.error {
+                background: var(--rh-red-dark);
+                border-left: 4px solid var(--rh-red);
+            }
+
+            .toast.warning {
+                background: #8a6d00;
+                border-left: 4px solid var(--rh-orange);
+            }
+
+            .toast.info {
+                background: #004080;
+                border-left: 4px solid var(--rh-blue);
+            }
+
+            .toast.success {
+                border-left: 4px solid var(--rh-green);
+                background: #0f2b0f;
+                color: #e0ffe0;
+            }
+
+            .toast.error {
+                border-left: 4px solid var(--rh-red);
+                background: #2b0f0f;
+                color: #ffe0e0;
+            }
+
+            .toast.warning {
+                border-left: 4px solid var(--rh-orange);
+                background: #2b200f;
+                color: #ffe0c0;
+            }
+
+            .toast-icon {
+                font-size: 1.25rem;
+                flex-shrink: 0;
+            }
+
+            .toast-content {
+                flex: 1;
+            }
+
+            .toast-title {
+                font-weight: 600;
+                margin-bottom: 0.25rem;
+            }
+
+            .toast-message {
+                font-size: 0.9rem;
+                opacity: 0.9;
+            }
+
+            .toast-close {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 1.25rem;
+                cursor: pointer;
+                opacity: 0.7;
+                padding: 0;
+                line-height: 1;
+            }
+
+            .toast-close:hover {
+                opacity: 1;
+            }
+
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+
+            .toast.hiding {
+                animation: slideOut 0.3s ease-in forwards;
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                background: var(--bg-body);
+                color: var(--text-main);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                line-height: 1.5;
+            }
+
+            /* Top Header Bar */
+            .header {
+                background: rgba(10, 10, 11, 0.8);
+                backdrop-filter: blur(12px);
+                border-bottom: var(--glass-border);
+                padding: 0.75rem 1.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                position: sticky;
+                top: 0;
+                z-index: 50;
+            }
+
+            .header-left {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .logo {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-weight: 700;
+                font-size: 1.1rem;
+            }
+
+            .logo-icon {
+                width: 28px;
+                height: 28px;
+                background: var(--rh-red);
+                border-radius: 2px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 0.9rem;
+            }
+
+            .header-center {
+                display: flex;
+                align-items: center;
+                gap: 2rem;
+            }
+
+            .vm-status {
+                display: flex;
+                gap: 1rem;
+            }
+
+            .vm-indicator {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.4rem 0.75rem;
+                background: var(--rh-gray);
+                border-radius: 4px;
+                font-size: 0.85rem;
+                cursor: pointer;
+                transition: background 0.2s, transform 0.1s;
+            }
+
+            .vm-indicator:hover {
+                background: #3a3d40;
+                transform: translateY(-1px);
+            }
+
+            .vm-indicator .vm-info {
+                display: flex;
+                flex-direction: column;
+                line-height: 1.2;
+            }
+
+            .vm-indicator .vm-hostname {
+                font-weight: 500;
+            }
+
+            .vm-indicator .vm-ip {
+                font-size: 0.7rem;
+                color: var(--rh-gray-light);
+                font-family: 'Consolas', monospace;
+            }
+
+            .vm-indicator .dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--rh-gray-light);
+                flex-shrink: 0;
+            }
+
+            .vm-indicator .dot.ok {
+                background: var(--rh-green);
+            }
+
+            .vm-indicator .dot.fail {
+                background: var(--rh-red);
+            }
+
+            .vm-indicator .dot.pending {
+                background: var(--rh-orange);
+            }
+
+            .timer-display {
+                font-family: 'Consolas', monospace;
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: var(--rh-white);
+                padding: 0.25rem 1rem;
+                background: var(--rh-gray);
+                border-radius: 4px;
+            }
+
+            .timer-display.warning {
+                color: var(--rh-orange);
+                animation: pulse 1s infinite;
+            }
+
+            .timer-display.critical {
+                color: var(--rh-red);
+                animation: pulse 0.5s infinite;
+            }
+
+            @keyframes pulse {
+
+                0%,
+                100% {
+                    opacity: 1;
+                }
+
+                50% {
+                    opacity: 0.6;
+                }
+            }
+
+            .header-right {
+                display: flex;
+                gap: 0.75rem;
+            }
+
+            /* Main Layout */
+            .main-container {
+                display: flex;
+                flex: 1;
+                overflow: hidden;
+            }
+
+            /* Left Sidebar - Task List */
+            .sidebar {
+                width: 320px;
+                background: var(--rh-gray-dark);
+                border-right: 1px solid var(--rh-gray);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                flex-shrink: 0;
+                min-width: 320px;
+            }
+
+            .sidebar-header {
+                padding: 1rem;
+                border-bottom: 1px solid var(--rh-gray);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .sidebar-header h2 {
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: var(--rh-gray-light);
+            }
+
+            .task-count {
+                font-size: 0.85rem;
+                color: var(--rh-gray-light);
+            }
+
+            /* Sidebar search and controls */
+            .sidebar-controls {
+                padding: 0.5rem;
+                border-bottom: 1px solid var(--rh-gray);
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .sidebar-search {
+                width: 100%;
+                padding: 0.5rem 0.75rem;
+                background: var(--rh-black);
+                border: 1px solid var(--rh-gray);
+                border-radius: 4px;
+                color: var(--rh-white);
+                font-size: 0.85rem;
+            }
+
+            .sidebar-search:focus {
+                outline: none;
+                border-color: var(--rh-blue);
+            }
+
+            .sidebar-toggles {
+                display: flex;
+                gap: 0.5rem;
+                font-size: 0.75rem;
+            }
+
+            .sidebar-toggle {
+                padding: 0.25rem 0.5rem;
+                background: var(--rh-gray);
+                border: none;
+                border-radius: 3px;
+                color: var(--rh-gray-light);
+                cursor: pointer;
+                font-size: 0.7rem;
+            }
+
+            .sidebar-toggle:hover,
+            .sidebar-toggle.active {
+                background: var(--rh-blue);
+                color: white;
+            }
+
+            /* Task list with categories */
+            .task-list {
+                flex: 1;
+                overflow-y: auto;
+                padding: 0.5rem;
+            }
+
+            .task-category-group {
+                margin-bottom: 0.5rem;
+            }
+
+            .task-category-header {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem;
+                background: var(--rh-gray);
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 0.8rem;
+                text-transform: capitalize;
+                user-select: none;
+            }
+
+            .task-category-header:hover {
+                background: #4a4d50;
+            }
+
+            .task-category-header .arrow {
+                transition: transform 0.2s;
+                font-size: 0.7rem;
+            }
+
+            .task-category-header.collapsed .arrow {
+                transform: rotate(-90deg);
+            }
+
+            .task-category-header .cat-count {
+                margin-left: auto;
+                background: var(--rh-gray-dark);
+                padding: 0.1rem 0.4rem;
+                border-radius: 10px;
+                font-size: 0.7rem;
+            }
+
+            .task-category-items {
+                padding-left: 0.25rem;
+            }
+
+            .task-category-items.hidden {
+                display: none;
+            }
+
+            /* Compact task items */
+            .task-item {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem;
+                margin: 0.15rem 0;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background 0.15s;
+                border-left: 3px solid transparent;
+                font-size: 0.85rem;
+            }
+
+            .task-item.compact {
+                padding: 0.35rem 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            .task-item.compact .task-number {
+                width: 20px;
+                height: 20px;
+                font-size: 0.65rem;
+            }
+
+            .task-item.compact .task-title {
+                font-size: 0.8rem;
+            }
+
+            .task-item:hover {
+                background: var(--rh-gray);
+            }
+
+            .task-item.active {
+                background: var(--rh-gray);
+                border-left-color: var(--rh-red);
+            }
+
+            .task-item.completed {
+                opacity: 0.6;
+            }
+
+            .task-item.task-passed {
+                border-left-color: var(--rh-green);
+                background: rgba(146, 212, 0, 0.1);
+            }
+
+            .task-item.task-passed .task-number {
+                background: var(--rh-green);
+                color: var(--rh-dark);
+            }
+
+            .task-item.task-failed {
+                border-left-color: var(--rh-red);
+                background: rgba(204, 0, 0, 0.1);
+            }
+
+            .task-item.task-failed .task-number {
+                background: var(--rh-red);
+            }
+
+            .task-number {
+                width: 24px;
+                height: 24px;
+                background: var(--rh-gray);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.75rem;
+                font-weight: 600;
+                flex-shrink: 0;
+            }
+
+            .task-item.completed .task-number {
+                background: var(--rh-green);
+            }
+
+            .task-item.failed .task-number {
+                background: var(--rh-red);
+            }
+
+            .task-info {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .task-title {
+                font-size: 0.9rem;
+                margin-bottom: 0.25rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .task-category {
+                font-size: 0.75rem;
+                color: var(--rh-cyan);
+                text-transform: capitalize;
+            }
+
+            .task-target {
+                font-size: 0.65rem;
+                padding: 0.15rem 0.4rem;
+                border-radius: 3px;
+                text-transform: uppercase;
+                font-weight: 600;
+                margin-left: 0.5rem;
+            }
+
+            .task-target.node1 {
+                background: rgba(0, 149, 150, 0.3);
+                color: var(--rh-cyan);
+            }
+
+            .task-target.node2 {
+                background: rgba(240, 171, 0, 0.3);
+                color: var(--rh-orange);
+            }
+
+            .task-target.both {
+                background: rgba(102, 0, 204, 0.3);
+                color: #b380ff;
+            }
+
+            /* Main Content Area */
+            .content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .content-header {
+                padding: 1.5rem 2rem;
+                border-bottom: 1px solid var(--rh-gray);
+                background: var(--rh-gray-dark);
+            }
+
+            .content-header h1 {
+                font-size: 1.5rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+            }
+
+            .content-header .meta {
+                display: flex;
+                gap: 1.5rem;
+                font-size: 0.85rem;
+                color: var(--rh-gray-light);
+            }
+
+            .content-body {
+                flex: 1;
+                overflow-y: auto;
+                padding: 2rem;
+            }
+
+            /* Buttons */
+            .btn {
+                padding: 0.6rem 1.25rem;
+                border: none;
+                border-radius: 6px;
+                font-family: inherit;
+                font-size: 0.9rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            }
+
+            .btn:active {
+                transform: scale(0.98);
+            }
+
+            .btn-primary {
+                background: var(--primary-gradient);
+                color: white;
+                box-shadow: var(--shadow-glow);
+            }
+
+            .btn-primary:hover {
+                background: var(--primary-hover);
+                box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+            }
+
+            .btn-secondary {
+                background: var(--rh-gray);
+                color: var(--text-main);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .btn-secondary:hover {
+                background: #27272a;
+                border-color: rgba(255, 255, 255, 0.2);
+            }
+
+            .btn-success {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                color: white;
+            }
+
+            .btn-success:hover {
+                background: linear-gradient(135deg, #059669 0%, #047857 100%);
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+            }
+
+            .btn-outline {
+                background: transparent;
+                border: 1px solid var(--rh-gray-light);
+                color: var(--text-muted);
+            }
+
+            .btn-outline:hover {
+                border-color: var(--text-main);
+                color: var(--text-main);
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            /* Cards */
+            .card {
+                background: var(--bg-card);
+                border: var(--glass-border);
+                border-radius: 12px;
+                padding: 2rem;
+                margin-bottom: 2rem;
+                box-shadow: var(--shadow-lg);
+                position: relative;
+                overflow: hidden;
+                background-clip: padding-box;
+            }
+
+            /* Subtle shine effect */
+            .card::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            }
+
+            .card h2 {
+                font-size: 1.25rem;
+                margin-bottom: 1.25rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                font-weight: 600;
+                color: var(--text-main);
+            }
+
+            /* Forms */
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 0.4rem;
+                font-size: 0.85rem;
+                color: var(--rh-gray-light);
+            }
+
+            .form-group input,
+            .form-group select {
+                width: 100%;
+                padding: 0.6rem 0.75rem;
+                background: var(--rh-black);
+                border: 1px solid var(--rh-gray);
+                border-radius: 4px;
+                color: var(--rh-white);
+                font-family: inherit;
+                font-size: 0.9rem;
+            }
+
+            .form-group input:focus,
+            .form-group select:focus {
+                outline: none;
+                border-color: var(--rh-blue);
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            /* Mode Selection */
+            .mode-cards {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+                margin: 1.5rem 0;
+            }
+
+            .mode-card {
+                background: var(--rh-gray-dark);
+                border: 2px solid var(--rh-gray);
+                border-radius: 8px;
+                padding: 2rem;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .mode-card:hover {
+                border-color: var(--rh-gray-light);
+            }
+
+            .mode-card.active {
+                border-color: var(--rh-red);
+                background: rgba(238, 0, 0, 0.1);
+            }
+
+            .mode-card h3 {
+                font-size: 1.25rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .mode-card p {
+                color: var(--rh-gray-light);
+                font-size: 0.9rem;
+            }
+
+            .mode-card .icon {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+
+            /* Category Grid */
+            .category-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .category-card {
+                background: var(--rh-gray-dark);
+                border: 2px solid var(--rh-gray);
+                border-radius: 8px;
+                padding: 1.25rem;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .category-card:hover {
+                border-color: var(--rh-gray-light);
+                background: var(--rh-gray);
+            }
+
+            .category-card h4 {
+                font-size: 1rem;
+                margin-bottom: 0.5rem;
+                text-transform: capitalize;
+            }
+
+            .category-card .task-count {
+                color: var(--rh-gray-light);
+                font-size: 0.85rem;
+            }
+
+            @media (max-width: 768px) {
+                .category-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
+            /* Results */
+            .results-summary {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .result-box {
+                background: var(--rh-gray);
+                border-radius: 6px;
+                padding: 1.25rem;
+                text-align: center;
+            }
+
+            .result-box .value {
+                font-size: 2rem;
+                font-weight: 700;
+                margin-bottom: 0.25rem;
+            }
+
+            .result-box .label {
+                font-size: 0.8rem;
+                color: var(--rh-gray-light);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .result-box.passed .value {
+                color: var(--rh-green);
+            }
+
+            .result-box.failed .value {
+                color: var(--rh-red);
+            }
+
+            /* Check Results List */
+            .check-list {
+                border: 1px solid var(--rh-gray);
+                border-radius: 6px;
+                overflow: hidden;
+            }
+
+            .check-item {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid var(--rh-gray);
+            }
+
+            .check-item:last-child {
+                border-bottom: none;
+            }
+
+            .check-item .icon {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.8rem;
+                flex-shrink: 0;
+            }
+
+            .check-item.passed .icon {
+                background: var(--rh-green);
+            }
+
+            .check-item.failed .icon {
+                background: var(--rh-red);
+            }
+
+            .check-item .text {
+                flex: 1;
+                font-size: 0.9rem;
+            }
+
+            .check-item .category {
+                font-size: 0.75rem;
+                color: var(--rh-cyan);
+                text-transform: capitalize;
+            }
+
+            /* Stats */
+            .category-bars {
+                margin-top: 1rem;
+            }
+
+            .category-bar {
+                margin-bottom: 1rem;
+            }
+
+            .category-bar .header {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 0.4rem;
+                font-size: 0.9rem;
+                background: none;
+                border: none;
+                padding: 0;
+            }
+
+            .category-bar .name {
+                text-transform: capitalize;
+            }
+
+            .category-bar .pct {
+                font-weight: 600;
+            }
+
+            .category-bar .pct.good {
+                color: var(--rh-green);
+            }
+
+            .category-bar .pct.ok {
+                color: var(--rh-orange);
+            }
+
+            .category-bar .pct.bad {
+                color: var(--rh-red);
+            }
+
+            .progress-track {
+                height: 8px;
+                background: var(--rh-gray);
+                border-radius: 4px;
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                height: 100%;
+                border-radius: 4px;
+                transition: width 0.3s;
+            }
+
+            .progress-fill.good {
+                background: var(--rh-green);
+            }
+
+            .progress-fill.ok {
+                background: var(--rh-orange);
+            }
+
+            .progress-fill.bad {
+                background: var(--rh-red);
+            }
+
+            /* Utilities */
+            .hidden {
+                display: none !important;
+            }
+
+            .text-center {
+                text-align: center;
+            }
+
+            .mt-1 {
+                margin-top: 1rem;
+            }
+
+            .mt-2 {
+                margin-top: 2rem;
+            }
+
+            .mb-1 {
+                margin-bottom: 1rem;
+            }
+
+            .mb-2 {
+                margin-bottom: 2rem;
+            }
+
+            .loading {
+                text-align: center;
+                padding: 3rem;
+                color: var(--rh-gray-light);
+            }
+
+            .loading-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(21, 21, 21, 0.95);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+            }
+
+            .loading-overlay.hidden {
+                display: none;
+            }
+
+            .alert {
+                padding: 1rem;
+                border-radius: 4px;
+                margin-bottom: 1rem;
+            }
+
+            .alert-info {
+                background: rgba(0, 102, 204, 0.2);
+                border: 1px solid var(--rh-blue);
+            }
+
+            .alert-warning {
+                background: rgba(240, 171, 0, 0.2);
+                border: 1px solid var(--rh-orange);
+            }
+
+            /* Task Checkbox List */
+            .task-checkbox-list {
+                max-height: 400px;
+                overflow-y: auto;
+                border: 1px solid var(--rh-gray);
+                border-radius: 4px;
+            }
+
+            .task-checkbox-item {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.6rem 0.75rem;
+                border-bottom: 1px solid var(--rh-gray);
+                cursor: pointer;
+            }
+
+            .task-checkbox-item:last-child {
+                border-bottom: none;
+            }
+
+            .task-checkbox-item:hover {
+                background: var(--rh-gray);
+            }
+
+            .task-checkbox-item input[type="checkbox"] {
+                width: 16px;
+                height: 16px;
+                accent-color: var(--rh-red);
+            }
+
+            .task-checkbox-item .desc {
+                flex: 1;
+                font-size: 0.85rem;
+            }
+
+            .task-checkbox-item .cat {
+                font-size: 0.75rem;
+                color: var(--rh-cyan);
+            }
+
+            /* Welcome Screen */
+            .welcome {
+                text-align: center;
+                padding: 4rem 2rem;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+
+            .welcome h1 {
+                font-size: 2rem;
+                margin-bottom: 1rem;
+            }
+
+            .welcome p {
+                color: var(--rh-gray-light);
+                margin-bottom: 2rem;
+                line-height: 1.6;
+            }
+
+            .welcome .actions {
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+            }
+
+            /* Tab Navigation */
+            .tabs {
+                display: flex;
+                border-bottom: 1px solid var(--rh-gray);
+                margin-bottom: 1.5rem;
+            }
+
+            .tab {
+                padding: 0.75rem 1.5rem;
+                background: none;
+                border: none;
+                color: var(--rh-gray-light);
+                cursor: pointer;
+                font-family: inherit;
+                font-size: 0.9rem;
+                position: relative;
+            }
+
+            .tab:hover {
+                color: var(--rh-white);
+            }
+
+            .tab.active {
+                color: var(--rh-white);
+            }
+
+            .tab.active::after {
+                content: '';
+                position: absolute;
+                bottom: -1px;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: var(--rh-red);
+            }
+
+            /* Exam Running State */
+            .exam-instructions {
+                background: var(--rh-gray);
+                padding: 1.5rem;
+                border-radius: 6px;
+                margin-bottom: 1.5rem;
+            }
+
+            .exam-instructions h3 {
+                margin-bottom: 0.75rem;
+            }
+
+            .exam-instructions ul {
+                margin-left: 1.5rem;
+                color: var(--rh-gray-light);
+                line-height: 1.8;
+            }
+
+            .actions-bar {
+                display: flex;
+                gap: 1rem;
+                padding: 1rem;
+                background: var(--rh-gray-dark);
+                border-top: 1px solid var(--rh-gray);
+            }
+
+            @keyframes spin {
+                from {
+                    transform: rotate(0deg);
+                }
+
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .spinner-large {
+                width: 48px;
+                height: 48px;
+                border: 4px solid rgba(255, 255, 255, 0.1);
+                border-top-color: var(--info);
+                border-radius: 50%;
+                display: inline-block;
+                animation: spin 1s linear infinite;
+            }
+
+            .step-item {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.5rem 0;
+                color: var(--text-muted);
+                transition: all 0.2s;
+            }
+
+            .step-item.active {
+                color: var(--text-main);
+                font-weight: 500;
+            }
+
+            .step-item.done {
+                color: var(--success);
+            }
+
+            .step-item.fail {
+                color: var(--error);
+            }
+
+            .step-item.pending {
+                color: var(--text-muted);
+                opacity: 0.7;
+            }
+
+            .step-icon {
+                width: 18px;
+                height: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1rem;
+            }
+
+            .step-spinner {
+                width: 14px;
+                height: 14px;
+                border: 2px solid currentColor;
+                border-top-color: transparent;
+                border-radius: 50%;
+                display: inline-block;
+                animation: spin 0.8s linear infinite;
+            }
+
+            /* Sidebar sticky footer */
+            .sidebar-footer {
+                padding: 0.75rem;
+                background: var(--rh-gray-dark);
+                border-top: 1px solid var(--rh-gray);
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .sidebar-footer .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .sidebar-progress {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.8rem;
+                color: var(--rh-gray-light);
+            }
+
+            .sidebar-progress .progress-bar {
+                flex: 1;
+                height: 6px;
+                background: var(--rh-gray);
+                border-radius: 3px;
+                overflow: hidden;
+            }
+
+            .sidebar-progress .progress-fill {
+                height: 100%;
+                background: var(--rh-green);
+                transition: width 0.3s;
+            }
+
+            /* Grading Progress Modal */
+            .grading-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.85);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                backdrop-filter: blur(5px);
+                animation: fadeIn 0.2s ease-out;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
+            }
+
+            /* Sleek Reveal Box (for inline config/howto) */
+            .reveal-box {
+                max-height: 0;
+                opacity: 0;
+                overflow: hidden;
+                transform: translateY(-10px) scale(0.98);
+                transition:
+                    max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                    opacity 0.3s ease-out,
+                    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                    margin 0.3s ease,
+                    padding 0.3s ease;
+
+                /* Collapsed State Styles */
+                margin-top: 0;
+                padding: 0 2rem;
+                border: 0 solid var(--glass-border-color, rgba(255, 255, 255, 0.08));
+                background: var(--bg-card);
+                border-radius: 12px;
+            }
+
+            .reveal-box.active {
+                max-height: 1000px;
+                /* Arbitrary large height */
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                margin-top: 2rem;
+                padding: 2rem;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                /* Re-apply border */
+                box-shadow: var(--shadow-lg);
+            }
+
+            z-index: 10000;
+        }
+
+        .grading-modal.hidden {
+            display: none;
+        }
+
+        .grading-modal-content {
+            background: var(--rh-gray-dark);
+            border: 1px solid var(--rh-gray);
+            border-radius: 8px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .grading-modal h2 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .grading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--rh-gray);
+            border-top-color: var(--rh-red);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes reboot-progress {
+            from {
+                width: 0%;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+
+        .reboot-card:hover {
+            border-color: var(--rh-orange) !important;
+            background: var(--rh-gray) !important;
+        }
+
+        .reboot-card.confirming {
+            border-color: var(--rh-orange) !important;
+            background: rgba(240, 171, 0, 0.1) !important;
+        }
+
+        .reboot-target-card.confirming {
+            border-color: var(--rh-orange);
+            background: rgba(240, 171, 0, 0.1);
+            animation: pulse-border 1s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% {
+                border-color: var(--rh-orange);
+            }
+
+            50% {
+                border-color: rgba(240, 171, 0, 0.3);
+            }
+
+            100% {
+                border-color: var(--rh-orange);
+            }
+        }
+
+        .reboot-progress-container {
+            height: 4px;
+            background: var(--rh-gray);
+            border-radius: 2px;
+            margin-top: 0.75rem;
+            overflow: hidden;
+            display: none;
+        }
+
+        .reboot-target-card.rebooting .reboot-progress-container {
+            display: block;
+        }
+
+        .reboot-progress-bar {
+            height: 100%;
+            background: var(--rh-orange);
+            width: 0%;
+            transition: width 0.5s linear;
+        }
+
+        .grading-progress-bar {
+            height: 8px;
+            background: var(--rh-gray);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .grading-progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--rh-red), var(--rh-orange));
+            transition: width 0.3s;
+        }
+
+        .grading-status {
+            font-size: 0.9rem;
+            color: var(--rh-gray-light);
+            margin-bottom: 1rem;
+        }
+
+        .grading-task-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--rh-gray);
+            border-radius: 4px;
+        }
+
+        .grading-task-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--rh-gray);
+            font-size: 0.85rem;
+        }
+
+        .grading-task-item:last-child {
+            border-bottom: none;
+        }
+
+        .grading-task-item .icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+        }
+
+        .grading-task-item.pending .icon {
+            background: var(--rh-gray);
+            color: var(--rh-gray-light);
+        }
+
+        .grading-task-item.grading .icon {
+            background: var(--rh-orange);
+            animation: pulse 1s infinite;
+        }
+
+        .grading-task-item.passed .icon {
+            background: var(--rh-green);
+        }
+
+        .grading-task-item.failed .icon {
+            background: var(--rh-red);
+        }
+
+        .grading-task-item .task-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Reboot Modal */
+        .reboot-modal-content {
+            background: var(--rh-gray-dark);
+            border: 1px solid var(--rh-gray);
+            border-radius: 8px;
+            padding: 0;
+            width: 90%;
+            max-width: 600px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .reboot-modal-header {
+            padding: 1.5rem;
+            background: var(--rh-black);
+            border-bottom: 1px solid var(--rh-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reboot-modal-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .reboot-modal-body {
+            padding: 2rem;
+        }
+
+        .reboot-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .reboot-target-card {
+            background: var(--rh-gray);
+            border: 2px solid transparent;
+            border-radius: 6px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reboot-target-card:hover {
+            background: #4a4d50;
+            transform: translateY(-2px);
+        }
+
+        .reboot-target-card.active {
+            border-color: var(--rh-orange);
+            background: rgba(240, 171, 0, 0.1);
+        }
+
+        .reboot-target-card .icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            color: var(--rh-gray-light);
+            transition: color 0.2s;
+        }
+
+        .reboot-target-card:hover .icon {
+            color: var(--rh-white);
+        }
+
+        .reboot-target-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .reboot-target-card .status {
+            font-size: 0.85rem;
+            color: var(--rh-gray-light);
+            min-height: 1.2em;
+        }
+
+        .reboot-target-card.rebooting .icon {
+            animation: pulse-orange 1.5s infinite;
+            color: var(--rh-orange);
+        }
+
+        .reboot-target-card.success {
+            border-color: var(--rh-green);
+        }
+
+        .reboot-target-card.success .icon {
+            color: var(--rh-green);
+        }
+
+        .reboot-target-card.success .status {
+            color: var(--rh-green);
+        }
+
+        .reboot-target-card.error {
+            border-color: var(--rh-red);
+        }
+
+        .reboot-target-card.error .icon {
+            color: var(--rh-red);
+        }
+
+        .reboot-target-card.error .status {
+            color: var(--rh-red);
+        }
+
+        /* Reboot All Section */
+        .reboot-all-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--rh-gray);
+            text-align: center;
+        }
+
+        @keyframes pulse-orange {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .task-jump-select {
+            width: 100%;
+            padding: 0.4rem;
+            background: var(--rh-black);
+            border: 1px solid var(--rh-gray);
+            border-radius: 4px;
+            color: var(--rh-white);
+            font-size: 0.8rem;
+        }
+
+        /* Responsive VM Status */
+        @media (max-width: 600px) {
+            .vm-indicator span:not(.dot):not([id*="status"]) {
+                display: none;
+            }
+
+            .vm-indicator {
+                padding: 0.25rem 0.5rem;
+            }
+        }
+
+        .btn-icon-small {
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 0.5rem;
+        }
+
+        .btn-icon-small:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-icon-small.spinning {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo" onclick="goHome()" style="cursor: pointer;" title="Go to Home">
+                <div class="logo-icon">RH</div>
+                <span>RHCSA Practice Labs</span>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="vm-status">
+                <div class="vm-indicator" onclick="showVmInfoModal()" title="Click to view VM details">
+                    <span class="dot" id="vm1-status"></span>
+                    <div class="vm-info">
+                        <span class="vm-hostname" id="vm1-name">node1</span>
+                        <span class="vm-ip" id="vm1-ip-display">-</span>
+                    </div>
+                </div>
+                <div class="vm-indicator" onclick="showVmInfoModal()" title="Click to view VM details">
+                    <span class="dot" id="vm2-status"></span>
+                    <div class="vm-info">
+                        <span class="vm-hostname" id="vm2-name">node2</span>
+                        <span class="vm-ip" id="vm2-ip-display">-</span>
+                    </div>
+                </div>
+                <button class="btn-icon-small" id="refresh-conn-btn" onclick="quickTestConnection()"
+                    title="Test Connectivity">
+                    ↻
+                </button>
+            </div>
+            <div class="timer-display hidden" id="timer">03:00:00</div>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-outline" onclick="toggleConfig()">Configure VMs</button>
+            <button class="btn btn-outline" onclick="showView('stats')">Statistics</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar - Task List (shown during exam) -->
+        <aside class="sidebar hidden" id="exam-sidebar">
+            <div class="sidebar-header">
+                <h2>Tasks</h2>
+                <span class="task-count" id="task-count">0/0</span>
+            </div>
+            <div class="sidebar-controls">
+                <input type="text" class="sidebar-search" id="task-search" placeholder="Search tasks..."
+                    oninput="filterSidebarTasks()">
+                <div class="sidebar-toggles">
+                    <button class="sidebar-toggle" id="toggle-compact" onclick="toggleCompactMode()">Compact</button>
+                    <button class="sidebar-toggle" id="toggle-collapse" onclick="toggleAllCategories()">Collapse
+                        All</button>
+                    <button class="sidebar-toggle" id="toggle-sort-random" onclick="toggleSortMode()">Sort:
+                        Random</button>
+                    <select class="task-jump-select" id="task-jump" onchange="jumpToTask()" style="flex:1;">
+                        <option value="">Jump to task...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="task-list" id="sidebar-task-list"></div>
+            <div class="sidebar-footer">
+                <div class="sidebar-progress">
+                    <span id="graded-count">0</span>/<span id="total-task-count">0</span> graded
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="graded-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="submitExam()">Submit All for Grading</button>
+                <button class="btn btn-secondary" onclick="confirmAbandon()"
+                    style="font-size: 0.8rem; padding: 0.4rem;">Abandon</button>
+            </div>
+        </aside>
+
+        <!-- Grading Progress Modal -->
+        <div class="grading-modal hidden" id="grading-modal">
+            <div class="grading-modal-content">
+                <h2>
+                    <div class="grading-spinner" id="grading-spinner"></div>
+                    <span id="grading-title">Grading in Progress</span>
+                </h2>
+                <div class="grading-progress-bar">
+                    <div class="fill" id="grading-progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="grading-status" id="grading-status">Preparing to grade...</div>
+                <div class="grading-task-list" id="grading-task-list"></div>
+                <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <button class="btn btn-secondary" onclick="abortGrading()" id="cancel-grading-btn">Cancel
+                        Grading</button>
+                    <span style="color: var(--rh-gray-light); font-size: 0.8rem;">Press ESC to cancel</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Welcome View (Revamped) -->
+            <div class="content-body hidden" id="view-welcome"
+                style="align-items: center; justify-content: center; display: flex; text-align: center; padding-top: 3rem;">
+
+                <div style="max-width: 800px; width: 100%; animation: fadeInUp 0.5s ease-out;">
+                    <!-- Hero -->
+                    <div style="margin-bottom: 4rem;">
+                        <h1
+                            style="font-size: 3.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; line-height: 1.1;">
+                            Master <span
+                                style="background: var(--primary-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">RHCSA</span><br>Practice
+                            Labs
+                        </h1>
+                        <p
+                            style="font-size: 1.25rem; color: var(--text-muted); max-width: 600px; margin: 0 auto; line-height: 1.6;">
+                            A professional-grade environment to test your Red Hat System Administrator skills. Real VMs,
+                            real tasks, instant feedback.
+                        </p>
+                    </div>
+
+                    <!-- Resume Session Banner (hidden by default) -->
+                    <div id="resume-session-banner" class="hidden"
+                        style="margin-bottom: 2rem; animation: fadeInUp 0.3s;">
+                        <div class="card"
+                            style="margin: 0; background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1px solid rgba(34, 197, 94, 0.4); cursor: pointer;"
+                            onclick="resumeSession()">
+                            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                                <div
+                                    style="width: 48px; height: 48px; background: rgba(34, 197, 94, 0.25); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #4ade80; font-size: 1.5rem; flex-shrink: 0;">
+                                    ▶</div>
+                                <div style="flex: 1;">
+                                    <h3
+                                        style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem; color: #4ade80;">
+                                        Resume Previous Session</h3>
+                                    <p id="resume-session-info" style="color: #9ca3af; font-size: 0.9rem; margin: 0;">-
+                                    </p>
+                                </div>
+                                <button class="btn btn-outline" onclick="event.stopPropagation(); clearSavedSession();"
+                                    style="border-color: rgba(156, 163, 175, 0.5); color: #9ca3af; font-size: 0.8rem; padding: 0.4rem 0.75rem;">
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Actions -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 4rem;">
+                        <div class="card action-card" onclick="startQuickPractice()"
+                            style="margin: 0; text-align: left; cursor: pointer; transition: transform 0.2s, border-color 0.2s; border: 1px solid rgba(255,255,255,0.08);">
+                            <div
+                                style="width: 48px; height: 48px; background: rgba(59, 130, 246, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; color: #3b82f6; font-size: 1.5rem;">
+                                🚀</div>
+                            <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Quick Practice</h3>
+                            <p style="color: var(--text-muted); font-size: 0.95rem;">Jump straight into practice mode
+                                with all tasks enabled. No setup required.</p>
+                        </div>
+
+                        <div class="card action-card" onclick="selectMode('exam')"
+                            style="margin: 0; text-align: left; cursor: pointer; transition: transform 0.2s, border-color 0.2s; border: 1px solid rgba(255,255,255,0.08);">
+                            <div
+                                style="width: 48px; height: 48px; background: rgba(245, 158, 11, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; color: #f59e0b; font-size: 1.5rem;">
+                                ⏱️</div>
+                            <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Exam Simulation
+                            </h3>
+                            <p style="color: var(--text-muted); font-size: 0.95rem;">Simulate the real exam. 3 hours,
+                                random tasks, and strict grading.</p>
+                        </div>
+                    </div>
+
+                    <!-- Footer / Helper -->
+                    <div
+                        style="display: flex; justify-content: center; gap: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+                        <span onclick="toggleHowTo()"
+                            style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: color 0.2s;"
+                            onmouseover="this.style.color='white'" onmouseout="this.style.color='#a1a1aa'">
+                            ℹ️ How it works
+                        </span>
+                        <span onclick="toggleConfig()"
+                            style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: color 0.2s;"
+                            onmouseover="this.style.color='white'" onmouseout="this.style.color='#a1a1aa'">
+                            ⚙️ Configure VMs
+                        </span>
+                    </div>
+
+                    <!-- Hidden How To Modal/Content -->
+                    <div id="howto-content" class="reveal-box" style="text-align: left;">
+                        <h3 style="color: white; margin-bottom: 1rem;">Getting Started</h3>
+                        <ol style="color: var(--text-muted); margin-left: 1.5rem; line-height: 1.8;">
+                            <li>Ensure you have two RHEL/Clone VMs running.</li>
+                            <li>Click "Configure VMs" above to set their IPs and root password.</li>
+                            <li>Choose "Quick Practice" to start working on tasks immediately.</li>
+                            <li>Use the sidebar to grade individual tasks as you complete them.</li>
+                        </ol>
+                    </div>
+
+                    <!-- Hidden Config Box (Inline) -->
+                    <div id="config-content" class="reveal-box" style="text-align: left;">
+                        <h3 style="color: white; margin-bottom: 1rem;">Virtual Machine Configuration</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Node 1 Hostname</label>
+                                <input type="text" id="node1" value="rhcsa1">
+                            </div>
+                            <div class="form-group">
+                                <label>Node 1 IP Address</label>
+                                <input type="text" id="node1_ip" placeholder="192.168.122.10">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Node 2 Hostname</label>
+                                <input type="text" id="node2" value="rhcsa2">
+                            </div>
+                            <div class="form-group">
+                                <label>Node 2 IP Address</label>
+                                <input type="text" id="node2_ip" placeholder="192.168.122.11">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Root Password (for SSH)</label>
+                                <input type="password" id="root_password" placeholder="VM root password">
+                            </div>
+                            <div></div>
+                        </div>
+                        <div class="mt-1" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="saveConfig()">Save Configuration</button>
+                            <button class="btn btn-secondary" onclick="testConnection()">Test Connection</button>
+                            <button class="btn btn-outline" onclick="discoverAndUpdateIps()"
+                                style="border-color: var(--rh-green); color: var(--rh-green);">
+                                Auto-Discover IPs
+                            </button>
+                            <button class="btn btn-outline" onclick="showRebootModal()"
+                                style="border-color: var(--rh-orange); color: var(--rh-orange);">
+                                <span style="font-size: 1.1em;">↻</span> Reboot VMs
+                            </button>
+                            <button class="btn btn-secondary" onclick="toggleConfig()">Close</button>
+                        </div>
+                        <div id="connection-result" class="mt-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Setup View (Removed in favor of inline config) -->
+
+            <!-- Mode Selection View -->
+            <div class="content-body hidden" id="view-mode-select">
+                <h1 class="mb-2">Select Mode</h1>
+                <div class="mode-cards">
+                    <div class="mode-card" onclick="showView('practice-choice')">
+                        <div class="icon">📚</div>
+                        <h3>Practice Mode</h3>
+                        <p>Select specific tasks and topics.<br>No time limit.</p>
+                    </div>
+                    <div class="mode-card" onclick="selectMode('exam')">
+                        <div class="icon">⏱️</div>
+                        <h3>Exam Mode</h3>
+                        <p>Random selection of 13-20 tasks.<br>3 hour time limit.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Practice Choice View (All or Category) -->
+            <div class="content-body hidden" id="view-practice-choice">
+                <h1 class="mb-2">Practice Mode</h1>
+                <p style="color: var(--rh-gray-light); margin-bottom: 1.5rem;">Choose how you want to practice:</p>
+                <div class="mode-cards">
+                    <div class="mode-card" onclick="selectMode('practice')">
+                        <div class="icon">📋</div>
+                        <h3>Select Tasks</h3>
+                        <p>Choose specific tasks from a list.<br>Full control over what to practice.</p>
+                    </div>
+                    <div class="mode-card" onclick="showView('practice-category')">
+                        <div class="icon">📂</div>
+                        <h3>Practice by Category</h3>
+                        <p>Focus on a specific RHCSA objective.<br>Great for targeted study.</p>
+                    </div>
+                </div>
+                <button class="btn btn-secondary mt-2" onclick="showView('mode-select')">Back</button>
+            </div>
+
+            <!-- Practice by Category View -->
+            <div class="content-body hidden" id="view-practice-category">
+                <h1 class="mb-2">Select Category</h1>
+                <p style="color: var(--rh-gray-light); margin-bottom: 1.5rem;">Choose an RHCSA objective to practice:
+                </p>
+                <div class="category-grid" id="category-grid">
+                    <div class="loading">Loading categories...</div>
+                </div>
+                <button class="btn btn-secondary mt-2" onclick="showView('practice-choice')">Back</button>
+            </div>
+
+            <!-- Practice Setup View -->
+            <div class="content-body hidden" id="view-practice-setup">
+                <div class="card">
+                    <h2>Select Tasks to Practice</h2>
+                    <div class="mb-1">
+                        <button class="btn btn-secondary" onclick="selectAllTasks()">Select All</button>
+                        <button class="btn btn-secondary" onclick="deselectAllTasks()">Clear</button>
+
+                        <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <input type="text" id="task-filter-text" placeholder="Search tasks..."
+                                style="padding: 0.5rem; background: var(--rh-black); border: 1px solid var(--rh-gray); color: white; border-radius: 4px; flex: 1; min-width: 200px;">
+
+                            <select id="category-filter" onchange="filterByCategory()"
+                                style="padding: 0.5rem; background: var(--rh-black); border: 1px solid var(--rh-gray); color: white; border-radius: 4px;">
+                                <option value="">All Categories</option>
+                            </select>
+
+                            <select id="task-sort-mode"
+                                style="padding: 0.5rem; background: var(--rh-black); border: 1px solid var(--rh-gray); color: white; border-radius: 4px;">
+                                <option value="id">Sort by ID</option>
+                                <option value="category">Sort by Category</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="task-checkbox-list" id="task-checkbox-list">
+                        <div class="loading">Loading tasks...</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn btn-success" onclick="startPractice()" id="btn-start-practice">Start
+                        Practice</button>
+                    <button class="btn btn-secondary" onclick="showView('practice-choice')">Back</button>
+                </div>
+            </div>
+
+            <!-- Exam Setup View -->
+            <div class="content-body hidden" id="view-exam-setup">
+                <div class="card">
+                    <h2>Exam Simulation</h2>
+                    <div class="alert alert-info">
+                        <strong>Exam Rules:</strong> You will have 3 hours to complete randomly selected tasks.
+                        Work on your VMs and submit when finished. All configurations must persist after reboot.
+                    </div>
+                    <div class="form-group" style="max-width: 200px;">
+                        <label>Number of Tasks (13-20)</label>
+                        <input type="number" id="exam-task-count" value="15" min="13" max="20">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="startExam()">Begin Exam</button>
+                <button class="btn btn-secondary" onclick="showView('mode-select')">Back</button>
+            </div>
+
+            <!-- Exam Running View -->
+            <div class="content-body hidden" id="view-exam-running">
+                <!-- Breadcrumb -->
+                <div class="breadcrumb" style="margin-bottom: 1rem; font-size: 0.9rem;">
+                    <a href="#" onclick="confirmAbandon(); return false;" style="color: var(--rh-gray-light);">Home</a>
+                    <span style="color: var(--rh-gray-light); margin: 0 0.5rem;">/</span>
+                    <span id="breadcrumb-mode">Practice</span>
+                </div>
+                <div class="exam-instructions">
+                    <h3>Instructions</h3>
+                    <ul>
+                        <li>Complete the tasks listed in the sidebar on your virtual machines</li>
+                        <li>All configurations must persist after system reboot</li>
+                        <li>Do not disable SELinux or firewalld (50 point penalty each)</li>
+                        <li>Click "Submit for Grading" when finished or when time expires</li>
+                    </ul>
+                </div>
+                <div id="current-task-detail">
+                    <p style="color: var(--rh-gray-light);">Select a task from the sidebar to view details.</p>
+                </div>
+                <!-- Task Navigation -->
+                <div class="task-nav" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="btn btn-secondary" id="prev-task-btn" onclick="navigateTask(-1)"
+                        disabled>Previous</button>
+                    <button class="btn btn-primary" id="next-task-btn" onclick="navigateTask(1)">Next</button>
+                    <span id="task-nav-indicator"
+                        style="margin-left: auto; color: var(--rh-gray-light); align-self: center;">Task 1 of 1</span>
+                </div>
+            </div>
+
+            <!-- Connecting / Intermediate View -->
+            <div class="content-body hidden" id="view-connecting"
+                style="align-items: center; justify-content: center; display: flex; flex-direction: column;">
+                <div style="text-align: center; max-width: 400px; width: 100%;">
+                    <div id="connecting-spinner" class="spinner-large" style="margin: 0 auto 2rem;"></div>
+                    <h2 id="connecting-title" style="margin-bottom: 1.5rem;">Initializing Environment</h2>
+
+                    <div class="connection-steps"
+                        style="text-align: left; background: var(--bg-card); padding: 1.5rem; border-radius: 8px; border: var(--glass-border);">
+                        <div class="step-item pending" id="step-tasks">
+                            <span class="step-icon">○</span> Loading Tasks
+                        </div>
+                        <div class="step-item pending" id="step-config">
+                            <span class="step-icon">○</span> Checking Configuration
+                        </div>
+                        <div class="step-item pending" id="step-node1">
+                            <span class="step-icon">○</span> Connecting to Node 1
+                        </div>
+                        <div class="step-item pending" id="step-node2">
+                            <span class="step-icon">○</span> Connecting to Node 2
+                        </div>
+                    </div>
+
+                    <div id="connect-error-actions" class="hidden" style="margin-top: 2rem; animation: fadeInUp 0.3s;">
+                        <p style="color: var(--error); margin-bottom: 1rem;" id="connect-error-msg">Connection failed.
+                        </p>
+                        <button class="btn btn-primary" onclick="showView('setup')">Configure VMs</button>
+                        <button class="btn btn-secondary" onclick="showView('welcome')">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results View -->
+            <div class="content-body hidden" id="view-results">
+                <h1 class="mb-2">Exam Results</h1>
+                <div class="results-summary">
+                    <div class="result-box" id="result-score-box">
+                        <div class="value" id="result-score">0</div>
+                        <div class="label">Points Earned</div>
+                    </div>
+                    <div class="result-box">
+                        <div class="value" id="result-total">0</div>
+                        <div class="label">Total Points</div>
+                    </div>
+                    <div class="result-box">
+                        <div class="value" id="result-pct">0%</div>
+                        <div class="label">Percentage</div>
+                    </div>
+                    <div class="result-box" id="result-status-box">
+                        <div class="value" id="result-status">-</div>
+                        <div class="label">Status</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>Task Results</h2>
+                    <div class="check-list" id="check-results"></div>
+                </div>
+                <button class="btn btn-primary" onclick="showView('mode-select')">Try Again</button>
+                <button class="btn btn-secondary" onclick="showView('stats')">View Statistics</button>
+            </div>
+
+            <!-- Statistics View -->
+            <div class="content-body hidden" id="view-stats">
+                <h1 class="mb-2">Performance Statistics</h1>
+
+                <div class="results-summary" id="stats-summary">
+                    <div class="loading">Loading statistics...</div>
+                </div>
+                <div class="card">
+                    <h2>Performance by Category</h2>
+                    <div class="category-bars" id="category-stats"></div>
+                    <div id="weak-areas"
+                        style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--rh-gray);">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-secondary" onclick="showView('welcome')">Back to Home</button>
+                    <button class="btn btn-outline" onclick="clearAllResults()"
+                        style="border-color: var(--rh-red); color: var(--rh-red);">Clear All History</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Reboot Modal -->
+    <div class="grading-modal hidden" id="reboot-modal" onclick="if(event.target === this) hideRebootModal()">
+        <div class="reboot-modal-content">
+            <div class="reboot-modal-header">
+                <h2>
+                    <span style="color: var(--rh-orange);">↻</span> Reboot Virtual Machines
+                </h2>
+                <button class="toast-close" onclick="hideRebootModal()">×</button>
+            </div>
+            <div class="reboot-modal-body">
+                <p style="color: var(--rh-gray-light); margin-bottom: 2rem; text-align: center;">
+                    Select a virtual machine to reboot. The system will wait for it to come back online.
+                </p>
+
+                <div class="reboot-grid">
+                    <div class="reboot-target-card" id="card-node1" onclick="rebootNode('node1')">
+                        <div class="icon">💻</div>
+                        <h3>Node 1</h3>
+                        <div class="status" id="status-node1">Ready</div>
+                        <div class="reboot-progress-container">
+                            <div class="reboot-progress-bar" id="progress-node1"></div>
+                        </div>
+                    </div>
+                    <div class="reboot-target-card" id="card-node2" onclick="rebootNode('node2')">
+                        <div class="icon">💻</div>
+                        <h3>Node 2</h3>
+                        <div class="status" id="status-node2">Ready</div>
+                        <div class="reboot-progress-container">
+                            <div class="reboot-progress-bar" id="progress-node2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reboot-all-section">
+                    <button class="btn btn-outline" onclick="rebootNode('both')"
+                        style="width: 100%; justify-content: center; border-color: var(--rh-orange); color: var(--rh-orange);">
+                        Reboot Both Systems
+                    </button>
+                    <div id="status-both"
+                        style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--rh-gray-light); min-height: 1.2em;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VM Info Modal -->
+    <div class="grading-modal hidden" id="vm-info-modal" onclick="if(event.target === this) hideVmInfoModal()">
+        <div class="reboot-modal-content" style="max-width: 500px;">
+            <div class="reboot-modal-header">
+                <h2>Virtual Machine Info</h2>
+                <button class="toast-close" onclick="hideVmInfoModal()">×</button>
+            </div>
+            <div class="reboot-modal-body" style="padding: 1.5rem;">
+                <div style="display: grid; gap: 1rem;">
+                    <!-- Node 1 -->
+                    <div id="vm-info-node1"
+                        style="background: var(--rh-gray-dark); padding: 1rem; border-radius: 8px; border: 1px solid var(--rh-gray);">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                            <span class="dot" id="vm-info-status1"
+                                style="width: 10px; height: 10px; border-radius: 50%; background: var(--rh-gray-light);"></span>
+                            <span style="font-weight: 600; font-size: 1.1rem;" id="vm-info-name1">Node 1</span>
+                        </div>
+                        <div
+                            style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; font-size: 0.9rem;">
+                            <span style="color: var(--rh-gray-light);">IP Address:</span>
+                            <span id="vm-info-ip1" style="font-family: 'Consolas', monospace;">-</span>
+                            <span style="color: var(--rh-gray-light);">SSH Command:</span>
+                            <code id="vm-info-ssh1"
+                                style="font-size: 0.8rem; background: var(--rh-black); padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer;"
+                                onclick="copyToClipboard(this.innerText)">-</code>
+                        </div>
+                    </div>
+
+                    <!-- Node 2 -->
+                    <div id="vm-info-node2"
+                        style="background: var(--rh-gray-dark); padding: 1rem; border-radius: 8px; border: 1px solid var(--rh-gray);">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                            <span class="dot" id="vm-info-status2"
+                                style="width: 10px; height: 10px; border-radius: 50%; background: var(--rh-gray-light);"></span>
+                            <span style="font-weight: 600; font-size: 1.1rem;" id="vm-info-name2">Node 2</span>
+                        </div>
+                        <div
+                            style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; font-size: 0.9rem;">
+                            <span style="color: var(--rh-gray-light);">IP Address:</span>
+                            <span id="vm-info-ip2" style="font-family: 'Consolas', monospace;">-</span>
+                            <span style="color: var(--rh-gray-light);">SSH Command:</span>
+                            <code id="vm-info-ssh2"
+                                style="font-size: 0.8rem; background: var(--rh-black); padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer;"
+                                onclick="copyToClipboard(this.innerText)">-</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap;">
+                    <button class="btn btn-outline" onclick="refreshVmInfo()"
+                        style="border-color: var(--rh-cyan); color: var(--rh-cyan); font-size: 0.9em;">Refresh
+                        Status</button>
+                    <button class="btn btn-outline" onclick="discoverAndUpdateIps()"
+                        style="border-color: var(--rh-green); color: var(--rh-green); font-size: 0.9em;">Auto-Discover
+                        IPs</button>
+                    <button class="btn btn-primary" onclick="hideVmInfoModal(); showView('setup')"
+                        style="font-size: 0.9em;">Edit Configuration</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/state.js"></script>
+    <script src="scripts/utils.js"></script>
+    <script src="scripts/config.js"></script>
+    <script src="scripts/session.js"></script>
+    <script src="scripts/ui.js"></script>
+    <script src="scripts/exam.js"></script>
+    <script src="scripts/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,17 @@
+# RHCSA Practice Labs Configuration
+# Copy this file to 'config' and edit with your node IPs
+#
+# Example:
+#   cp config.example config
+#   vim config
+
+# Node 1 (where you run the grader from)
+NODE1_IP="192.168.99.11"
+NODE1="node1"
+
+# Node 2 (remote node for multi-node tasks)
+NODE2_IP="192.168.99.12"
+NODE2="node2"
+
+# Root password for SSH (used with sshpass)
+ROOT_PASSWORD="vagrant"

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Task: Create user vicky with the custom UID 2008
+# Category: users-groups
+# Target: node1
+
+
+check \'run_ssh "$NODE1_IP" "id vicky" &>/dev/null\' \
+    "User vicky exists" \
+    "User vicky does not exist"
+check \'run_ssh "$NODE1_IP" "id vicky" &>/dev/null\' \
+    "User vicky exists" \
+    "User vicky does not exist"
+check '[[ $(id -u vicky 2>/dev/null) == "2008" ]]' \
+    "User vicky has UID 2008" \
+    "User vicky does not have UID 2008"
