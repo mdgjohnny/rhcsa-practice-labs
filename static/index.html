@@ -213,14 +213,26 @@
         </div>
 
         <!-- VIEW: Practice by Category -->
-        <div id="view-practice-category" class="view flex-col items-center py-12 px-6 max-w-5xl mx-auto w-full animate-fade-in">
-            <button onclick="showView('practice-choice')" class="self-start flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors">
-                <span class="material-symbols-outlined">arrow_back</span> Back
-            </button>
-            <h1 class="text-4xl font-bold mb-2 text-center">Select Category</h1>
-            <p class="text-gray-400 mb-10 text-center">Choose an RHCSA objective to practice</p>
-            <div id="category-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-                <div class="text-gray-400 text-center py-8">Loading categories...</div>
+        <div id="view-practice-category" class="view flex-col py-12 px-6 max-w-[1000px] mx-auto w-full animate-fade-in">
+            <div class="mb-12">
+                <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 border-b border-white/10 pb-8">
+                    <div class="flex flex-col gap-3">
+                        <button onclick="showView('practice-choice')" class="self-start flex items-center gap-2 text-gray-400 hover:text-white mb-2 transition-colors text-sm">
+                            <span class="material-symbols-outlined text-lg">arrow_back</span> Back
+                        </button>
+                        <h1 class="text-3xl md:text-4xl font-bold tracking-tight uppercase">Practice by Category</h1>
+                        <p class="text-gray-400 text-lg font-light max-w-2xl">Select a topic to begin a focused practice session. Master each objective to prepare for the exam.</p>
+                    </div>
+                </div>
+            </div>
+            <div id="category-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full mb-12">
+                <div class="text-gray-400 text-center py-8 col-span-full">Loading categories...</div>
+            </div>
+            <div class="flex justify-center border-t border-white/10 pt-8">
+                <button onclick="showView('practice-choice')" class="group flex items-center justify-center gap-2 h-10 px-8 rounded bg-white/10 hover:bg-primary text-white transition-all font-bold text-sm uppercase tracking-wide">
+                    <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                    <span>Back to Practice</span>
+                </button>
             </div>
         </div>
 
@@ -844,21 +856,44 @@
                 return;
             }
             
-            const icons = {
-                'networking': 'lan', 'storage': 'storage', 'users': 'group',
-                'selinux': 'security', 'services': 'dns', 'firewall': 'local_fire_department',
-                'default': 'folder'
+            const categoryMeta = {
+                'essential-tools': { icon: 'construction', desc: 'File handling, grep, regex, pipelines, and IO redirection.' },
+                'operate-systems': { icon: 'settings_power', desc: 'Boot, reboot, interrupt boot process, and manage system processes.' },
+                'local-storage': { icon: 'hard_drive', desc: 'Partitions, LVM logical volumes, extending volumes, swap space.' },
+                'file-systems': { icon: 'folder_open', desc: 'Create vfat, ext4, xfs systems. Mount and unmount, configure autofs.' },
+                'deploy-maintain': { icon: 'cloud_sync', desc: 'Networking, time synchronization, logging, package management.' },
+                'networking': { icon: 'lan', desc: 'Network configuration, hostnames, DNS, and routing.' },
+                'users': { icon: 'group', desc: 'User creation, group management, password aging, LDAP auth.' },
+                'security': { icon: 'security', desc: 'Firewalls, SELinux contexts, booleans, SSH configuration.' },
+                'selinux': { icon: 'shield', desc: 'SELinux modes, contexts, booleans, and troubleshooting.' },
+                'services': { icon: 'dns', desc: 'Systemd services, targets, and process management.' },
+                'containers': { icon: 'deployed_code', desc: 'Podman containers, images, and rootless containers.' },
+                'default': { icon: 'folder', desc: 'Practice tasks for this category.' }
             };
             
-            grid.innerHTML = categories.map(cat => {
+            grid.innerHTML = categories.map((cat, idx) => {
                 const count = allTasks.filter(t => t.category === cat).length;
-                const icon = Object.keys(icons).find(k => cat.toLowerCase().includes(k)) || 'default';
+                const key = Object.keys(categoryMeta).find(k => cat.toLowerCase().includes(k)) || 'default';
+                const meta = categoryMeta[key] || categoryMeta.default;
                 return `
                     <button onclick="startCategoryPractice('${cat}')" 
-                            class="flex flex-col items-start p-6 rounded-xl bg-surface-dark border border-white/5 hover:border-primary/50 transition-all hover:-translate-y-0.5 text-left">
-                        <span class="material-symbols-outlined text-3xl text-gray-500 mb-3">${icons[icon]}</span>
-                        <h3 class="font-bold mb-1">${cat}</h3>
-                        <p class="text-sm text-gray-400">${count} tasks</p>
+                            class="group flex flex-col text-left h-full rounded-lg border border-white/10 bg-[#1b1b1b] p-6 hover:border-primary hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div class="absolute top-0 left-0 w-1 h-0 bg-primary group-hover:h-full transition-all duration-300"></div>
+                        <div class="mb-5 flex justify-between items-start">
+                            <div class="inline-flex h-12 w-12 items-center justify-center rounded bg-white/5 text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                                <span class="material-symbols-outlined">${meta.icon}</span>
+                            </div>
+                            <span class="material-symbols-outlined text-gray-600 group-hover:text-primary transition-colors opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transform duration-300">arrow_forward</span>
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <h3 class="text-lg font-bold group-hover:text-primary transition-colors capitalize">${cat.replace(/-/g, ' ')}</h3>
+                            <p class="text-gray-500 text-sm leading-relaxed mb-4">${meta.desc}</p>
+                            <div class="mt-auto pt-4 border-t border-white/5 group-hover:border-transparent transition-colors flex items-center justify-between text-xs font-bold uppercase tracking-wider text-gray-500">
+                                <span class="text-primary">Obj ${idx + 1}</span>
+                                <span>${count} Tasks</span>
+                            </div>
+                        </div>
                     </button>
                 `;
             }).join('');
