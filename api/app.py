@@ -788,4 +788,4 @@ def random_tasks():
 
 if __name__ == '__main__':
     logger.info(f"Starting RHCSA Practice Labs API (debug={DEBUG}, log_level={LOG_LEVEL})")
-    app.run(host='0.0.0.0', port=5000, debug=DEBUG)
+    app.run(host='0.0.0.0', port=8080, debug=DEBUG)
