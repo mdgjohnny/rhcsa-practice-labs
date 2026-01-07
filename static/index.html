@@ -1294,6 +1294,37 @@
             saveSession();
         }
 
+        // Generate a concise title from task description
+        function generateShortTitle(description) {
+            if (!description) return 'Task';
+            
+            let title = description;
+            
+            // Remove common verbose patterns
+            // "Configure network on node1 with IP..." -> "Configure Network"
+            title = title.replace(/^(Configure|Create|Set|Install|Enable|Add|Mount|Find|Search|Write|Schedule|Launch|Grant|Extend|Resize)\s+/i, (m, verb) => verb + ' ');
+            
+            // Cut at first occurrence of "with", "on node", "using", "for user", etc.
+            const cutPoints = [' with ', ' on node', ' using ', ' for user', ' to /', ' from /', ' in /', ', '];
+            for (const cut of cutPoints) {
+                const idx = title.toLowerCase().indexOf(cut.toLowerCase());
+                if (idx > 10 && idx < 50) {
+                    title = title.substring(0, idx);
+                    break;
+                }
+            }
+            
+            // Capitalize first letter after the verb
+            title = title.replace(/^(\w+)\s+(\w)/, (m, verb, first) => verb + ' ' + first.toUpperCase());
+            
+            // Truncate if still too long
+            if (title.length > 50) {
+                title = title.substring(0, 47) + '...';
+            }
+            
+            return title;
+        }
+        
         function showTaskDetail(taskId) {
             const task = selectedTasks.find(t => t.id === taskId);
             if (!task) return;
@@ -1333,17 +1364,20 @@
                 `;
             }
             
+            // Generate a short title from the task description
+            const shortTitle = generateShortTitle(task.description || task.id);
+            
             container.innerHTML = `
                 <!-- Task Header -->
                 <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
                     <div>
-                        <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">${task.description || task.id}</h1>
-                        <p class="text-gray-400 text-lg">Task ${taskIndex + 1} of ${selectedTasks.length}</p>
+                        <div class="flex items-center gap-2 text-gray-400 text-sm font-mono mb-1">Task ${taskIndex + 1} of ${selectedTasks.length}</div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight leading-tight">${shortTitle}</h1>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-sm bg-surface-dark border border-border-dark text-xs font-medium text-white uppercase tracking-wider">
                             <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
-                            ${task.category || 'General'}
+                            ${(task.category || 'General').replace(/-/g, ' ')}
                         </span>
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-sm bg-primary/10 border border-primary/20 text-xs font-bold text-primary uppercase tracking-wider">
                             ${task.points || 1} Points
@@ -1373,19 +1407,24 @@
                     </div>
                 </div>
                 
-                <hr class="border-border-dark mb-6"/>
+                <hr class="border-border-dark"/>
                 
                 <!-- Task Description -->
-                <div class="prose prose-invert prose-lg max-w-none">
-                    <h3 class="text-white text-xl font-bold mb-4 flex items-center gap-2 border-l-4 border-primary pl-3">
+                <div class="prose prose-invert prose-lg max-w-none mt-6">
+                    <h3 class="text-white text-xl font-bold mb-4 flex items-center gap-2 border-l-4 border-primary pl-3 h-8">
                         Description
                     </h3>
-                    <p class="text-gray-300 leading-relaxed mb-6">
-                        ${task.details || task.description || 'Complete this task according to the requirements.'}
+                    <p class="text-white text-base leading-relaxed mb-6 font-medium">
+                        ${task.description || 'Complete this task according to the requirements.'}
                     </p>
+                    ${task.details ? `
+                    <p class="text-gray-300 leading-relaxed mb-4 text-sm">
+                        ${task.details}
+                    </p>
+                    ` : ''}
                 </div>
                 
-                <!-- Action Button -->
+                <!-- Action Buttons -->
                 <div class="flex gap-3 mt-8">
                     <button onclick="gradeTask('${taskId}')" class="flex items-center gap-2 px-6 py-3 rounded-sm bg-primary hover:bg-primary-hover text-white font-bold transition-all shadow-lg shadow-red-900/20">
                         <span class="material-symbols-outlined">check_circle</span> Check Task
