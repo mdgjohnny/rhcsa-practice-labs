@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Configure journald for persistent storage under /var/log/journal
+# Title: Configure Persistent Journal
 # Category: operate-systems
 
 check '[[ -d /var/log/journal ]]' \

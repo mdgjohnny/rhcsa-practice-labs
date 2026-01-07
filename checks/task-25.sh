@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create user50 with non-interactive shell
+# Title: Create Non-interactive User
 # Category: users-groups
 
 check 'id user50 &>/dev/null' \

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Install RHEL 9 VM per requirements
+# Title: Install RHEL 9 VM
 # Category: operate-systems
 # Target: node1
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Set up web server serving index.html with "hello world" from /webfiles
+# Title: Apache Custom DocumentRoot
 # Category: deploy-maintain
 # rhcsa2 should be able to access via curl
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Configure network manually: IP 192.168.0.241/24, gateway 192.168.0.1, DNS 192.168.0.1
+# Title: Manual Network Configuration
 # Category: networking
 # Target: node1
 

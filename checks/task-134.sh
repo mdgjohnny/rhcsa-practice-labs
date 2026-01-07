@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create 1GiB VG with 512MiB swap LV, mount persistently
+# Title: LVM Swap Volume
 # Category: file-systems
 # Target: node1
 

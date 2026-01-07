@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create 1GiB partition, ext4, label stdlabel, mount on /mnt/stdfs1
+# Title: Create Partition with Label
 # Category: local-storage
 
 check '[[ -d /mnt/stdfs1 ]]' \

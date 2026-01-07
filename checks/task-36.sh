@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - Add group20, change /mnt/lvfs1 group to group20
+# Title: Set Directory Group
 # Category: file-systems
 # rwx for owner, group, and others
 

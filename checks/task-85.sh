@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create mariadb container on port 3206, MYSQL_ROOT_PASSWORD=password, mydb database, /opt/mariadb mount
+# Title: MariaDB Container (port 3206)
 # Category: containers
 # Target: node1
 

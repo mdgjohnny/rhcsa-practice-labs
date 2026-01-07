@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Set SELinux to permissive mode
+# Title: SELinux Permissive Mode
 # Category: security
 # Target: node1
 

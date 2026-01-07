@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Search "essential" (case-insensitive) in /usr/share/dict/linux.words, output to /var/tmp/pattern.txt
+# Title: Grep Case-insensitive Search
 # Category: essential-tools
 
 check '[[ -f /var/tmp/pattern.txt ]]' \

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Set hostname to rhcsa1.example.com with alias rhcsa1
+# Title: Set FQDN Hostname
 # Category: networking
 # Target: node1
 

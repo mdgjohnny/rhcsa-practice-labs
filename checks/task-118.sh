@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Configure SSH server per requirements
+# Title: Configure SSH Server
 # Category: networking
 # Target: node1
 

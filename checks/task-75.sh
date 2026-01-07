@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - Mariadb container as user edwin
+# Title: MariaDB Container (edwin)
 # Category: containers
 # Port 3306, /var/mariadb-container for persistent storage
 

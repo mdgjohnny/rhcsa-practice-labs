@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Export /share1 on rhcsa1 and mount it to /share2 on rhcsa2 persistently
+# Title: NFS Export & Mount
 # Category: file-systems
 
 check '[[ -d /share1 ]]' \

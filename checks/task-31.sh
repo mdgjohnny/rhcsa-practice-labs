@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create group30 (GID 3000), add user60/user80
+# Title: Create Group with GID
 # Category: users-groups
 # Create /sdata with setgid, group write, owned by root:group30
 

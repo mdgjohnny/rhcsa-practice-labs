@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Set COLOR=red environment variable for all subshells
+# Title: Environment Variable (COLOR)
 # Category: essential-tools
 # Target: node1
 

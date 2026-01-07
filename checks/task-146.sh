@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create user user40 with UID 2929 and password user1234
+# Title: Create User with UID
 # Category: users-groups
 # Target: node1
 

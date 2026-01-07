@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Write script to create user555/666/777 with no shell, passwords matching usernames
+# Title: User Creation Script
 # Category: users-groups
 # Target: node1
 

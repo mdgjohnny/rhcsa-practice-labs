@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Verify root SSH access to node2
+# Title: Verify SSH Access (node2)
 # Category: essential-tools
 
 # Try hostname first, fall back to IP

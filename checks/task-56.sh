@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Set tuned profile to powersave
+# Title: Set Tuned Profile (powersave)
 # Category: operate-systems
 
 ACTIVE_PROFILE=$(tuned-adm active 2>/dev/null | awk '{print $NF}')

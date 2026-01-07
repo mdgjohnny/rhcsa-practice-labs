@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Search /usr/share/dict/linux.words for lines starting with 'essential' (case-insensitive), save to /var/tmp/pattern.txt
+# Title: Grep Pattern Search
 # Category: essential-tools
 # Target: node1
 

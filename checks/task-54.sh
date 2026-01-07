@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Boot messages should be present (not silenced)
+# Title: Enable Boot Messages
 # Category: deploy-maintain
 
 check '! grep -q "rhgb\|quiet" /etc/default/grub 2>/dev/null || grep -q "^#.*rhgb\|^#.*quiet" /etc/default/grub 2>/dev/null' \

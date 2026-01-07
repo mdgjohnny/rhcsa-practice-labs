@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - Create LV lv1 (10 LEs) in vg1 (PE size 8MB)
+# Title: Create LV (custom PE size)
 # Category: local-storage
 # XFS filesystem, mount on /mnt/lvfs1
 

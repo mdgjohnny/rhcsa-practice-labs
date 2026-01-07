@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create 4GiB VG (2MiB PE), 1GiB LV myfiles with ext3, mount on /myfiles
+# Title: Create VG, LV & Mount (myfiles)
 # Category: file-systems
 # Target: node1
 

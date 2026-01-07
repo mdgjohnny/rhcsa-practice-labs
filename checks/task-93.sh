@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Set password validity to 90 days, first UID to 2000
+# Title: Set Password & UID Defaults
 # Category: users-groups
 # Target: node1
 

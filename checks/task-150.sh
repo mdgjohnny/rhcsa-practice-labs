@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create 280MB swap LV lvswap in vgtest, mount persistently by UUID
+# Title: Create Swap LV (UUID mount)
 # Category: file-systems
 # Target: node1
 

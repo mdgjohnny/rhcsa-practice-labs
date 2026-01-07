@@ -327,6 +327,7 @@ list_tasks() {
 		for task in "${TASKS[@]}"; do
 			local name=$(basename "$task" .sh)
 			local category=$(grep "^# Category:" "$task" | sed 's/# Category: //')
+			local title=$(grep "^# Title:" "$task" | sed 's/# Title: //')
 			local desc=$(grep "^# Task:" "$task" | sed 's/# Task: //')
 			local target=$(grep "^# Target:" "$task" | sed 's/# Target: //')
 			# Default target based on description if not specified
@@ -341,22 +342,24 @@ list_tasks() {
 					target="node1"  # Default
 				fi
 			fi
-			# Escape quotes in description
+			# Escape quotes in title and description
+			title="${title//\"/\\\"}"
 			desc="${desc//\"/\\\"}"
-			entries+=("{\"id\":\"$name\",\"category\":\"$category\",\"description\":\"$desc\",\"target\":\"$target\"}")
+			entries+=("{\"id\":\"$name\",\"category\":\"$category\",\"title\":\"$title\",\"description\":\"$desc\",\"target\":\"$target\"}")
 		done
 		# Join with commas and output
 		local IFS=,
 		echo "[${entries[*]}]"
 	else
-		printf "%-12s %-8s %-18s %s\n" "TASK" "TARGET" "CATEGORY" "DESCRIPTION"
-		printf "%-12s %-8s %-18s %s\n" "----" "------" "--------" "-----------"
+		printf "%-12s %-8s %-18s %-30s %s\n" "TASK" "TARGET" "CATEGORY" "TITLE" "DESCRIPTION"
+		printf "%-12s %-8s %-18s %-30s %s\n" "----" "------" "--------" "-----" "-----------"
 		for task in "${TASKS[@]}"; do
 			local name=$(basename "$task" .sh)
 			local category=$(grep "^# Category:" "$task" | sed 's/# Category: //')
+			local title=$(grep "^# Title:" "$task" | sed 's/# Title: //')
 			local desc=$(grep "^# Task:" "$task" | sed 's/# Task: //')
 			local target=$(grep "^# Target:" "$task" | sed 's/# Target: //' || echo "node1")
-			printf "%-12s %-8s %-18s %s\n" "$name" "${target:-node1}" "$category" "${desc:0:45}"
+			printf "%-12s %-8s %-18s %-30s %s\n" "$name" "${target:-node1}" "$category" "${title:0:28}" "${desc:0:40}"
 		done
 	fi
 }

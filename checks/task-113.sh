@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create user vicky with the custom UID 2008
+# Title: Create User with Custom UID
 # Category: users-groups
 # Target: node1
 

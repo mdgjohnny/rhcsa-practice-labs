@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create 2GiB swap partition and mount persistently
+# Title: Create Swap Partition
 # Category: file-systems
 # Target: node1
 

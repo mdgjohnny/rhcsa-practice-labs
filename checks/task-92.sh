@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Reset root password to 'mypassword' using recovery mode
+# Title: Reset Root Password
 # Category: operate-systems
 # Target: node1
 

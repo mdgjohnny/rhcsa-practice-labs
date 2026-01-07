@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Set password policy: 3 day warning before expiry, 120 day maximum lifetime
+# Title: Password Warning & Lifetime
 # Category: users-groups
 # Target: node1
 

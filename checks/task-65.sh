@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Configure passwordless SSH for user100 from rhcsa1 to rhcsa2
+# Title: Passwordless SSH (user100)
 # Category: security
 # Copy /etc/sysconfig to rhcsa2:/var/tmp/remote
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - SSH config: allow root, port 2022
+# Title: SSH Config (port 2022)
 # Category: security
 
 check 'run_ssh "$NODE2_IP" "grep -q \"^PermitRootLogin yes\" /etc/ssh/sshd_config"' \

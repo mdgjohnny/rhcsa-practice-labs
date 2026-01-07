@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create /groups/sales and /groups/account
+# Title: Create Group Directories
 # Category: file-systems
 # Alex can delete all files (ACL)
 

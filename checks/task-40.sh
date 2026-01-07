@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - Create compressed archive of /usr/lib
+# Title: Create Compressed Archive
 # Category: essential-tools
 # Store as /var/tmp/usr.tar.bz2
 

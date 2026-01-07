@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: List files from setup package containing "hosts" to /var/tmp/setup.pkg
+# Title: List Package Files
 # Category: deploy-maintain
 
 check '[[ -f /var/tmp/setup.pkg ]]' \

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Configure wildcard autofs on node1 for NFS-shared home directories
+# Title: Autofs Wildcard Mount
 # Category: networking
 # Target: node1
 

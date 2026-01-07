@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Set hostname to rhcsa1 on node1
+# Title: Set Hostname (node1)
 # Category: networking
 # Target: node1
 

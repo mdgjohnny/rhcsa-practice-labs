@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create users lori (UID 2000) and laura (UID 2001) in sales group
+# Title: Create Users with Custom UIDs
 # Category: users-groups
 # Target: node1
 

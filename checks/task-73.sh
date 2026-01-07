@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - MySQL container as rootless (user santos)
+# Title: MySQL Rootless Container
 # Category: containers
 # Password "password", bind mount /home/santos/mysql to /var/lib/mysql
 # Auto-start via systemd

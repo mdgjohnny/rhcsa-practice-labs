@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create 2GiB VG myvg (8MiB PE), 500MiB LV mydata, mount on /mydata
+# Title: Create VG & LV (myvg/mydata)
 # Category: file-systems
 # Target: node1
 

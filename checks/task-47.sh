@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - Add custom message to /var/log/messages
+# Title: Add Custom Log Message
 # Category: operate-systems
 # Confirm with regex, output to /root/customlogmessage
 

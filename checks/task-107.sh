@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Configure /etc/skel to copy NEWFILE to new user home directories
+# Title: Configure /etc/skel (NEWFILE)
 # Category: users-groups
 # Target: node1
 

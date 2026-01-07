@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create user10, user20, user30 with password Temp1234. user10/user30 expire Dec 31, 2025
+# Title: Create Users with Password & Expiry
 # Category: users-groups
 
 check 'id user10 &>/dev/null' \

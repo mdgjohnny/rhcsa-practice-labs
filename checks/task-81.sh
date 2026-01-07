@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Set up passwordless SSH-based authentication between both nodes
+# Title: Passwordless SSH (both nodes)
 # Category: networking
 # Target: both
 

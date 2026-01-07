@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Apply tuned profile for throughput optimization
+# Title: Tuned Profile (throughput)
 # Category: operate-systems
 # Target: node1
 

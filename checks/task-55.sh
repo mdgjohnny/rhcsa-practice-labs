@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - Determine and apply recommended tuned profile
+# Title: Apply Tuned Profile
 # Category: operate-systems
 
 check 'run_ssh "$NODE2_IP" "systemctl is-active tuned &>/dev/null" 2>/dev/null' \

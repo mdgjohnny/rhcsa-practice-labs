@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Find all SUID files and save list to /root/suidfiles
+# Title: Find SUID Files
 # Category: users-groups
 # Target: node1
 

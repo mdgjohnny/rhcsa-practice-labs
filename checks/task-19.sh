@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Change root prompt to show hostname, username, current dir
+# Title: Customize Root Prompt
 # Category: essential-tools
 # Update ~/.bashrc for permanence
 

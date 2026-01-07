@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Launch container as user20 using ubi9 with SHELL and HOSTNAME vars
+# Title: Container with Env Variables
 # Category: containers
 # Auto-start via systemd without login
 

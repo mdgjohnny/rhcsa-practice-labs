@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Set password policy: minimum 6 characters, 3 day minimum age
+# Title: Password Length & Age Policy
 # Category: users-groups
 # Target: node1
 

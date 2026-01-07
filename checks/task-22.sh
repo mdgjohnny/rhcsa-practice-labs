@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: NFS export homes for user100/200/300, auto-mount under /home1 on rhcsa1
+# Title: NFS Autofs Home Directories
 # Category: file-systems
 
 check 'id user100 &>/dev/null' \

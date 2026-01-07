@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - Create /dir1/dir2/dir3/dir4 with SELinux contexts of /etc
+# Title: Apply SELinux Contexts
 # Category: security
 
 check 'run_ssh "$NODE2_IP" "[[ -d /dir1/dir2/dir3/dir4 ]]" 2>/dev/null' \

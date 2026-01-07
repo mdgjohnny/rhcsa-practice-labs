@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create users linda and anna with autofs-mounted NFS home directories under /home/users
+# Title: Autofs NFS Home Directories
 # Category: users-groups
 # Target: node1
 

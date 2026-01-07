@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Configure Chrony to sync with hardware clock, remove other NTP sources
+# Title: Configure Chrony
 # Category: deploy-maintain
 
 check 'systemctl is-active chronyd &>/dev/null' \

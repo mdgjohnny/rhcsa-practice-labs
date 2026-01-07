@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Configure sudo for bill to manage users but not change root password
+# Title: Sudo User Management (bill)
 # Category: users-groups
 # Target: node1
 

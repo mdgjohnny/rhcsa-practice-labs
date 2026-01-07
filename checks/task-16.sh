@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Set default boot target to multi-user.target on both VMs
+# Title: Set Boot Target (both nodes)
 # Category: deploy-maintain
 # Target: both
 

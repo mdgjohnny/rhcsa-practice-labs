@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create LV lvo2 (400MiB) in vgo2, mount vfat on /mnt/vfatfs
+# Title: Create LV & Mount (vfat)
 # Category: local-storage
 
 check 'lvs vgo2/lvo2 &>/dev/null' \

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: On rhcsa2 - Enable atd for user20, deny for user30
+# Title: Configure atd Access
 # Category: deploy-maintain
 
 check 'run_ssh "$NODE2_IP" "grep -q user20 /etc/at.allow 2>/dev/null"' \

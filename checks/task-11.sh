@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create edwin/santos in group dbadmin, serene/alex in accounting. santos: UID 1234, no shell
+# Title: Create Users & Groups (dbadmin/accounting)
 # Category: users-groups
 
 check 'id edwin &>/dev/null' \

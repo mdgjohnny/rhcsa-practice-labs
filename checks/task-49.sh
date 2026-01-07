@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create /direct01 with SELinux contexts from /root (persistent)
+# Title: Apply SELinux Contexts (/direct01)
 # Category: security
 
 check '[[ -d /direct01 ]]' \

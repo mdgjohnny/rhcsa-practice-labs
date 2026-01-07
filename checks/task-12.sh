@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Create /groups/dbadmin and /groups/accounting with setgid, no access for others
+# Title: Shared Directories with setgid
 # Category: file-systems
 
 check '[[ -d /groups/dbadmin ]]' \

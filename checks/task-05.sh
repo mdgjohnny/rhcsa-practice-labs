@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Task: Configure /etc/hosts so node1 can ping rhcsa2 by hostname and node2 can ping rhcsa1 by hostname
+# Title: Configure /etc/hosts
 # Category: networking
 # Target: both
 
