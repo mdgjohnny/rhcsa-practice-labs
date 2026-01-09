@@ -315,7 +315,7 @@
 
             // Connect to WebSocket
             socket = io('/terminal', {
-                transports: ['websocket', 'polling']
+                transports: ['polling', 'websocket']
             });
 
             socket.on('connect', () => {

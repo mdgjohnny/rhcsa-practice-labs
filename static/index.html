@@ -1966,7 +1966,7 @@
 
             // Connect to WebSocket
             termSocket = io('/terminal', {
-                transports: ['websocket', 'polling']
+                transports: ['polling', 'websocket']
             });
 
             termSocket.on('connect', () => {
