@@ -20,9 +20,19 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from flask import jsonify, request
 from flask_socketio import SocketIO
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Import the main Flask app
 from app import app, DEBUG, LOG_LEVEL, logger
+
+# Initialize rate limiter
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://",
+)
 
 # Initialize Socket.IO with eventlet async mode
 socketio = SocketIO(
@@ -84,6 +94,7 @@ def get_active_session():
 
 
 @app.route('/api/sessions', methods=['POST'])
+@limiter.limit("5 per hour")  # Rate limit session creation
 def create_session():
     """Create a new practice session."""
     if not session_manager:
