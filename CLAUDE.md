@@ -100,16 +100,33 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
 
 ### ✅ Recently Completed (Jan 2026)
 
-3. **End-to-End Grading** ✅
-   - Grader now connects to cloud VMs automatically
-   - `get_grading_env()` injects session IPs from sessions.db
-   - `exam-grader.sh` supports SSH_KEY_FILE + SSH_USER for OCI auth
-   - Remote checks executed via SSH with sudo
-   - Tested: task-100 (create user bob) completed and graded successfully
+3. **Partial End-to-End Grading** ⚠️ (needs more work)
+   - `get_grading_env()` injects cloud session IPs from sessions.db
+   - `exam-grader.sh` accepts IPs via environment variables
+   - Basic remote check execution via SSH works for simple tasks
+   - Tested ONE task (task-100) successfully
+   - **NOT fully verified** - 154 tasks exist, many have different patterns
 
 ### 🔲 TODO
 
-1. **Modular Cloud VM Setup / User Onboarding**
+1. **Rewrite Grader for Robust Local/Remote Support** (HIGH PRIORITY)
+   - Current state: Grading logic is inconsistent across 154 tasks
+     - Some tasks assume local execution (run checks directly)
+     - Some tasks explicitly use `run_ssh` for remote checks
+     - My quick fix only works for simple local-style checks
+   - Need to:
+     - Audit all task patterns and identify inconsistencies
+     - Design a clean abstraction for local vs remote execution
+     - Ensure ALL 154 tasks work in both modes
+     - Handle complex conditions (variables, multi-line, subshells)
+     - Handle tasks targeting both nodes
+     - Add comprehensive testing
+   - Consider approaches:
+     - Option A: Make all checks use explicit `run_ssh` calls
+     - Option B: Wrap execution context (run entire task script remotely)
+     - Option C: Smart detection based on Target: comment
+
+2. **Modular Cloud VM Setup / User Onboarding**
    - Make the cloud VM integration self-service for GitHub users
    - Don't expose/commit any credentials - keep `terraform.tfvars` gitignored
    - Create clear onboarding documentation:
