@@ -38,17 +38,24 @@ CURRENT_CATEGORY=""
 #-----------------------------------------
 
 # SSH options for non-interactive remote checks
-SSH_OPTS="-o ConnectTimeout=5"
+SSH_OPTS="-o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
-# SSH wrapper - uses sshpass with ROOT_PASSWORD when set
+# SSH wrapper - supports multiple auth methods:
+# 1. SSH_KEY_FILE + SSH_USER (for cloud VMs with key-based auth)
+# 2. ROOT_PASSWORD (for local VMs with password auth)
+# 3. Default SSH (assumes key-based auth to root)
 # Usage: run_ssh <host> <command>
-# Note: Prefer hostnames over IPs as some systems block IP-based SSH
 run_ssh() {
     local host="$1"
     shift
-    if [[ -n "$ROOT_PASSWORD" ]]; then
+    if [[ -n "$SSH_KEY_FILE" && -n "$SSH_USER" ]]; then
+        # Cloud VM mode: use key file and specified user, then sudo
+        ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${SSH_USER}@${host}" "sudo $@"
+    elif [[ -n "$ROOT_PASSWORD" ]]; then
+        # Local VM mode: use sshpass with root password
         sshpass -p "$ROOT_PASSWORD" ssh $SSH_OPTS root@"$host" "$@"
     else
+        # Default: assume key-based auth to root
         ssh $SSH_OPTS root@"$host" "$@"
     fi
 }
@@ -150,7 +157,12 @@ parse_args() {
 log() {
 	local level=$1
 	shift
-	echo -e "[$level] $*" | tee -a "$LOG_FILE"
+	# In JSON mode, only log to file (not stdout) to avoid corrupting JSON output
+	if [[ "$JSON_OUTPUT" == true ]]; then
+		echo -e "[$level] $*" >> "$LOG_FILE"
+	else
+		echo -e "[$level] $*" | tee -a "$LOG_FILE"
+	fi
 }
 
 error_exit() {
@@ -159,6 +171,13 @@ error_exit() {
 }
 
 load_config() {
+	# Check if IPs are already set via environment variables (cloud mode)
+	if [[ -n "$NODE1_IP" && -n "$NODE2_IP" ]]; then
+		log "${GREEN}INFO${NC}" "Using environment variables for VM IPs (cloud mode)"
+		return 0
+	fi
+	
+	# Otherwise, load from config file
 	if [[ ! -f "$CONFIG_FILE" ]]; then
 		error_exit "Config file not found. Run: cp config.example config && vim config"
 	fi
@@ -228,17 +247,69 @@ EOF
     fi
 }
 
+# Run a check on a remote host via SSH
+# Usage: remote_check <target_ip> <condition> <ok_msg> <fail_msg> [points]
+remote_check() {
+    local target_ip="$1"
+    local condition="$2"
+    local ok_msg="$3"
+    local fail_msg="$4"
+    local points="${5:-10}"
+    local passed=false
+
+    TOTAL=$(( TOTAL + points ))
+    
+    # Run the condition on the remote host
+    if ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${SSH_USER}@${target_ip}" "sudo bash -c '$condition'" &>/dev/null; then
+        passed=true
+        SCORE=$(( SCORE + points ))
+        if [[ "$JSON_OUTPUT" == false ]]; then
+            echo -e "${GREEN}[OK]${NC} $ok_msg"
+        fi
+    else
+        if [[ "$JSON_OUTPUT" == false ]]; then
+            echo -e "${RED}[FAIL]${NC} $fail_msg"
+        fi
+    fi
+
+    # Store result for JSON output
+    if [[ "$JSON_OUTPUT" == true ]]; then
+        RESULTS_JSON+=("{\"task\":\"$CURRENT_TASK\",\"category\":\"$CURRENT_CATEGORY\",\"check\":\"$ok_msg\",\"passed\":$passed,\"points\":$points}")
+    fi
+}
+
 # Sources task script and compound each score
 evaluate_task() {
 	local task="$1"
 	CURRENT_TASK=$(basename "$task" .sh)
 	# Extract category from task file
 	CURRENT_CATEGORY=$(grep "^# Category:" "$task" | sed 's/# Category: //' || echo "unknown")
+	# Extract target VM from task file
+	local target=$(grep "^# Target:" "$task" | sed 's/# Target: //' || echo "node1")
 
 	if [[ "$JSON_OUTPUT" == false ]]; then
 		echo -e "\n${YELLOW}=== Checking: ${CURRENT_TASK} ===${NC}"
 	fi
-	source "$task"
+
+	# Cloud mode: override check function to run remotely
+	if [[ -n "$SSH_KEY_FILE" && -n "$SSH_USER" ]]; then
+		# Determine target IP
+		local target_ip
+		case "$target" in
+			node1) target_ip="$NODE1_IP" ;;
+			node2) target_ip="$NODE2_IP" ;;
+			*) target_ip="$NODE1_IP" ;;
+		esac
+		
+		# Override check function to run remotely
+		check() {
+			remote_check "$target_ip" "$@"
+		}
+		source "$task"
+	else
+		# Local mode: source and run directly
+		source "$task"
+	fi
 }
 
 check_prereqs() {

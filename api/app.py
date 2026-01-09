@@ -102,6 +102,58 @@ def parse_grader_json(output):
         return json.loads(cleaned)
 
 
+def get_grading_env():
+    """
+    Get environment variables for grading, including cloud session IPs if available.
+    This allows the grader to connect to cloud VMs when a session is active.
+    """
+    import tempfile
+    env = os.environ.copy()
+    
+    # Try to get cloud session IPs directly from sessions.db
+    sessions_db = BASE_DIR / 'sessions.db'
+    if not sessions_db.exists():
+        logger.debug("No sessions.db found, using config file for VM IPs")
+        return env
+    
+    try:
+        conn = sqlite3.connect(str(sessions_db))
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        # Get any ready/active session
+        cursor.execute("""
+            SELECT session_id, node1_ip, node2_ip, ssh_private_key 
+            FROM sessions 
+            WHERE state IN ('ready', 'active')
+            ORDER BY created_at DESC
+            LIMIT 1
+        """)
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row:
+            if row['node1_ip']:
+                env['NODE1_IP'] = row['node1_ip']
+                env['NODE1'] = 'rhcsa1'
+            if row['node2_ip']:
+                env['NODE2_IP'] = row['node2_ip']
+                env['NODE2'] = 'rhcsa2'
+            # Get SSH key for passwordless auth
+            if row['ssh_private_key']:
+                key_file = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.pem')
+                key_file.write(row['ssh_private_key'])
+                key_file.close()
+                os.chmod(key_file.name, 0o600)
+                env['SSH_KEY_FILE'] = key_file.name
+                env['SSH_USER'] = 'opc'  # OCI default user
+            logger.info(f"Using cloud session IPs: node1={row['node1_ip']}, node2={row['node2_ip']}")
+    except Exception as e:
+        logger.warning(f"Failed to get cloud session IPs: {e}")
+    
+    return env
+
+
 # Initialize DB on startup
 init_db()
 
@@ -431,14 +483,16 @@ def run_grader():
     cmd = [str(GRADER_SCRIPT), '--skip-reboot', '--json', f"--tasks={','.join(task_nums)}"]
     logger.debug(f"Running grader command: {' '.join(cmd)}")
 
-    # Run the grader with timeout
+    # Run the grader with timeout, using cloud session IPs if available
+    grading_env = get_grading_env()
     try:
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             cwd=str(BASE_DIR),
-            timeout=TIMEOUT_GRADER
+            timeout=TIMEOUT_GRADER,
+            env=grading_env
         )
     except subprocess.TimeoutExpired:
         logger.error(f"Grader timed out after {TIMEOUT_GRADER}s")
@@ -446,6 +500,10 @@ def run_grader():
             'error': 'Grading timed out',
             'message': f'Grading took longer than {TIMEOUT_GRADER} seconds. Try fewer tasks.'
         }), 504
+    finally:
+        # Clean up temp SSH key file if created
+        if 'SSH_KEY_FILE' in grading_env and os.path.exists(grading_env['SSH_KEY_FILE']):
+            os.unlink(grading_env['SSH_KEY_FILE'])
 
     logger.debug(f"Grader returncode: {result.returncode}")
     if result.stderr:
@@ -500,13 +558,16 @@ def grade_single_task(task_id):
         cmd.append(f"--target={target}")
     logger.debug(f"Running single task grader: {' '.join(cmd)}")
 
+    # Run with cloud session IPs if available
+    grading_env = get_grading_env()
     try:
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             cwd=str(BASE_DIR),
-            timeout=TIMEOUT_SINGLE_TASK
+            timeout=TIMEOUT_SINGLE_TASK,
+            env=grading_env
         )
     except subprocess.TimeoutExpired:
         logger.error(f"Single task grader timed out after {TIMEOUT_SINGLE_TASK}s")
@@ -515,8 +576,14 @@ def grade_single_task(task_id):
             'message': f'Task grading took longer than {TIMEOUT_SINGLE_TASK} seconds.',
             'task_id': task_id
         }), 504
+    finally:
+        # Clean up temp SSH key file if created
+        if 'SSH_KEY_FILE' in grading_env and os.path.exists(grading_env['SSH_KEY_FILE']):
+            os.unlink(grading_env['SSH_KEY_FILE'])
 
     logger.debug(f"Single task grader returncode: {result.returncode}")
+    logger.debug(f"Single task grader stdout: {result.stdout[:500] if result.stdout else 'empty'}")
+    logger.debug(f"Single task grader stderr: {result.stderr[:500] if result.stderr else 'empty'}")
 
     if result.returncode != 0:
         error_msg = result.stderr.strip() if result.stderr else 'Grader process failed'
