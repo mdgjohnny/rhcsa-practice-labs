@@ -14,35 +14,29 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
+from flask import jsonify, request
 from flask_socketio import SocketIO
 
 # Import the main Flask app
 from app import app, DEBUG, LOG_LEVEL, logger
 
-# Initialize Socket.IO
+# Initialize Socket.IO with threading mode (more reliable than eventlet)
 socketio = SocketIO(
     app,
-    cors_allowed_origins="*",  # Configure appropriately for production
-    async_mode="eventlet",
+    cors_allowed_origins="*",
+    async_mode="threading",  # Use threading instead of eventlet
     logger=DEBUG,
-    engineio_logger=DEBUG
+    engineio_logger=DEBUG,
+    ping_timeout=60,
+    ping_interval=25
 )
 
-# Make socketio available for terminal.py
-import builtins
-builtins.socketio = socketio
+BASE_DIR = Path(__file__).parent.parent
 
-# Initialize terminal handlers
-from terminal import init_terminal_handlers
-init_terminal_handlers(socketio)
-
-# Add session management endpoints
+# Initialize session manager if OCI is configured
 from oci_manager import SessionManager, SessionState
 
-BASE_DIR = Path(__file__).parent.parent
 session_manager = None
-
-# Only initialize session manager if infra is configured
 if (BASE_DIR / 'infra' / 'terraform.tfvars').exists():
     session_manager = SessionManager(
         db_path=BASE_DIR / 'sessions.db',
@@ -54,11 +48,18 @@ if (BASE_DIR / 'infra' / 'terraform.tfvars').exists():
 else:
     logger.warning("OCI not configured - session management disabled")
 
+# Initialize terminal handlers with session manager
+from terminal import init_terminal_handlers
+init_terminal_handlers(socketio, session_manager)
+
+
+# =============================================================================
+# Session Management API Endpoints
+# =============================================================================
 
 @app.route('/api/sessions', methods=['GET'])
 def list_sessions():
     """List active sessions."""
-    from flask import jsonify
     if not session_manager:
         return jsonify({'error': 'OCI not configured'}), 503
     
@@ -66,10 +67,21 @@ def list_sessions():
     return jsonify([s.to_dict() for s in sessions])
 
 
+@app.route('/api/sessions/active', methods=['GET'])
+def get_active_session():
+    """Get the currently active session (if any)."""
+    if not session_manager:
+        return jsonify({'error': 'OCI not configured'}), 503
+    
+    session = session_manager.get_active_session()
+    if session:
+        return jsonify(session.to_dict())
+    return jsonify(None)
+
+
 @app.route('/api/sessions', methods=['POST'])
 def create_session():
     """Create a new practice session."""
-    from flask import jsonify, request
     if not session_manager:
         return jsonify({'error': 'OCI not configured'}), 503
     
@@ -91,7 +103,6 @@ def create_session():
 @app.route('/api/sessions/<session_id>', methods=['GET'])
 def get_session(session_id):
     """Get session details."""
-    from flask import jsonify
     if not session_manager:
         return jsonify({'error': 'OCI not configured'}), 503
     
@@ -104,13 +115,16 @@ def get_session(session_id):
 
 @app.route('/api/sessions/<session_id>/provision', methods=['POST'])
 def provision_session(session_id):
-    """Start provisioning VMs for a session."""
-    from flask import jsonify
+    """
+    Start provisioning VMs for a session.
+    
+    Note: This is a blocking operation that can take 2-5 minutes.
+    In production, use a task queue (Celery, etc.)
+    """
     if not session_manager:
         return jsonify({'error': 'OCI not configured'}), 503
     
     try:
-        # This is a blocking operation - in production, use a task queue
         session = session_manager.provision_session(session_id)
         return jsonify(session.to_dict())
     except ValueError as e:
@@ -121,8 +135,7 @@ def provision_session(session_id):
 
 @app.route('/api/sessions/<session_id>', methods=['DELETE'])
 def terminate_session_endpoint(session_id):
-    """Terminate a session."""
-    from flask import jsonify
+    """Terminate a session and destroy its VMs."""
     if not session_manager:
         return jsonify({'error': 'OCI not configured'}), 503
     
@@ -135,7 +148,6 @@ def terminate_session_endpoint(session_id):
 @app.route('/api/sessions/<session_id>/extend', methods=['POST'])
 def extend_session(session_id):
     """Extend session timeout."""
-    from flask import jsonify, request
     if not session_manager:
         return jsonify({'error': 'OCI not configured'}), 503
     
@@ -148,22 +160,30 @@ def extend_session(session_id):
     return jsonify({'error': 'Session not found'}), 404
 
 
-# Serve terminal test page
+# =============================================================================
+# Terminal Test Page
+# =============================================================================
+
 @app.route('/terminal-test')
 def terminal_test():
     """Serve terminal test page."""
     return app.send_static_file('terminal-test.html')
 
 
+# =============================================================================
+# Main Entry Point
+# =============================================================================
+
 if __name__ == '__main__':
     logger.info(f"Starting RHCSA Practice Labs API with WebSocket support")
     logger.info(f"Debug: {DEBUG}, Log Level: {LOG_LEVEL}")
+    logger.info(f"Session manager: {'enabled' if session_manager else 'disabled'}")
     
-    # Use eventlet for WebSocket support
     socketio.run(
         app,
         host='0.0.0.0',
         port=8080,
         debug=DEBUG,
-        use_reloader=DEBUG
+        use_reloader=False,  # Disable reloader with threading mode
+        allow_unsafe_werkzeug=True
     )

@@ -6,9 +6,7 @@
     <title>Terminal Test - RHCSA Practice Labs</title>
     <link href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.3.0/css/xterm.min.css" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
         body {
             margin: 0;
             padding: 20px;
@@ -16,77 +14,28 @@
             color: #fff;
             font-family: system-ui, -apple-system, sans-serif;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        h1 {
-            margin: 0 0 20px 0;
-            font-size: 1.5rem;
-        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { margin: 0 0 20px 0; font-size: 1.5rem; }
         .status {
             padding: 10px 15px;
             border-radius: 6px;
             margin-bottom: 20px;
             font-size: 0.9rem;
         }
-        .status.connected {
-            background: #064e3b;
-            border: 1px solid #10b981;
-        }
-        .status.disconnected {
-            background: #7f1d1d;
-            border: 1px solid #ef4444;
-        }
-        .status.connecting {
-            background: #78350f;
-            border: 1px solid #f59e0b;
-        }
-        .connection-form {
+        .status.connected { background: #064e3b; border: 1px solid #10b981; }
+        .status.disconnected { background: #7f1d1d; border: 1px solid #ef4444; }
+        .status.connecting { background: #78350f; border: 1px solid #f59e0b; }
+        .status.provisioning { background: #1e3a5f; border: 1px solid #3b82f6; }
+        .session-info {
             background: #262626;
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
         }
-        .form-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-        .form-group {
-            flex: 1;
-            min-width: 200px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.85rem;
-            color: #a1a1aa;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #3f3f46;
-            border-radius: 4px;
-            background: #18181b;
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.9rem;
-        }
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: #ef4444;
-        }
-        textarea {
-            min-height: 100px;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            font-size: 0.8rem;
-        }
-        .buttons {
-            display: flex;
-            gap: 10px;
-        }
+        .session-info h3 { margin: 0 0 10px 0; font-size: 1rem; }
+        .session-detail { margin: 5px 0; font-size: 0.85rem; color: #a1a1aa; }
+        .session-detail span { color: #fff; }
+        .buttons { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
         button {
             padding: 10px 20px;
             border: none;
@@ -95,38 +44,21 @@
             cursor: pointer;
             font-weight: 500;
         }
-        button.primary {
-            background: #ef4444;
-            color: #fff;
-        }
-        button.primary:hover {
-            background: #dc2626;
-        }
-        button.secondary {
-            background: #3f3f46;
-            color: #fff;
-        }
-        button.secondary:hover {
-            background: #52525b;
-        }
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        button.primary { background: #ef4444; color: #fff; }
+        button.primary:hover { background: #dc2626; }
+        button.secondary { background: #3f3f46; color: #fff; }
+        button.secondary:hover { background: #52525b; }
+        button.success { background: #059669; color: #fff; }
+        button.success:hover { background: #047857; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
         #terminal-container {
             background: #000;
             border-radius: 8px;
             padding: 10px;
             height: 500px;
         }
-        #terminal {
-            height: 100%;
-        }
-        .tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 10px;
-        }
+        #terminal { height: 100%; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 10px; }
         .tab {
             padding: 8px 16px;
             background: #262626;
@@ -136,93 +68,69 @@
             cursor: pointer;
             font-size: 0.85rem;
         }
-        .tab.active {
-            background: #000;
-            color: #fff;
-        }
-        .tab:hover:not(.active) {
-            background: #3f3f46;
-        }
+        .tab.active { background: #000; color: #fff; }
+        .tab:hover:not(.active) { background: #3f3f46; }
+        .hidden { display: none; }
+        .loading { display: inline-block; animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>💻 Terminal Test</h1>
+        <h1>💻 RHCSA Practice Terminal</h1>
         
         <div id="status" class="status disconnected">
-            ● Disconnected
+            ● No active session
         </div>
 
-        <div class="connection-form">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="host">Host (IP Address)</label>
-                    <input type="text" id="host" placeholder="192.168.1.100">
-                </div>
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" value="opc" placeholder="opc">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group" style="flex: 2;">
-                    <label for="private-key">Private Key (PEM format)</label>
-                    <textarea id="private-key" placeholder="-----BEGIN RSA PRIVATE KEY-----
-...
------END RSA PRIVATE KEY-----"></textarea>
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="password">Or Password</label>
-                    <input type="password" id="password" placeholder="(alternative to key)">
-                </div>
+        <div class="session-info">
+            <h3>Session</h3>
+            <div id="session-details">
+                <p class="session-detail">No session active. Create one to start practicing.</p>
             </div>
             <div class="buttons">
-                <button id="connect-btn" class="primary" onclick="connect()">
-                    Connect
+                <button id="create-btn" class="success" onclick="createSession()">
+                    Create Session
                 </button>
-                <button id="disconnect-btn" class="secondary" onclick="disconnect()" disabled>
-                    Disconnect
+                <button id="provision-btn" class="primary hidden" onclick="provisionSession()">
+                    Provision VMs
+                </button>
+                <button id="destroy-btn" class="secondary hidden" onclick="destroySession()">
+                    Destroy Session
                 </button>
             </div>
         </div>
 
-        <div class="tabs">
-            <button class="tab active" id="tab-node1" onclick="switchTab('node1')">
-                rhcsa1 (node1)
-            </button>
-            <button class="tab" id="tab-node2" onclick="switchTab('node2')">
-                rhcsa2 (node2)
-            </button>
-        </div>
-
-        <div id="terminal-container">
-            <div id="terminal"></div>
+        <div id="terminal-section" class="hidden">
+            <div class="tabs">
+                <button class="tab active" id="tab-node1" onclick="connectToNode('node1')">
+                    rhcsa1 (node1)
+                </button>
+                <button class="tab" id="tab-node2" onclick="connectToNode('node2')">
+                    rhcsa2 (node2)
+                </button>
+            </div>
+            <div id="terminal-container">
+                <div id="terminal"></div>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.3.0/lib/xterm.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.8.0/lib/addon-fit.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-web-links@0.9.0/lib/addon-web-links.min.js"></script>
     <script>
-        // Terminal instances for each node
-        const terminals = {
-            node1: null,
-            node2: null
-        };
-        const fitAddons = {
-            node1: null,
-            node2: null
-        };
-        
         let socket = null;
-        let activeTab = 'node1';
-        let currentTerminal = null;
-        let currentFitAddon = null;
+        let terminal = null;
+        let fitAddon = null;
+        let currentSession = null;
+        let currentNode = 'node1';
 
         // Initialize terminal
-        function initTerminal(nodeId) {
-            const term = new Terminal({
+        function initTerminal() {
+            if (terminal) return;
+            
+            terminal = new Terminal({
                 cursorBlink: true,
                 fontSize: 14,
                 fontFamily: '"Cascadia Code", "Fira Code", Menlo, Monaco, monospace',
@@ -231,165 +139,236 @@
                     foreground: '#ffffff',
                     cursor: '#ffffff',
                     selection: 'rgba(255, 255, 255, 0.3)',
-                    black: '#000000',
-                    red: '#ff5555',
-                    green: '#50fa7b',
-                    yellow: '#f1fa8c',
-                    blue: '#bd93f9',
-                    magenta: '#ff79c6',
-                    cyan: '#8be9fd',
-                    white: '#bfbfbf',
-                    brightBlack: '#4d4d4d',
-                    brightRed: '#ff6e67',
-                    brightGreen: '#5af78e',
-                    brightYellow: '#f4f99d',
-                    brightBlue: '#caa9fa',
-                    brightMagenta: '#ff92d0',
-                    brightCyan: '#9aedfe',
-                    brightWhite: '#e6e6e6'
                 }
             });
 
-            const fitAddon = new FitAddon.FitAddon();
-            term.loadAddon(fitAddon);
-            
-            const webLinksAddon = new WebLinksAddon.WebLinksAddon();
-            term.loadAddon(webLinksAddon);
+            fitAddon = new FitAddon.FitAddon();
+            terminal.loadAddon(fitAddon);
+            terminal.open(document.getElementById('terminal'));
+            fitAddon.fit();
 
-            terminals[nodeId] = term;
-            fitAddons[nodeId] = fitAddon;
-
-            return { term, fitAddon };
+            // Handle input
+            terminal.onData(data => {
+                if (socket && socket.connected) {
+                    socket.emit('terminal_input', { data });
+                }
+            });
         }
 
-        // Switch terminal tab
-        function switchTab(nodeId) {
-            // Update tab UI
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(`tab-${nodeId}`).classList.add('active');
-
-            // Clear terminal container
-            const container = document.getElementById('terminal');
-            container.innerHTML = '';
-
-            // Create terminal if not exists
-            if (!terminals[nodeId]) {
-                initTerminal(nodeId);
-            }
-
-            // Open terminal in container
-            currentTerminal = terminals[nodeId];
-            currentFitAddon = fitAddons[nodeId];
-            currentTerminal.open(container);
-            currentFitAddon.fit();
-            currentTerminal.focus();
-
-            activeTab = nodeId;
-        }
-
-        // Update status indicator
         function updateStatus(status, message) {
             const statusEl = document.getElementById('status');
             statusEl.className = `status ${status}`;
             statusEl.innerHTML = `● ${message}`;
         }
 
-        // Connect to SSH via WebSocket
-        function connect() {
-            const host = document.getElementById('host').value;
-            const username = document.getElementById('username').value || 'opc';
-            const privateKey = document.getElementById('private-key').value;
-            const password = document.getElementById('password').value;
+        function updateSessionUI(session) {
+            currentSession = session;
+            const details = document.getElementById('session-details');
+            const createBtn = document.getElementById('create-btn');
+            const provisionBtn = document.getElementById('provision-btn');
+            const destroyBtn = document.getElementById('destroy-btn');
+            const terminalSection = document.getElementById('terminal-section');
 
-            if (!host) {
-                alert('Please enter a host IP address');
+            if (!session) {
+                details.innerHTML = '<p class="session-detail">No session active. Create one to start practicing.</p>';
+                createBtn.classList.remove('hidden');
+                provisionBtn.classList.add('hidden');
+                destroyBtn.classList.add('hidden');
+                terminalSection.classList.add('hidden');
+                updateStatus('disconnected', 'No active session');
                 return;
             }
 
-            if (!privateKey && !password) {
-                alert('Please provide either a private key or password');
-                return;
+            const timeRemaining = Math.max(0, Math.floor(session.time_remaining_seconds / 60));
+            details.innerHTML = `
+                <p class="session-detail">ID: <span>${session.session_id}</span></p>
+                <p class="session-detail">State: <span>${session.state}</span></p>
+                <p class="session-detail">Time remaining: <span>${timeRemaining} minutes</span></p>
+                ${session.node1_ip ? `<p class="session-detail">Node1 IP: <span>${session.node1_ip}</span></p>` : ''}
+                ${session.node2_ip ? `<p class="session-detail">Node2 IP: <span>${session.node2_ip}</span></p>` : ''}
+                ${session.error ? `<p class="session-detail" style="color:#ef4444">Error: <span>${session.error}</span></p>` : ''}
+            `;
+
+            createBtn.classList.add('hidden');
+            
+            if (session.state === 'pending') {
+                provisionBtn.classList.remove('hidden');
+                provisionBtn.disabled = false;
+                destroyBtn.classList.remove('hidden');
+                terminalSection.classList.add('hidden');
+                updateStatus('disconnected', 'Session created - click Provision to start VMs');
+            } else if (session.state === 'provisioning') {
+                provisionBtn.classList.remove('hidden');
+                provisionBtn.disabled = true;
+                provisionBtn.innerHTML = '<span class="loading">⟳</span> Provisioning...';
+                destroyBtn.classList.add('hidden');
+                terminalSection.classList.add('hidden');
+                updateStatus('provisioning', 'Provisioning VMs... (this takes 2-5 minutes)');
+            } else if (session.state === 'ready' || session.state === 'active') {
+                provisionBtn.classList.add('hidden');
+                destroyBtn.classList.remove('hidden');
+                terminalSection.classList.remove('hidden');
+                initTerminal();
+                updateStatus('connected', `Session ready - connected to ${currentNode}`);
+            } else if (session.state === 'failed') {
+                provisionBtn.classList.add('hidden');
+                destroyBtn.classList.remove('hidden');
+                terminalSection.classList.add('hidden');
+                updateStatus('disconnected', 'Session failed - destroy and try again');
+            } else {
+                provisionBtn.classList.add('hidden');
+                destroyBtn.classList.add('hidden');
+                terminalSection.classList.add('hidden');
+                updateStatus('disconnected', `Session ${session.state}`);
+            }
+        }
+
+        async function checkActiveSession() {
+            try {
+                const resp = await fetch('/api/sessions/active');
+                const session = await resp.json();
+                updateSessionUI(session);
+                if (session && (session.state === 'ready' || session.state === 'active')) {
+                    connectToNode(currentNode);
+                }
+            } catch (e) {
+                console.error('Failed to check session:', e);
+            }
+        }
+
+        async function createSession() {
+            try {
+                updateStatus('connecting', 'Creating session...');
+                const resp = await fetch('/api/sessions', { method: 'POST' });
+                const session = await resp.json();
+                if (resp.ok) {
+                    updateSessionUI(session);
+                } else {
+                    alert(session.error || 'Failed to create session');
+                    updateStatus('disconnected', 'Failed to create session');
+                }
+            } catch (e) {
+                console.error('Failed to create session:', e);
+                alert('Failed to create session');
+            }
+        }
+
+        async function provisionSession() {
+            if (!currentSession) return;
+            
+            try {
+                updateSessionUI({ ...currentSession, state: 'provisioning' });
+                const resp = await fetch(`/api/sessions/${currentSession.session_id}/provision`, { method: 'POST' });
+                const session = await resp.json();
+                if (resp.ok) {
+                    updateSessionUI(session);
+                    connectToNode(currentNode);
+                } else {
+                    alert(session.error || 'Failed to provision session');
+                    checkActiveSession();
+                }
+            } catch (e) {
+                console.error('Failed to provision session:', e);
+                alert('Failed to provision session');
+                checkActiveSession();
+            }
+        }
+
+        async function destroySession() {
+            if (!currentSession) return;
+            if (!confirm('Destroy this session? All VMs will be terminated.')) return;
+            
+            try {
+                updateStatus('connecting', 'Destroying session...');
+                if (socket) {
+                    socket.disconnect();
+                    socket = null;
+                }
+                await fetch(`/api/sessions/${currentSession.session_id}`, { method: 'DELETE' });
+                currentSession = null;
+                updateSessionUI(null);
+            } catch (e) {
+                console.error('Failed to destroy session:', e);
+                alert('Failed to destroy session');
+            }
+        }
+
+        function connectToNode(node) {
+            if (!currentSession || !['ready', 'active'].includes(currentSession.state)) return;
+
+            currentNode = node;
+            
+            // Update tab UI
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${node}`).classList.add('active');
+
+            // Clear terminal
+            if (terminal) {
+                terminal.clear();
+                terminal.write(`\r\nConnecting to ${node}...\r\n`);
             }
 
-            updateStatus('connecting', 'Connecting...');
+            // Disconnect existing socket
+            if (socket) {
+                socket.disconnect();
+            }
 
-            // Connect to Socket.IO
+            // Connect to WebSocket
             socket = io('/terminal', {
                 transports: ['websocket', 'polling']
             });
 
             socket.on('connect', () => {
-                console.log('Socket connected');
-                
-                // Set up terminal input handler
-                currentTerminal.onData(data => {
-                    socket.emit('terminal_input', { data });
-                });
-
-                // Start SSH session
-                socket.emit('start_terminal', {
-                    host,
-                    username,
-                    private_key: privateKey || undefined,
-                    password: password || undefined,
-                    cols: currentTerminal.cols,
-                    rows: currentTerminal.rows
+                console.log('Socket connected, starting terminal...');
+                socket.emit('start_session_terminal', {
+                    session_id: currentSession.session_id,
+                    node: node,
+                    cols: terminal ? terminal.cols : 80,
+                    rows: terminal ? terminal.rows : 24
                 });
             });
 
             socket.on('terminal_ready', (data) => {
                 console.log('Terminal ready:', data);
-                updateStatus('connected', `Connected to ${data.host}`);
-                document.getElementById('connect-btn').disabled = true;
-                document.getElementById('disconnect-btn').disabled = false;
+                updateStatus('connected', `Connected to ${data.node} (${data.host})`);
+                if (terminal) {
+                    terminal.clear();
+                    terminal.focus();
+                }
             });
 
             socket.on('terminal_output', (data) => {
-                currentTerminal.write(data.data);
+                if (terminal) {
+                    terminal.write(data.data);
+                }
             });
 
             socket.on('terminal_error', (data) => {
                 console.error('Terminal error:', data.error);
                 updateStatus('disconnected', `Error: ${data.error}`);
-                currentTerminal.write(`\r\n\x1b[31mError: ${data.error}\x1b[0m\r\n`);
+                if (terminal) {
+                    terminal.write(`\r\n\x1b[31mError: ${data.error}\x1b[0m\r\n`);
+                }
             });
 
             socket.on('terminal_disconnected', (data) => {
                 console.log('Terminal disconnected:', data);
-                updateStatus('disconnected', 'Disconnected');
-                currentTerminal.write(`\r\n\x1b[33mConnection closed: ${data.reason}\x1b[0m\r\n`);
-                document.getElementById('connect-btn').disabled = false;
-                document.getElementById('disconnect-btn').disabled = true;
+                updateStatus('disconnected', 'Terminal disconnected');
             });
 
             socket.on('disconnect', () => {
                 console.log('Socket disconnected');
-                updateStatus('disconnected', 'Disconnected');
-                document.getElementById('connect-btn').disabled = false;
-                document.getElementById('disconnect-btn').disabled = true;
             });
-        }
-
-        // Disconnect
-        function disconnect() {
-            if (socket) {
-                socket.emit('stop_terminal');
-                socket.disconnect();
-                socket = null;
-            }
-            updateStatus('disconnected', 'Disconnected');
-            document.getElementById('connect-btn').disabled = false;
-            document.getElementById('disconnect-btn').disabled = true;
         }
 
         // Handle window resize
         window.addEventListener('resize', () => {
-            if (currentFitAddon && currentTerminal) {
-                currentFitAddon.fit();
-                if (socket) {
+            if (fitAddon && terminal) {
+                fitAddon.fit();
+                if (socket && socket.connected) {
                     socket.emit('terminal_resize', {
-                        cols: currentTerminal.cols,
-                        rows: currentTerminal.rows
+                        cols: terminal.cols,
+                        rows: terminal.rows
                     });
                 }
             }
@@ -397,7 +376,7 @@
 
         // Initialize on load
         document.addEventListener('DOMContentLoaded', () => {
-            switchTab('node1');
+            checkActiveSession();
         });
     </script>
 </body>

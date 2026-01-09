@@ -1,4 +1,8 @@
-"""WebSocket terminal handler for SSH connections."""
+"""WebSocket terminal handler for SSH connections.
+
+The terminal connects using session_id - SSH keys are stored securely
+in the backend session database, never exposed to the browser.
+"""
 
 import logging
 import os
@@ -6,24 +10,29 @@ import select
 import socket
 import threading
 from io import StringIO
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 import paramiko
 from flask import request
 from flask_socketio import SocketIO, emit, disconnect
+
+if TYPE_CHECKING:
+    from oci_manager import SessionManager
 
 logger = logging.getLogger(__name__)
 
 # Store active terminal sessions: sid -> TerminalSession
 active_terminals = {}
 
+# Reference to session manager (set during init)
+_session_manager: Optional["SessionManager"] = None
+
 
 class TerminalSession:
     """Manages an SSH terminal session."""
 
     def __init__(self, sid: str, host: str, username: str = "opc",
-                 private_key: Optional[str] = None, password: Optional[str] = None,
-                 port: int = 22):
+                 private_key: Optional[str] = None, port: int = 22):
         """
         Initialize terminal session.
 
@@ -32,53 +41,50 @@ class TerminalSession:
             host: SSH host
             username: SSH username (default: opc for OCI instances)
             private_key: SSH private key content (PEM format)
-            password: SSH password (alternative to private_key)
             port: SSH port
         """
         self.sid = sid
         self.host = host
         self.username = username
         self.private_key = private_key
-        self.password = password
         self.port = port
 
         self.ssh_client: Optional[paramiko.SSHClient] = None
         self.channel: Optional[paramiko.Channel] = None
         self.reader_thread: Optional[threading.Thread] = None
         self.running = False
+        self._socketio = None  # Set during connect
 
-    def connect(self) -> bool:
+    def connect(self, socketio: SocketIO) -> bool:
         """
         Establish SSH connection.
 
         Returns:
             True if connection successful
         """
+        self._socketio = socketio
         try:
             self.ssh_client = paramiko.SSHClient()
             self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            connect_kwargs = {
-                "hostname": self.host,
-                "port": self.port,
-                "username": self.username,
-                "timeout": 30,
-                "allow_agent": False,
-                "look_for_keys": False,
-            }
-
-            if self.private_key:
-                # Load private key from string
-                key_file = StringIO(self.private_key)
+            # Load private key from string
+            key_file = StringIO(self.private_key)
+            try:
                 pkey = paramiko.RSAKey.from_private_key(key_file)
-                connect_kwargs["pkey"] = pkey
-            elif self.password:
-                connect_kwargs["password"] = self.password
-            else:
-                raise ValueError("Either private_key or password must be provided")
+            except:
+                key_file.seek(0)
+                pkey = paramiko.Ed25519Key.from_private_key(key_file)
 
             logger.info(f"Connecting to {self.username}@{self.host}:{self.port}")
-            self.ssh_client.connect(**connect_kwargs)
+            self.ssh_client.connect(
+                hostname=self.host,
+                port=self.port,
+                username=self.username,
+                pkey=pkey,
+                timeout=30,
+                allow_agent=False,
+                look_for_keys=False,
+            )
 
             # Request PTY
             self.channel = self.ssh_client.invoke_shell(
@@ -120,26 +126,21 @@ class TerminalSession:
 
     def _read_output(self):
         """Background thread that reads SSH output and emits to client."""
-        import builtins
-        socketio = getattr(builtins, 'socketio', None)
-        if not socketio:
-            logger.error("socketio not available in builtins")
-            return
-
         while self.running and self.channel:
             try:
-                # Use select for non-blocking read
+                # Use select for non-blocking read with short timeout
                 readable, _, _ = select.select([self.channel], [], [], 0.1)
                 if readable:
                     data = self.channel.recv(4096)
                     if data:
                         # Emit data to the specific client
-                        socketio.emit(
-                            "terminal_output",
-                            {"data": data.decode("utf-8", errors="replace")},
-                            room=self.sid,
-                            namespace="/terminal"
-                        )
+                        if self._socketio:
+                            self._socketio.emit(
+                                "terminal_output",
+                                {"data": data.decode("utf-8", errors="replace")},
+                                room=self.sid,
+                                namespace="/terminal"
+                            )
                     else:
                         # Connection closed
                         logger.info(f"SSH channel closed for {self.sid}")
@@ -152,8 +153,8 @@ class TerminalSession:
                 break
 
         # Notify client of disconnection
-        if self.running:
-            socketio.emit(
+        if self.running and self._socketio:
+            self._socketio.emit(
                 "terminal_disconnected",
                 {"reason": "SSH connection closed"},
                 room=self.sid,
@@ -182,8 +183,10 @@ class TerminalSession:
         logger.info(f"Terminal session {self.sid} closed")
 
 
-def init_terminal_handlers(socketio: SocketIO):
+def init_terminal_handlers(socketio: SocketIO, session_manager: Optional["SessionManager"] = None):
     """Initialize Socket.IO event handlers for terminal."""
+    global _session_manager
+    _session_manager = session_manager
 
     @socketio.on("connect", namespace="/terminal")
     def handle_connect():
@@ -202,59 +205,82 @@ def init_terminal_handlers(socketio: SocketIO):
             active_terminals[sid].close()
             del active_terminals[sid]
 
-    @socketio.on("start_terminal", namespace="/terminal")
-    def handle_start_terminal(data):
+    @socketio.on("start_session_terminal", namespace="/terminal")
+    def handle_start_session_terminal(data):
         """
-        Start a new terminal session.
-
+        Start terminal for a practice session.
+        
         Expected data:
         {
-            "host": "ip_address",
-            "username": "opc",
-            "private_key": "-----BEGIN RSA PRIVATE KEY-----...",
-            "password": "optional_password",
+            "session_id": "sess-xxxx",
+            "node": "node1" or "node2",
             "cols": 80,
             "rows": 24
         }
         """
-        logger.info(f"start_terminal received: host={data.get('host', 'no host')}")
         sid = request.sid
-
-        # Close existing session if any
-        if sid in active_terminals:
-            active_terminals[sid].close()
-            del active_terminals[sid]
-
-        host = data.get("host")
-        username = data.get("username", "opc")
-        private_key = data.get("private_key")
-        password = data.get("password")
+        session_id = data.get("session_id")
+        node = data.get("node", "node1")
         cols = data.get("cols", 80)
         rows = data.get("rows", 24)
 
-        if not host:
-            emit("terminal_error", {"error": "Host is required"})
+        logger.info(f"start_session_terminal: session={session_id}, node={node}")
+
+        if not session_id:
+            emit("terminal_error", {"error": "session_id is required"})
             return
 
-        if not private_key and not password:
-            emit("terminal_error", {"error": "Either private_key or password is required"})
+        if not _session_manager:
+            emit("terminal_error", {"error": "Session manager not available"})
             return
+
+        # Get session info
+        session = _session_manager.get_session(session_id)
+        if not session:
+            emit("terminal_error", {"error": f"Session {session_id} not found"})
+            return
+
+        if session.state.value not in ("ready", "active"):
+            emit("terminal_error", {"error": f"Session not ready (state: {session.state.value})"})
+            return
+
+        # Get connection info based on node
+        if node == "node1":
+            host = session.node1_ip
+        elif node == "node2":
+            host = session.node2_ip
+        else:
+            emit("terminal_error", {"error": f"Invalid node: {node}"})
+            return
+
+        if not host:
+            emit("terminal_error", {"error": f"No IP for {node}"})
+            return
+
+        private_key = session.ssh_private_key
+        if not private_key:
+            emit("terminal_error", {"error": "No SSH key available for session"})
+            return
+
+        # Close existing terminal if any
+        if sid in active_terminals:
+            active_terminals[sid].close()
+            del active_terminals[sid]
 
         # Create terminal session
         terminal = TerminalSession(
             sid=sid,
             host=host,
-            username=username,
-            private_key=private_key,
-            password=password
+            username="opc",
+            private_key=private_key
         )
 
-        if terminal.connect():
+        if terminal.connect(socketio):
             terminal.resize(cols, rows)
             active_terminals[sid] = terminal
-            emit("terminal_ready", {"host": host})
+            emit("terminal_ready", {"host": host, "node": node})
         else:
-            emit("terminal_error", {"error": f"Failed to connect to {host}"})
+            emit("terminal_error", {"error": f"Failed to connect to {node} ({host})"})
 
     @socketio.on("terminal_input", namespace="/terminal")
     def handle_terminal_input(data):
