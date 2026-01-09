@@ -98,16 +98,18 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
    - Added cloud session management in Settings page
    - Terminal connects automatically when cloud session is ready
 
+### ✅ Recently Completed (Jan 2026)
+
+3. **End-to-End Grading** ✅
+   - Grader now connects to cloud VMs automatically
+   - `get_grading_env()` injects session IPs from sessions.db
+   - `exam-grader.sh` supports SSH_KEY_FILE + SSH_USER for OCI auth
+   - Remote checks executed via SSH with sudo
+   - Tested: task-100 (create user bob) completed and graded successfully
+
 ### 🔲 TODO
 
-1. **End-to-End Grading Test** (HIGH PRIORITY)
-   - Verify that tasks can actually be completed and graded on cloud VMs
-   - Each grading script in `checks/task-*.sh` contains the solution (grep to find)
-   - Test workflow: Start practice mode → Complete task in terminal → Submit grading
-   - Start with a single task before attempting full exam mode
-   - Fix any issues with grader connecting to cloud VM IPs
-
-2. **Modular Cloud VM Setup / User Onboarding**
+1. **Modular Cloud VM Setup / User Onboarding**
    - Make the cloud VM integration self-service for GitHub users
    - Don't expose/commit any credentials - keep `terraform.tfvars` gitignored
    - Create clear onboarding documentation:
