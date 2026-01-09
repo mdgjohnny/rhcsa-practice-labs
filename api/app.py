@@ -853,6 +853,97 @@ def random_tasks():
     return jsonify(selected)
 
 
+# =============================================================================
+# New Grader API (v2) - Uses Python grader module instead of shell script
+# =============================================================================
+
+try:
+    from api.grader.api_integration import get_grader_service
+    NEW_GRADER_AVAILABLE = True
+except ImportError:
+    try:
+        from grader.api_integration import get_grader_service
+        NEW_GRADER_AVAILABLE = True
+    except ImportError:
+        NEW_GRADER_AVAILABLE = False
+        logger.warning("New grader module not available, using shell script fallback")
+
+
+@app.route('/api/v2/tasks', methods=['GET'])
+def list_tasks_v2():
+    """List all available tasks using the new grader."""
+    if not NEW_GRADER_AVAILABLE:
+        return jsonify({'error': 'New grader not available'}), 501
+    
+    try:
+        service = get_grader_service(BASE_DIR)
+        tasks = service.list_tasks()
+        return jsonify(tasks)
+    except Exception as e:
+        logger.error(f"list_tasks_v2 failed: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/v2/grade/<task_id>', methods=['POST'])
+def grade_task_v2(task_id):
+    """Grade a single task using the new grader."""
+    if not NEW_GRADER_AVAILABLE:
+        return jsonify({'error': 'New grader not available'}), 501
+    
+    data = request.json or {}
+    target = data.get('target')  # Optional: node1, node2
+    session_id = data.get('session_id')  # Optional: specific cloud session
+    timeout = data.get('timeout', 60)
+    
+    try:
+        service = get_grader_service(BASE_DIR)
+        result = service.grade_task(task_id, session_id=session_id, target=target, timeout=timeout)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"grade_task_v2 failed: {e}")
+        return jsonify({'error': str(e), 'task_id': task_id}), 500
+
+
+@app.route('/api/v2/grade', methods=['POST'])
+def grade_tasks_v2():
+    """Grade multiple tasks using the new grader."""
+    if not NEW_GRADER_AVAILABLE:
+        return jsonify({'error': 'New grader not available'}), 501
+    
+    data = request.json or {}
+    tasks = data.get('tasks', [])
+    session_id = data.get('session_id')
+    timeout = data.get('timeout', 60)
+    
+    if not tasks:
+        return jsonify({'error': 'No tasks provided'}), 400
+    
+    try:
+        service = get_grader_service(BASE_DIR)
+        result = service.grade_tasks(tasks, session_id=session_id, timeout_per_task=timeout)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"grade_tasks_v2 failed: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/v2/status', methods=['GET'])
+def grader_status_v2():
+    """Get grader status and session info."""
+    if not NEW_GRADER_AVAILABLE:
+        return jsonify({'error': 'New grader not available'}), 501
+    
+    try:
+        service = get_grader_service(BASE_DIR)
+        status = service.get_session_status()
+        status['grader_version'] = 'v2'
+        return jsonify(status)
+    except Exception as e:
+        logger.error(f"grader_status_v2 failed: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     logger.info(f"Starting RHCSA Practice Labs API (debug={DEBUG}, log_level={LOG_LEVEL})")
+    logger.info(f"New grader available: {NEW_GRADER_AVAILABLE}")
     app.run(host='0.0.0.0', port=8080, debug=DEBUG)
