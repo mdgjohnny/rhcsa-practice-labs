@@ -120,7 +120,11 @@ class TerminalSession:
 
     def _read_output(self):
         """Background thread that reads SSH output and emits to client."""
-        from app import socketio  # Import here to avoid circular import
+        import builtins
+        socketio = getattr(builtins, 'socketio', None)
+        if not socketio:
+            logger.error("socketio not available in builtins")
+            return
 
         while self.running and self.channel:
             try:
@@ -213,6 +217,7 @@ def init_terminal_handlers(socketio: SocketIO):
             "rows": 24
         }
         """
+        logger.info(f"start_terminal received: host={data.get('host', 'no host')}")
         sid = request.sid
 
         # Close existing session if any

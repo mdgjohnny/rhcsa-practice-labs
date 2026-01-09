@@ -3,11 +3,11 @@
 # =============================================================================
 
 provider "oci" {
-  tenancy_ocid     = var.tenancy_ocid
-  user_ocid        = var.user_ocid
-  fingerprint      = var.fingerprint
-  private_key_path = var.private_key_path
-  region           = var.region
+  tenancy_ocid = var.tenancy_ocid
+  user_ocid    = var.user_ocid
+  fingerprint  = var.fingerprint
+  region       = var.region
+  private_key  = file(var.private_key_path)
 }
 
 # =============================================================================
@@ -68,7 +68,7 @@ resource "oci_core_vcn" "practice_vcn" {
   compartment_id = var.compartment_ocid
   cidr_blocks    = [var.vcn_cidr]
   display_name   = "rhcsa-practice-vcn-${var.session_id}"
-  dns_label      = "rhcsa${substr(var.session_id, 0, 8)}"
+  dns_label      = "rhcsa${replace(substr(var.session_id, 0, 8), "-", "")}"
   freeform_tags  = local.common_tags
 }
 
