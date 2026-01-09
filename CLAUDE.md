@@ -151,13 +151,17 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
    - Added `infra/terraform.tfvars.example` template
    - Covers prerequisites, OCI CLI, Terraform, troubleshooting
 
+8. **Production Hardening** ✅
+   - `gunicorn.conf.py` - Production WSGI config with eventlet
+   - `requirements.txt` - Frozen dependencies
+   - `scripts/run-production.sh` - Production startup script
+   - `rhcsa-labs.service` - Systemd service file
+   - Rate limiting via Flask-Limiter (5 sessions/hour)
+   - Max 1 active session enforced in session manager
+
 ### 🔲 TODO
 
-1. **Production Hardening**
-   - Proper WSGI server (gunicorn)
-   - Rate limiting on session creation
-   - Max 1 active session per user
-   - Secure session token handling
+*All major tasks completed!*
 
 ## Key Files
 
