@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""IMPORTANT: eventlet monkey-patching must happen FIRST."""
+import eventlet
+eventlet.monkey_patch()
+
 """
 RHCSA Practice Labs API with WebSocket support.
 
@@ -20,11 +24,11 @@ from flask_socketio import SocketIO
 # Import the main Flask app
 from app import app, DEBUG, LOG_LEVEL, logger
 
-# Initialize Socket.IO with threading mode (more reliable than eventlet)
+# Initialize Socket.IO with eventlet async mode
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
-    async_mode="threading",  # Use threading instead of eventlet
+    async_mode="eventlet",
     logger=DEBUG,
     engineio_logger=DEBUG,
     ping_timeout=60,
@@ -184,6 +188,5 @@ if __name__ == '__main__':
         host='0.0.0.0',
         port=8080,
         debug=DEBUG,
-        use_reloader=False,  # Disable reloader with threading mode
-        allow_unsafe_werkzeug=True
+        use_reloader=False
     )

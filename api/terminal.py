@@ -6,12 +6,11 @@ in the backend session database, never exposed to the browser.
 
 import logging
 import os
-import select
-import socket
-import threading
 from io import StringIO
 from typing import Optional, TYPE_CHECKING
 
+import eventlet
+from eventlet.green import select, socket
 import paramiko
 from flask import request
 from flask_socketio import SocketIO, emit, disconnect
@@ -51,7 +50,7 @@ class TerminalSession:
 
         self.ssh_client: Optional[paramiko.SSHClient] = None
         self.channel: Optional[paramiko.Channel] = None
-        self.reader_thread: Optional[threading.Thread] = None
+        self.reader_greenlet: Optional[eventlet.greenthread.GreenThread] = None
         self.running = False
         self._socketio = None  # Set during connect
 
@@ -94,10 +93,9 @@ class TerminalSession:
             )
             self.channel.setblocking(0)
 
-            # Start reader thread
+            # Start reader greenlet
             self.running = True
-            self.reader_thread = threading.Thread(target=self._read_output, daemon=True)
-            self.reader_thread.start()
+            self.reader_greenlet = eventlet.spawn(self._read_output)
 
             logger.info(f"SSH connection established for {self.sid}")
             return True
@@ -125,12 +123,11 @@ class TerminalSession:
                 logger.warning(f"Failed to resize terminal {self.sid}: {e}")
 
     def _read_output(self):
-        """Background thread that reads SSH output and emits to client."""
+        """Background greenlet that reads SSH output and emits to client."""
         while self.running and self.channel:
             try:
-                # Use select for non-blocking read with short timeout
-                readable, _, _ = select.select([self.channel], [], [], 0.1)
-                if readable:
+                # Use eventlet-friendly sleep and check for data
+                if self.channel.recv_ready():
                     data = self.channel.recv(4096)
                     if data:
                         # Emit data to the specific client
@@ -145,8 +142,9 @@ class TerminalSession:
                         # Connection closed
                         logger.info(f"SSH channel closed for {self.sid}")
                         break
-            except socket.timeout:
-                continue
+                else:
+                    # Yield to other greenlets
+                    eventlet.sleep(0.05)
             except Exception as e:
                 if self.running:
                     logger.error(f"Error reading from terminal {self.sid}: {e}")
