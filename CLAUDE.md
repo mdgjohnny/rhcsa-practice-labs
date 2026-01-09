@@ -140,24 +140,20 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
    - Task count: 154 → 158 (4 new split tasks)
    - Removed SSH_WRAPPER from bundler (no longer needed)
 
+6. **Background Session Cleanup** ✅
+   - Added `session_cleanup_worker()` in app_socketio.py
+   - Runs every 5 minutes via eventlet.spawn
+   - Auto-terminates expired sessions
+
+7. **OCI Setup / User Onboarding** ✅
+   - Added `SETUP.md` with comprehensive setup guide
+   - Added `scripts/setup-oci.sh` for automated configuration
+   - Added `infra/terraform.tfvars.example` template
+   - Covers prerequisites, OCI CLI, Terraform, troubleshooting
+
 ### 🔲 TODO
 
-1. **Modular Cloud VM Setup / User Onboarding**
-   - Make the cloud VM integration self-service for GitHub users
-   - Don't expose/commit any credentials - keep `terraform.tfvars` gitignored
-   - Create clear onboarding documentation:
-     - How to set up OCI free tier account
-     - How to configure `~/.oci/config` and API keys
-     - How to create `infra/terraform.tfvars` with user's own credentials
-     - Alternative: support other cloud providers (AWS, GCP, local VMs)
-   - Add setup wizard or validation script to check prerequisites
-   - Consider environment variable support as alternative to tfvars file
-
-2. **Background Session Cleanup**
-   - Add background worker/cron to terminate expired sessions
-   - `session_manager.cleanup_expired_sessions()` exists but isn't called
-
-3. **Production Hardening**
+1. **Production Hardening**
    - Proper WSGI server (gunicorn)
    - Rate limiting on session creation
    - Max 1 active session per user
