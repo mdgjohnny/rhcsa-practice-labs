@@ -126,6 +126,14 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
      python -m api.grader.cli test              # Run tests
      ```
 
+### ✅ Recently Completed (Jan 2026)
+
+4. **Frontend v2 API Integration** ✅
+   - Updated `loadTasks()` to use `/api/v2/tasks`
+   - Updated `gradeTask()` to use `/api/v2/grade/{taskId}`
+   - Proper JSON headers for POST requests
+   - Tested end-to-end with task selection and grading
+
 ### 🔲 TODO
 
 1. **Modular Cloud VM Setup / User Onboarding**
