@@ -105,14 +105,13 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
    - **Architecture:**
      - `bundler.py`: Creates self-contained scripts from task files
        - Injects JSON-outputting check() function
-       - Adds run_ssh wrapper for 25 SSH tasks
        - Extracts metadata (target, category, title)
      - `executor.py`: Execution backends (LocalExecutor, RemoteExecutor)
      - `grader.py`: Main grading orchestration
      - `api_integration.py`: Flask service layer
      - `cli.py`: Command-line interface
    - **Same script runs anywhere** - local or remote via SSH
-   - **Tested:** 39 unit tests, all 154 tasks bundle successfully
+   - **Tested:** 38 unit tests, all 158 tasks bundle successfully
    - **API v2 endpoints:**
      - `GET /api/v2/tasks` - List tasks
      - `POST /api/v2/grade` - Grade multiple tasks  
@@ -133,6 +132,13 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
    - Updated `gradeTask()` to use `/api/v2/grade/{taskId}`
    - Proper JSON headers for POST requests
    - Tested end-to-end with task selection and grading
+
+5. **Eliminated run_ssh Abstraction** ✅
+   - Rewrote 25 task files to remove redundant SSH layer
+   - Tasks now execute directly on target nodes (no SSH-to-self)
+   - Split "Target: both" tasks into separate node1/node2 tasks
+   - Task count: 154 → 158 (4 new split tasks)
+   - Removed SSH_WRAPPER from bundler (no longer needed)
 
 ### 🔲 TODO
 
@@ -188,7 +194,7 @@ rhcsa-practice-labs/
 ├── static/
 │   ├── index.html          # Main practice UI
 │   └── terminal-test.html  # Terminal test page
-├── checks/                 # 154 task verification scripts
+├── checks/                 # 158 task verification scripts
 └── exam-grader.sh          # Legacy CLI grader (bash)
 ```
 
