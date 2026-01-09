@@ -1090,7 +1090,8 @@
         // Task Management
         async function loadTasks() {
             try {
-                const res = await fetch('/api/tasks');
+                // Use v2 API with Python grader (more reliable)
+                const res = await fetch('/api/v2/tasks');
                 allTasks = await res.json();
                 renderTaskCheckboxes(allTasks);
                 populateCategoryFilter();
@@ -1681,7 +1682,12 @@
             showToast('info', 'Grading...', task.description);
             
             try {
-                const res = await fetch(`/api/grade-task/${taskId}`, { method: 'POST' });
+                // Use v2 API with Python grader
+                const res = await fetch(`/api/v2/grade/${taskId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
                 const result = await res.json();
                 
                 taskResults.set(taskId, {
