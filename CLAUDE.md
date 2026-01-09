@@ -153,14 +153,15 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
    - Add setup wizard or validation script to check prerequisites
    - Consider environment variable support as alternative to tfvars file
 
-2. **Update Frontend to Use v2 API**
-   - Current UI uses shell-script grader via `/api/run`
-   - Switch to `/api/v2/grade` endpoints for better reliability
-   - Test with cloud sessions end-to-end
-
-3. **Background Session Cleanup**
+2. **Background Session Cleanup**
    - Add background worker/cron to terminate expired sessions
    - `session_manager.cleanup_expired_sessions()` exists but isn't called
+
+3. **Production Hardening**
+   - Proper WSGI server (gunicorn)
+   - Rate limiting on session creation
+   - Max 1 active session per user
+   - Secure session token handling
 
 4. **Production Hardening**
    - Proper WSGI server (gunicorn)
