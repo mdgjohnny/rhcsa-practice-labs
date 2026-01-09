@@ -175,6 +175,25 @@ def terminal_test():
 
 
 # =============================================================================
+# Background Session Cleanup
+# =============================================================================
+
+SESSION_CLEANUP_INTERVAL = 300  # 5 minutes
+
+def session_cleanup_worker():
+    """Background worker that periodically cleans up expired sessions."""
+    while True:
+        eventlet.sleep(SESSION_CLEANUP_INTERVAL)
+        if session_manager:
+            try:
+                cleaned = session_manager.cleanup_expired_sessions()
+                if cleaned > 0:
+                    logger.info(f"Session cleanup: terminated {cleaned} expired session(s)")
+            except Exception as e:
+                logger.error(f"Session cleanup error: {e}")
+
+
+# =============================================================================
 # Main Entry Point
 # =============================================================================
 
@@ -182,6 +201,11 @@ if __name__ == '__main__':
     logger.info(f"Starting RHCSA Practice Labs API with WebSocket support")
     logger.info(f"Debug: {DEBUG}, Log Level: {LOG_LEVEL}")
     logger.info(f"Session manager: {'enabled' if session_manager else 'disabled'}")
+    
+    # Start background session cleanup worker
+    if session_manager:
+        eventlet.spawn(session_cleanup_worker)
+        logger.info(f"Session cleanup worker started (interval: {SESSION_CLEANUP_INTERVAL}s)")
     
     socketio.run(
         app,
