@@ -100,7 +100,25 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
 
 ### 🔲 TODO
 
-1. **Connect Grader to Cloud VMs**
+1. **End-to-End Grading Test** (HIGH PRIORITY)
+   - Verify that tasks can actually be completed and graded on cloud VMs
+   - Each grading script in `checks/task-*.sh` contains the solution (grep to find)
+   - Test workflow: Start practice mode → Complete task in terminal → Submit grading
+   - Start with a single task before attempting full exam mode
+   - Fix any issues with grader connecting to cloud VM IPs
+
+2. **Modular Cloud VM Setup / User Onboarding**
+   - Make the cloud VM integration self-service for GitHub users
+   - Don't expose/commit any credentials - keep `terraform.tfvars` gitignored
+   - Create clear onboarding documentation:
+     - How to set up OCI free tier account
+     - How to configure `~/.oci/config` and API keys
+     - How to create `infra/terraform.tfvars` with user's own credentials
+     - Alternative: support other cloud providers (AWS, GCP, local VMs)
+   - Add setup wizard or validation script to check prerequisites
+   - Consider environment variable support as alternative to tfvars file
+
+3. **Connect Grader to Cloud VMs**
    - Currently grader uses local `config` file for VM IPs
    - Need to update to use active session's IPs
    - Modify `api/app.py` grade endpoints to inject session IPs
