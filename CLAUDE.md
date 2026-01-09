@@ -159,12 +159,6 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
    - Max 1 active session per user
    - Secure session token handling
 
-4. **Production Hardening**
-   - Proper WSGI server (gunicorn)
-   - Rate limiting on session creation
-   - Max 1 active session per user
-   - Secure session token handling
-
 ## Key Files
 
 ```
