@@ -109,39 +109,72 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
 
 ### 🔲 TODO
 
-1. **Rewrite Grader for Robust Local/Remote Support** (HIGH PRIORITY)
-   - Current state: Grading logic is inconsistent across 154 tasks
-     - 25 tasks use explicit `run_ssh` calls (remote-aware)
-     - 129 tasks assume local execution
-     - 23 tasks have complex subshell conditions
-     - 68 tasks have no Target: comment
+1. **Rewrite Grader with Clean Local/Remote Abstraction** (HIGH PRIORITY)
    
-   - **Recommended approach: Option D (Hybrid)**
-     ```
-     For each task:
-     1. Check if task contains 'run_ssh' → run locally (it handles SSH itself)
-     2. Otherwise, for remote mode:
-        - Parse Target: comment (default node1)
-        - Bundle: modified check() function + task script
-        - SSH to target VM, execute bundled script
-        - check() outputs JSON: {"passed":bool,"msg":"...","points":N}
-        - Parse output, update local scoring
-     3. For "both" targets: task script handles multi-node (like task-03)
-     ```
+   **Current state:** Grading logic is inconsistent across 154 tasks
+   - 25 tasks use explicit `run_ssh` calls
+   - 129 tasks assume local execution
+   - 23 tasks have complex subshell conditions
+   - 68 tasks have no Target: comment
+   - Current hack only tested with 1 task (task-100)
    
-   - Why Option D:
-     - Preserves existing run_ssh tasks (no double-wrapping)
-     - Variables/bash logic work naturally (runs in context)
-     - Minimal task file changes
-     - Clean structured output for API
-     - Easy fallback to local mode
+   **Decision: Single clean abstraction that works anywhere**
    
-   - Implementation steps:
-     1. Modify check() to output JSON when REMOTE_MODE=true
-     2. Add task classification (has run_ssh or not)
-     3. Update evaluate_task() to bundle and execute remotely
-     4. Test representative tasks from each category
-     5. Run full test suite
+   The task script + check function should be a **self-contained unit** that can run:
+   - Locally (for development, or when running on the VM itself)
+   - Remotely via SSH (for cloud VMs from control plane)
+   
+   **Implementation approach:**
+   ```
+   evaluate_task(task_file, target_ip=None):
+       1. Read task file content
+       2. Generate self-contained script:
+          ┌─────────────────────────────────────┐
+          │ #!/bin/bash                         │
+          │ # JSON-outputting check function    │
+          │ check() {                           │
+          │   if eval "$1"; then               │
+          │     echo '{"passed":true,...}'     │
+          │   else                              │
+          │     echo '{"passed":false,...}'    │
+          │   fi                                │
+          │ }                                   │
+          │ # --- task content (as-is) ---      │
+          │ TIMEZONE=$(timedatectl show...)     │
+          │ check '[[ "$X" == "$Y" ]]' ...     │
+          └─────────────────────────────────────┘
+       3. Execute:
+          - Local: bash -c "$script"
+          - Remote: ssh user@target "sudo bash -s" <<< "$script"
+       4. Parse JSON lines from output
+       5. Aggregate results
+   ```
+   
+   **Why this approach:**
+   - Same code path for local and remote (just different executor)
+   - Variables and complex bash work naturally (runs in context)
+   - VMs are stateless - just need bash, no pre-installation
+   - Grader updates instantly (no VM rebuild needed)
+   - Easy to test locally during development
+   
+   **Tasks that use run_ssh:**
+   - These 25 tasks explicitly SSH to nodes (e.g., task-03 checks hostname via SSH)
+   - They need NODE1_IP/NODE2_IP environment variables
+   - For cloud mode: inject IPs into the script before execution
+   - The run_ssh function should also be included in the bundle
+   
+   **Implementation steps:**
+   1. Create `generate_check_script(task_content)` - bundles check() + task
+   2. Create `execute_script(script, target=None)` - runs local or remote
+   3. Update `evaluate_task()` to use these functions
+   4. Handle Target: comment to route to correct VM
+   5. For "both" targets: run on node1, let task's run_ssh handle node2
+   6. Test with representative tasks:
+      - Simple local check (task-100: create user)
+      - Variable-based check (task-07: timezone)
+      - run_ssh check (task-03: hostname)
+      - "both" target (task with cross-node verification)
+   7. Run full test suite on all 154 tasks
 
 2. **Modular Cloud VM Setup / User Onboarding**
    - Make the cloud VM integration self-service for GitHub users
