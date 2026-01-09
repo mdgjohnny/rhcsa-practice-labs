@@ -100,83 +100,35 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
 
 ### ✅ Recently Completed (Jan 2026)
 
-3. **Partial End-to-End Grading** ⚠️ (needs more work)
-   - `get_grading_env()` injects cloud session IPs from sessions.db
-   - `exam-grader.sh` accepts IPs via environment variables
-   - Basic remote check execution via SSH works for simple tasks
-   - Tested ONE task (task-100) successfully
-   - **NOT fully verified** - 154 tasks exist, many have different patterns
+3. **Python Grader Module with Clean Abstraction** ✅
+   - New `api/grader/` module replaces shell-script-based grading
+   - **Architecture:**
+     - `bundler.py`: Creates self-contained scripts from task files
+       - Injects JSON-outputting check() function
+       - Adds run_ssh wrapper for 25 SSH tasks
+       - Extracts metadata (target, category, title)
+     - `executor.py`: Execution backends (LocalExecutor, RemoteExecutor)
+     - `grader.py`: Main grading orchestration
+     - `api_integration.py`: Flask service layer
+     - `cli.py`: Command-line interface
+   - **Same script runs anywhere** - local or remote via SSH
+   - **Tested:** 39 unit tests, all 154 tasks bundle successfully
+   - **API v2 endpoints:**
+     - `GET /api/v2/tasks` - List tasks
+     - `POST /api/v2/grade` - Grade multiple tasks  
+     - `POST /api/v2/grade/<task_id>` - Grade single task
+     - `GET /api/v2/status` - Check grader/session status
+   - **CLI usage:**
+     ```bash
+     python -m api.grader.cli list              # List tasks
+     python -m api.grader.cli grade task-100    # Grade task
+     python -m api.grader.cli bundle task-07    # Show bundled script
+     python -m api.grader.cli test              # Run tests
+     ```
 
 ### 🔲 TODO
 
-1. **Rewrite Grader with Clean Local/Remote Abstraction** (HIGH PRIORITY)
-   
-   **Current state:** Grading logic is inconsistent across 154 tasks
-   - 25 tasks use explicit `run_ssh` calls
-   - 129 tasks assume local execution
-   - 23 tasks have complex subshell conditions
-   - 68 tasks have no Target: comment
-   - Current hack only tested with 1 task (task-100)
-   
-   **Decision: Single clean abstraction that works anywhere**
-   
-   The task script + check function should be a **self-contained unit** that can run:
-   - Locally (for development, or when running on the VM itself)
-   - Remotely via SSH (for cloud VMs from control plane)
-   
-   **Implementation approach:**
-   ```
-   evaluate_task(task_file, target_ip=None):
-       1. Read task file content
-       2. Generate self-contained script:
-          ┌─────────────────────────────────────┐
-          │ #!/bin/bash                         │
-          │ # JSON-outputting check function    │
-          │ check() {                           │
-          │   if eval "$1"; then               │
-          │     echo '{"passed":true,...}'     │
-          │   else                              │
-          │     echo '{"passed":false,...}'    │
-          │   fi                                │
-          │ }                                   │
-          │ # --- task content (as-is) ---      │
-          │ TIMEZONE=$(timedatectl show...)     │
-          │ check '[[ "$X" == "$Y" ]]' ...     │
-          └─────────────────────────────────────┘
-       3. Execute:
-          - Local: bash -c "$script"
-          - Remote: ssh user@target "sudo bash -s" <<< "$script"
-       4. Parse JSON lines from output
-       5. Aggregate results
-   ```
-   
-   **Why this approach:**
-   - Same code path for local and remote (just different executor)
-   - Variables and complex bash work naturally (runs in context)
-   - VMs are stateless - just need bash, no pre-installation
-   - Grader updates instantly (no VM rebuild needed)
-   - Easy to test locally during development
-   
-   **Tasks that use run_ssh:**
-   - These 25 tasks explicitly SSH to nodes (e.g., task-03 checks hostname via SSH)
-   - They need NODE1_IP/NODE2_IP environment variables
-   - For cloud mode: inject IPs into the script before execution
-   - The run_ssh function should also be included in the bundle
-   
-   **Implementation steps:**
-   1. Create `generate_check_script(task_content)` - bundles check() + task
-   2. Create `execute_script(script, target=None)` - runs local or remote
-   3. Update `evaluate_task()` to use these functions
-   4. Handle Target: comment to route to correct VM
-   5. For "both" targets: run on node1, let task's run_ssh handle node2
-   6. Test with representative tasks:
-      - Simple local check (task-100: create user)
-      - Variable-based check (task-07: timezone)
-      - run_ssh check (task-03: hostname)
-      - "both" target (task with cross-node verification)
-   7. Run full test suite on all 154 tasks
-
-2. **Modular Cloud VM Setup / User Onboarding**
+1. **Modular Cloud VM Setup / User Onboarding**
    - Make the cloud VM integration self-service for GitHub users
    - Don't expose/commit any credentials - keep `terraform.tfvars` gitignored
    - Create clear onboarding documentation:
@@ -187,16 +139,16 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
    - Add setup wizard or validation script to check prerequisites
    - Consider environment variable support as alternative to tfvars file
 
-3. **Connect Grader to Cloud VMs**
-   - Currently grader uses local `config` file for VM IPs
-   - Need to update to use active session's IPs
-   - Modify `api/app.py` grade endpoints to inject session IPs
+2. **Update Frontend to Use v2 API**
+   - Current UI uses shell-script grader via `/api/run`
+   - Switch to `/api/v2/grade` endpoints for better reliability
+   - Test with cloud sessions end-to-end
 
-4. **Background Session Cleanup**
+3. **Background Session Cleanup**
    - Add background worker/cron to terminate expired sessions
    - `session_manager.cleanup_expired_sessions()` exists but isn't called
 
-5. **Production Hardening**
+4. **Production Hardening**
    - Proper WSGI server (gunicorn)
    - Rate limiting on session creation
    - Max 1 active session per user
@@ -207,9 +159,16 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
 ```
 rhcsa-practice-labs/
 ├── api/
-│   ├── app.py              # Original Flask API (tasks, grading)
+│   ├── app.py              # Flask API (includes v2 grader endpoints)
 │   ├── app_socketio.py     # Extended API with WebSocket + sessions
 │   ├── terminal.py         # WebSocket terminal handler
+│   ├── grader/             # NEW: Python grader module
+│   │   ├── bundler.py      # Creates self-contained scripts
+│   │   ├── executor.py     # Local/Remote execution backends
+│   │   ├── grader.py       # Main grading logic
+│   │   ├── api_integration.py  # Flask service layer
+│   │   ├── cli.py          # Command-line interface
+│   │   └── test_grader.py  # 39 unit tests
 │   └── oci_manager/        # OCI/Terraform session management
 │       ├── session_manager.py
 │       └── terraform_wrapper.py
@@ -221,8 +180,8 @@ rhcsa-practice-labs/
 ├── static/
 │   ├── index.html          # Main practice UI
 │   └── terminal-test.html  # Terminal test page
-├── checks/                 # 150+ task verification scripts
-└── exam-grader.sh          # CLI grader
+├── checks/                 # 154 task verification scripts
+└── exam-grader.sh          # Legacy CLI grader (bash)
 ```
 
 ## Running Locally
