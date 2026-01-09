@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Task: On rhcsa2 - Add custom message to /var/log/messages
+# Task: Add custom message to /var/log/messages, output to /root/customlogmessage
 # Title: Add Custom Log Message
 # Category: operate-systems
-# Confirm with regex, output to /root/customlogmessage
+# Target: node2
 
-check 'run_ssh "$NODE2_IP" "[[ -f /root/customlogmessage ]]" 2>/dev/null' \
-    "File /root/customlogmessage exists on node2" \
+check '[[ -f /root/customlogmessage ]]' \
+    "File /root/customlogmessage exists" \
     "File /root/customlogmessage does not exist"
 
-check 'run_ssh "$NODE2_IP" "grep -q \"RHCSA sample exam\" /root/customlogmessage 2>/dev/null"' \
+check 'grep -q "RHCSA sample exam" /root/customlogmessage 2>/dev/null' \
     "Custom log message captured in output" \
     "Custom log message not found in output"

@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
-# Task: On rhcsa2 - MySQL container as rootless (user santos)
+# Task: MySQL container as rootless (user santos), password "password"
 # Title: MySQL Rootless Container
 # Category: containers
-# Password "password", bind mount /home/santos/mysql to /var/lib/mysql
-# Auto-start via systemd
+# Target: node2
+# Bind mount /home/santos/mysql to /var/lib/mysql, auto-start via systemd
 
-check 'run_ssh "$NODE2_IP" "id santos &>/dev/null"' \
-    "User santos exists on node2" \
+check 'id santos &>/dev/null' \
+    "User santos exists" \
     "User santos does not exist"
 
-check 'run_ssh "$NODE2_IP" "[[ -d /home/santos/mysql ]]"' \
-    "/home/santos/mysql exists on node2" \
+check '[[ -d /home/santos/mysql ]]' \
+    "/home/santos/mysql exists" \
     "/home/santos/mysql does not exist"
 
-check 'run_ssh "$NODE2_IP" "loginctl show-user santos 2>/dev/null | grep -q Linger=yes"' \
-    "Linger enabled for santos on node2" \
+check 'loginctl show-user santos 2>/dev/null | grep -q Linger=yes' \
+    "Linger enabled for santos" \
     "Linger not enabled for santos"
 
-check 'run_ssh "$NODE2_IP" "su - santos -c \"podman ps -a 2>/dev/null | grep -qi mysql\""' \
-    "santos has MySQL container on node2" \
+check 'su - santos -c "podman ps -a 2>/dev/null" | grep -qi mysql' \
+    "santos has MySQL container" \
     "santos does not have MySQL container"

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Task: Set default boot target to multi-user.target on node1
-# Title: Set Boot Target (node1)
+# Task: Set default boot target to multi-user.target on node2
+# Title: Set Boot Target (node2)
 # Category: deploy-maintain
-# Target: node1
+# Target: node2
 
 check 'systemctl get-default | grep -q "multi-user.target"' \
     "Default target is multi-user.target" \

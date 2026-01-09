@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Task: On rhcsa2 - Rootful container with port 443 mapped
+# Task: Rootful container with port 443 mapped, auto-start via systemd
 # Title: Rootful Container (port 443)
 # Category: containers
-# Auto-start via systemd
+# Target: node2
 
-check 'run_ssh "$NODE2_IP" "podman ps -a 2>/dev/null | grep -q 443"' \
-    "Container with port 443 exists on node2" \
-    "No container with port 443 on node2"
+check 'podman ps -a 2>/dev/null | grep -q 443' \
+    "Container with port 443 exists" \
+    "No container with port 443"
 
-check 'run_ssh "$NODE2_IP" "systemctl list-units --type=service | grep -qi container"' \
-    "Container systemd service exists on node2" \
-    "No container systemd service on node2"
+check 'systemctl list-units --type=service | grep -qi container' \
+    "Container systemd service exists" \
+    "No container systemd service"

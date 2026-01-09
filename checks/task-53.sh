@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Task: On rhcsa2 - Set bootloader timeout to 2 seconds
+# Task: Set bootloader timeout to 2 seconds
 # Title: Set Bootloader Timeout
 # Category: deploy-maintain
+# Target: node2
 
-check 'run_ssh "$NODE2_IP" "grep -q \"GRUB_TIMEOUT=2\" /etc/default/grub" 2>/dev/null' \
-    "GRUB timeout set to 2 seconds on node2" \
+check 'grep -q "GRUB_TIMEOUT=2" /etc/default/grub' \
+    "GRUB timeout set to 2 seconds" \
     "GRUB timeout not set to 2 seconds"

@@ -44,42 +44,7 @@ check() {
 }
 '''
 
-# SSH wrapper for tasks that call run_ssh
-# These tasks SSH from node1 to node2 (or vice versa) to verify cross-node config
-SSH_WRAPPER = r'''
-# SSH wrapper for cross-node checks
-# Smart: skips SSH if target is current host (eliminates redundant SSH)
-SSH_OPTS="-o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes"
 
-run_ssh() {
-    local host="$1"
-    shift
-    
-    # Check if target is current host - if so, run directly (no SSH needed)
-    local my_ips=$(hostname -I 2>/dev/null)
-    local my_hostname=$(hostname 2>/dev/null)
-    local my_short=$(hostname -s 2>/dev/null)
-    
-    if [[ " $my_ips " == *" $host "* ]] || \
-       [[ "$host" == "$my_hostname" ]] || \
-       [[ "$host" == "$my_short" ]] || \
-       [[ "$host" == "localhost" ]] || \
-       [[ "$host" == "127.0.0.1" ]]; then
-        # We are on the target host - run command directly
-        eval "$@"
-        return
-    fi
-    
-    # Different host - need to SSH
-    if [[ -n "$SSH_KEY_FILE" && -n "$SSH_USER" ]]; then
-        ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${SSH_USER}@${host}" "sudo $*"
-    elif [[ -n "$ROOT_PASSWORD" ]]; then
-        sshpass -p "$ROOT_PASSWORD" ssh $SSH_OPTS root@"$host" "$*"
-    else
-        ssh $SSH_OPTS root@"$host" "$*"
-    fi
-}
-'''
 
 
 @dataclass
@@ -149,10 +114,6 @@ class TaskBundler:
         
         return TaskMetadata.from_content(task_id, content)
     
-    def uses_run_ssh(self, content: str) -> bool:
-        """Check if task uses run_ssh function."""
-        return 'run_ssh' in content
-    
     def bundle(
         self,
         task_id: str,
@@ -197,11 +158,6 @@ class TaskBundler:
         # Add check function
         parts.append('# Check function (outputs JSON)')
         parts.append(CHECK_FUNCTION)
-        
-        # Add SSH wrapper if task uses run_ssh
-        if self.uses_run_ssh(content):
-            parts.append('# SSH wrapper for cross-node checks')
-            parts.append(SSH_WRAPPER)
         
         # Add metadata as variables
         parts.append('# Task metadata')

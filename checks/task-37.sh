@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
-# Task: On rhcsa2 - Extend lv1 by 64MB without unmounting
+# Task: Extend lv1 by 64MB without unmounting
 # Title: Extend LV Online
 # Category: file-systems
+# Target: node2
 
-LV_SIZE=$(run_ssh "$NODE2_IP" "lvs --noheadings -o lv_size --units m vg1/lv1 2>/dev/null" | tr -d ' m')
+LV_SIZE=$(lvs --noheadings -o lv_size --units m vg1/lv1 2>/dev/null | tr -d ' m')
 
 # Original was 10 LEs * 8MB = 80MB, extended by 64MB = ~144MB
 check '[[ "${LV_SIZE%.*}" -ge 140 ]]' \
-    "lv1 has been extended (size >= 140MB)" \
-    "lv1 has not been extended sufficiently"
+    "lv1 has been extended (size >= 140MB, got ${LV_SIZE}MB)" \
+    "lv1 has not been extended sufficiently (got ${LV_SIZE}MB)"
 
-check 'run_ssh "$NODE2_IP" "df -m /mnt/lvfs1 | tail -1 | awk \"{print \\\$2}\" | grep -q \"^1[34]\"" 2>/dev/null' \
+FS_SIZE=$(df -m /mnt/lvfs1 2>/dev/null | tail -1 | awk '{print $2}')
+check '[[ "$FS_SIZE" -ge 130 ]]' \
     "Filesystem on /mnt/lvfs1 has been extended" \
     "Filesystem on /mnt/lvfs1 has not been extended"

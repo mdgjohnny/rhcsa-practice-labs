@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# Task: On rhcsa2 - Add group20, change /mnt/lvfs1 group to group20
+# Task: Add group20, change /mnt/lvfs1 group to group20, rwx for all
 # Title: Set Directory Group
 # Category: file-systems
-# rwx for owner, group, and others
+# Target: node2
 
-check 'run_ssh "$NODE2_IP" "getent group group20 &>/dev/null" 2>/dev/null' \
-    "Group group20 exists on node2" \
-    "Group group20 does not exist on node2"
+check 'getent group group20 &>/dev/null' \
+    "Group group20 exists" \
+    "Group group20 does not exist"
 
-check 'run_ssh "$NODE2_IP" "stat -c %G /mnt/lvfs1 | grep -q group20" 2>/dev/null' \
-    "/mnt/lvfs1 group is group20 on node2" \
-    "/mnt/lvfs1 group is not group20 on node2"
+check 'stat -c %G /mnt/lvfs1 | grep -q group20' \
+    "/mnt/lvfs1 group is group20" \
+    "/mnt/lvfs1 group is not group20"
 
-check 'run_ssh "$NODE2_IP" "stat -c %a /mnt/lvfs1 | grep -q 777" 2>/dev/null' \
-    "/mnt/lvfs1 has rwx for all on node2" \
+check 'stat -c %a /mnt/lvfs1 | grep -q 777' \
+    "/mnt/lvfs1 has rwx for all" \
     "/mnt/lvfs1 does not have rwx for all"

@@ -81,16 +81,16 @@ check 'true' 'Check passed' 'Check failed'
 '''
         (self.checks_dir / 'task-01.sh').write_text(task_content)
         
-        # Create a task that uses run_ssh
-        ssh_task = '''#!/usr/bin/env bash
-# Task: SSH task
-# Title: SSH Test
+        # Create a second task
+        task2 = '''#!/usr/bin/env bash
+# Task: Second task
+# Title: Task 2
 # Category: networking
-# Target: both
+# Target: node2
 
-check 'run_ssh "$NODE1_IP" hostname' 'SSH works' 'SSH failed'
+check 'hostname' 'Got hostname' 'No hostname'
 '''
-        (self.checks_dir / 'task-02.sh').write_text(ssh_task)
+        (self.checks_dir / 'task-02.sh').write_text(task2)
         
         self.bundler = TaskBundler(self.checks_dir)
     
@@ -123,14 +123,10 @@ check 'run_ssh "$NODE1_IP" hostname' 'SSH works' 'SSH failed'
         script = self.bundler.bundle('task-01', env_vars={'NODE1_IP': '10.0.0.1'})
         self.assertIn("NODE1_IP='10.0.0.1'", script)
     
-    def test_bundle_ssh_task_includes_wrapper(self):
+    def test_bundle_second_task(self):
         script = self.bundler.bundle('task-02')
-        self.assertIn('run_ssh()', script)
-        self.assertIn('SSH_OPTS', script)
-    
-    def test_bundle_non_ssh_task_no_wrapper(self):
-        script = self.bundler.bundle('task-01')
-        self.assertNotIn('run_ssh()', script)
+        self.assertIsNotNone(script)
+        self.assertIn('hostname', script)
     
     def test_list_tasks(self):
         tasks = self.bundler.list_tasks()
@@ -425,13 +421,12 @@ class TestRealTasks(unittest.TestCase):
         self.assertIn('check', script)
     
     def test_bundle_task_03(self):
-        """Test bundling task-03 (uses run_ssh)."""
+        """Test bundling task-03 (hostname check)."""
         bundler = TaskBundler(self.checks_dir)
         script = bundler.bundle('task-03')
         
         self.assertIsNotNone(script)
-        self.assertIn('run_ssh', script)
-        self.assertIn('run_ssh()', script)  # Function should be included
+        self.assertIn('hostname', script)
     
     def test_bundle_task_07(self):
         """Test bundling task-07 (has variable assignment before check)."""

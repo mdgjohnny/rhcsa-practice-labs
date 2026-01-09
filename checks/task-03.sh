@@ -4,6 +4,6 @@
 # Category: networking
 # Target: node1
 
-check 'run_ssh "$NODE1_IP" "hostname -s" 2>/dev/null | grep -q "^rhcsa1$"' \
+check 'hostname -s | grep -q "^rhcsa1$"' \
     "Hostname set to rhcsa1" \
-    "Hostname not set to rhcsa1"
+    "Hostname not set to rhcsa1 (got $(hostname -s))"
