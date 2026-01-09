@@ -11,10 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <!-- Terminal dependencies -->
-    <link href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.3.0/css/xterm.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css" rel="stylesheet">
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.3.0/lib/xterm.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.8.0/lib/addon-fit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -967,7 +967,11 @@
         async function createCloudSession() {
             try {
                 showToast('info', 'Creating session...');
-                const resp = await fetch('/api/sessions', { method: 'POST' });
+                const resp = await fetch('/api/sessions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
                 const data = await resp.json();
                 if (resp.ok) {
                     showToast('success', 'Session Created', 'Click Provision to start VMs');
@@ -2023,11 +2027,13 @@
 
         async function checkCloudSession() {
             try {
-                const resp = await fetch('/api/sessions/active');
-                const session = await resp.json();
-                cloudSession = session;
+                // Get all sessions, not just active ones (to include pending/provisioning)
+                const resp = await fetch('/api/sessions');
+                const sessions = await resp.json();
+                // Return the first non-terminated session
+                cloudSession = sessions.find(s => !['terminated', 'failed'].includes(s.state)) || null;
                 updateTerminalUI();
-                return session;
+                return cloudSession;
             } catch (e) {
                 console.error('Failed to check cloud session:', e);
                 cloudSession = null;
