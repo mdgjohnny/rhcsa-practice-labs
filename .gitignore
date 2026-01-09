@@ -7,6 +7,7 @@ config
 
 # Database
 results.db
+sessions.db
 
 # Python
 .venv/
@@ -15,3 +16,19 @@ __pycache__/
 
 # Agent Artifacts
 CLAUDE.md
+
+# Terraform
+infra/terraform.tfvars
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/*.tfstate
+infra/*.tfstate.backup
+infra/tfplan
+infra/session_key.pem
+
+# Session workspaces
+workspaces/
+
+# SSH keys
+*.pem
+!*.example.pem

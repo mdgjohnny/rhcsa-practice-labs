@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Test - RHCSA Practice Labs</title>
+    <link href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.3.0/css/xterm.min.css" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            margin: 0 0 20px 0;
+            font-size: 1.5rem;
+        }
+        .status {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        .status.connected {
+            background: #064e3b;
+            border: 1px solid #10b981;
+        }
+        .status.disconnected {
+            background: #7f1d1d;
+            border: 1px solid #ef4444;
+        }
+        .status.connecting {
+            background: #78350f;
+            border: 1px solid #f59e0b;
+        }
+        .connection-form {
+            background: #262626;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+            color: #a1a1aa;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #3f3f46;
+            border-radius: 4px;
+            background: #18181b;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #ef4444;
+        }
+        textarea {
+            min-height: 100px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8rem;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        button.primary {
+            background: #ef4444;
+            color: #fff;
+        }
+        button.primary:hover {
+            background: #dc2626;
+        }
+        button.secondary {
+            background: #3f3f46;
+            color: #fff;
+        }
+        button.secondary:hover {
+            background: #52525b;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #terminal-container {
+            background: #000;
+            border-radius: 8px;
+            padding: 10px;
+            height: 500px;
+        }
+        #terminal {
+            height: 100%;
+        }
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        .tab {
+            padding: 8px 16px;
+            background: #262626;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            color: #a1a1aa;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .tab.active {
+            background: #000;
+            color: #fff;
+        }
+        .tab:hover:not(.active) {
+            background: #3f3f46;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💻 Terminal Test</h1>
+        
+        <div id="status" class="status disconnected">
+            ● Disconnected
+        </div>
+
+        <div class="connection-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="host">Host (IP Address)</label>
+                    <input type="text" id="host" placeholder="192.168.1.100">
+                </div>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" value="opc" placeholder="opc">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex: 2;">
+                    <label for="private-key">Private Key (PEM format)</label>
+                    <textarea id="private-key" placeholder="-----BEGIN RSA PRIVATE KEY-----
+...
+-----END RSA PRIVATE KEY-----"></textarea>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="password">Or Password</label>
+                    <input type="password" id="password" placeholder="(alternative to key)">
+                </div>
+            </div>
+            <div class="buttons">
+                <button id="connect-btn" class="primary" onclick="connect()">
+                    Connect
+                </button>
+                <button id="disconnect-btn" class="secondary" onclick="disconnect()" disabled>
+                    Disconnect
+                </button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" id="tab-node1" onclick="switchTab('node1')">
+                rhcsa1 (node1)
+            </button>
+            <button class="tab" id="tab-node2" onclick="switchTab('node2')">
+                rhcsa2 (node2)
+            </button>
+        </div>
+
+        <div id="terminal-container">
+            <div id="terminal"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.3.0/lib/xterm.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.8.0/lib/addon-fit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-web-links@0.9.0/lib/addon-web-links.min.js"></script>
+    <script>
+        // Terminal instances for each node
+        const terminals = {
+            node1: null,
+            node2: null
+        };
+        const fitAddons = {
+            node1: null,
+            node2: null
+        };
+        
+        let socket = null;
+        let activeTab = 'node1';
+        let currentTerminal = null;
+        let currentFitAddon = null;
+
+        // Initialize terminal
+        function initTerminal(nodeId) {
+            const term = new Terminal({
+                cursorBlink: true,
+                fontSize: 14,
+                fontFamily: '"Cascadia Code", "Fira Code", Menlo, Monaco, monospace',
+                theme: {
+                    background: '#000000',
+                    foreground: '#ffffff',
+                    cursor: '#ffffff',
+                    selection: 'rgba(255, 255, 255, 0.3)',
+                    black: '#000000',
+                    red: '#ff5555',
+                    green: '#50fa7b',
+                    yellow: '#f1fa8c',
+                    blue: '#bd93f9',
+                    magenta: '#ff79c6',
+                    cyan: '#8be9fd',
+                    white: '#bfbfbf',
+                    brightBlack: '#4d4d4d',
+                    brightRed: '#ff6e67',
+                    brightGreen: '#5af78e',
+                    brightYellow: '#f4f99d',
+                    brightBlue: '#caa9fa',
+                    brightMagenta: '#ff92d0',
+                    brightCyan: '#9aedfe',
+                    brightWhite: '#e6e6e6'
+                }
+            });
+
+            const fitAddon = new FitAddon.FitAddon();
+            term.loadAddon(fitAddon);
+            
+            const webLinksAddon = new WebLinksAddon.WebLinksAddon();
+            term.loadAddon(webLinksAddon);
+
+            terminals[nodeId] = term;
+            fitAddons[nodeId] = fitAddon;
+
+            return { term, fitAddon };
+        }
+
+        // Switch terminal tab
+        function switchTab(nodeId) {
+            // Update tab UI
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${nodeId}`).classList.add('active');
+
+            // Clear terminal container
+            const container = document.getElementById('terminal');
+            container.innerHTML = '';
+
+            // Create terminal if not exists
+            if (!terminals[nodeId]) {
+                initTerminal(nodeId);
+            }
+
+            // Open terminal in container
+            currentTerminal = terminals[nodeId];
+            currentFitAddon = fitAddons[nodeId];
+            currentTerminal.open(container);
+            currentFitAddon.fit();
+            currentTerminal.focus();
+
+            activeTab = nodeId;
+        }
+
+        // Update status indicator
+        function updateStatus(status, message) {
+            const statusEl = document.getElementById('status');
+            statusEl.className = `status ${status}`;
+            statusEl.innerHTML = `● ${message}`;
+        }
+
+        // Connect to SSH via WebSocket
+        function connect() {
+            const host = document.getElementById('host').value;
+            const username = document.getElementById('username').value || 'opc';
+            const privateKey = document.getElementById('private-key').value;
+            const password = document.getElementById('password').value;
+
+            if (!host) {
+                alert('Please enter a host IP address');
+                return;
+            }
+
+            if (!privateKey && !password) {
+                alert('Please provide either a private key or password');
+                return;
+            }
+
+            updateStatus('connecting', 'Connecting...');
+
+            // Connect to Socket.IO
+            socket = io('/terminal', {
+                transports: ['websocket', 'polling']
+            });
+
+            socket.on('connect', () => {
+                console.log('Socket connected');
+                
+                // Set up terminal input handler
+                currentTerminal.onData(data => {
+                    socket.emit('terminal_input', { data });
+                });
+
+                // Start SSH session
+                socket.emit('start_terminal', {
+                    host,
+                    username,
+                    private_key: privateKey || undefined,
+                    password: password || undefined,
+                    cols: currentTerminal.cols,
+                    rows: currentTerminal.rows
+                });
+            });
+
+            socket.on('terminal_ready', (data) => {
+                console.log('Terminal ready:', data);
+                updateStatus('connected', `Connected to ${data.host}`);
+                document.getElementById('connect-btn').disabled = true;
+                document.getElementById('disconnect-btn').disabled = false;
+            });
+
+            socket.on('terminal_output', (data) => {
+                currentTerminal.write(data.data);
+            });
+
+            socket.on('terminal_error', (data) => {
+                console.error('Terminal error:', data.error);
+                updateStatus('disconnected', `Error: ${data.error}`);
+                currentTerminal.write(`\r\n\x1b[31mError: ${data.error}\x1b[0m\r\n`);
+            });
+
+            socket.on('terminal_disconnected', (data) => {
+                console.log('Terminal disconnected:', data);
+                updateStatus('disconnected', 'Disconnected');
+                currentTerminal.write(`\r\n\x1b[33mConnection closed: ${data.reason}\x1b[0m\r\n`);
+                document.getElementById('connect-btn').disabled = false;
+                document.getElementById('disconnect-btn').disabled = true;
+            });
+
+            socket.on('disconnect', () => {
+                console.log('Socket disconnected');
+                updateStatus('disconnected', 'Disconnected');
+                document.getElementById('connect-btn').disabled = false;
+                document.getElementById('disconnect-btn').disabled = true;
+            });
+        }
+
+        // Disconnect
+        function disconnect() {
+            if (socket) {
+                socket.emit('stop_terminal');
+                socket.disconnect();
+                socket = null;
+            }
+            updateStatus('disconnected', 'Disconnected');
+            document.getElementById('connect-btn').disabled = false;
+            document.getElementById('disconnect-btn').disabled = true;
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (currentFitAddon && currentTerminal) {
+                currentFitAddon.fit();
+                if (socket) {
+                    socket.emit('terminal_resize', {
+                        cols: currentTerminal.cols,
+                        rows: currentTerminal.rows
+                    });
+                }
+            }
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTab('node1');
+        });
+    </script>
+</body>
+</html>
