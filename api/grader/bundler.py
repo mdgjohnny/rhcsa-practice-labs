@@ -48,12 +48,29 @@ check() {
 # These tasks SSH from node1 to node2 (or vice versa) to verify cross-node config
 SSH_WRAPPER = r'''
 # SSH wrapper for cross-node checks
-# Supports key-based or password-based auth
+# Smart: skips SSH if target is current host (eliminates redundant SSH)
 SSH_OPTS="-o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes"
 
 run_ssh() {
     local host="$1"
     shift
+    
+    # Check if target is current host - if so, run directly (no SSH needed)
+    local my_ips=$(hostname -I 2>/dev/null)
+    local my_hostname=$(hostname 2>/dev/null)
+    local my_short=$(hostname -s 2>/dev/null)
+    
+    if [[ " $my_ips " == *" $host "* ]] || \
+       [[ "$host" == "$my_hostname" ]] || \
+       [[ "$host" == "$my_short" ]] || \
+       [[ "$host" == "localhost" ]] || \
+       [[ "$host" == "127.0.0.1" ]]; then
+        # We are on the target host - run command directly
+        eval "$@"
+        return
+    fi
+    
+    # Different host - need to SSH
     if [[ -n "$SSH_KEY_FILE" && -n "$SSH_USER" ]]; then
         ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${SSH_USER}@${host}" "sudo $*"
     elif [[ -n "$ROOT_PASSWORD" ]]; then
