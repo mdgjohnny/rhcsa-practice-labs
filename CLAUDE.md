@@ -84,19 +84,23 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
    - Likely cause: Flask's dev server + threading mode not ideal for WebSocket
    - **Fix needed**: Use production WSGI server (gunicorn + eventlet/gevent) or debug further
 
+### ✅ Recently Completed (Jan 2026)
+
+1. **Fix WebSocket Terminal** ✅
+   - Switched from `threading` to `eventlet` async mode in SocketIO
+   - Added eventlet monkey-patching at module start
+   - Replaced threading.Thread with eventlet.spawn for SSH reader
+   - Terminal connections now stable, no timeout issues
+
+2. **Integrate Terminal into Main UI** ✅
+   - Added split-pane layout: task panel left, terminal panel right
+   - Added node tabs (rhcsa1/rhcsa2) for switching between VMs
+   - Added cloud session management in Settings page
+   - Terminal connects automatically when cloud session is ready
+
 ### 🔲 TODO
 
-1. **Fix WebSocket Terminal** (HIGH PRIORITY)
-   - Debug why `start_session_terminal` events aren't received
-   - Consider: gunicorn with eventlet worker, or switch to polling fallback
-   - Test with: `gunicorn -k eventlet -w 1 api.app_socketio:app`
-
-2. **Integrate Terminal into Main UI**
-   - Add split-pane view to `static/index.html`: tasks on left, terminal on right
-   - Session controls in header (create/destroy/time remaining)
-   - Tab switching between node1/node2
-
-3. **Connect Grader to Cloud VMs**
+1. **Connect Grader to Cloud VMs**
    - Currently grader uses local `config` file for VM IPs
    - Need to update to use active session's IPs
    - Modify `api/app.py` grade endpoints to inject session IPs
