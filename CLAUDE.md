@@ -111,20 +111,37 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
 
 1. **Rewrite Grader for Robust Local/Remote Support** (HIGH PRIORITY)
    - Current state: Grading logic is inconsistent across 154 tasks
-     - Some tasks assume local execution (run checks directly)
-     - Some tasks explicitly use `run_ssh` for remote checks
-     - My quick fix only works for simple local-style checks
-   - Need to:
-     - Audit all task patterns and identify inconsistencies
-     - Design a clean abstraction for local vs remote execution
-     - Ensure ALL 154 tasks work in both modes
-     - Handle complex conditions (variables, multi-line, subshells)
-     - Handle tasks targeting both nodes
-     - Add comprehensive testing
-   - Consider approaches:
-     - Option A: Make all checks use explicit `run_ssh` calls
-     - Option B: Wrap execution context (run entire task script remotely)
-     - Option C: Smart detection based on Target: comment
+     - 25 tasks use explicit `run_ssh` calls (remote-aware)
+     - 129 tasks assume local execution
+     - 23 tasks have complex subshell conditions
+     - 68 tasks have no Target: comment
+   
+   - **Recommended approach: Option D (Hybrid)**
+     ```
+     For each task:
+     1. Check if task contains 'run_ssh' → run locally (it handles SSH itself)
+     2. Otherwise, for remote mode:
+        - Parse Target: comment (default node1)
+        - Bundle: modified check() function + task script
+        - SSH to target VM, execute bundled script
+        - check() outputs JSON: {"passed":bool,"msg":"...","points":N}
+        - Parse output, update local scoring
+     3. For "both" targets: task script handles multi-node (like task-03)
+     ```
+   
+   - Why Option D:
+     - Preserves existing run_ssh tasks (no double-wrapping)
+     - Variables/bash logic work naturally (runs in context)
+     - Minimal task file changes
+     - Clean structured output for API
+     - Easy fallback to local mode
+   
+   - Implementation steps:
+     1. Modify check() to output JSON when REMOTE_MODE=true
+     2. Add task classification (has run_ssh or not)
+     3. Update evaluate_task() to bundle and execute remotely
+     4. Test representative tasks from each category
+     5. Run full test suite
 
 2. **Modular Cloud VM Setup / User Onboarding**
    - Make the cloud VM integration self-service for GitHub users
