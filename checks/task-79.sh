@@ -10,7 +10,7 @@ check '[[ -f /root/essentials.tar ]]' \
     "Archive /root/essentials.tar does not exist"
 
 # Check if archive contains /home and /etc
-check 'tar -tf /root/essentials.tar 2>/dev/null | grep -q "^home\|^etc"' \
+check 'tar -tf /root/essentials.tar 2>/dev/null | grep -qE "^home/|^etc/"' \
     "Archive contains /home and /etc directories" \
     "Archive does not contain expected directories"
 

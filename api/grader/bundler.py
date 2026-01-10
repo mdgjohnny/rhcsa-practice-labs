@@ -146,7 +146,7 @@ class TaskBundler:
         parts = [
             '#!/bin/bash',
             '# Bundled grading script for ' + task_id,
-            'set -o pipefail',
+            # 'set -o pipefail',  # Disabled: breaks grep -q in pipes
             '',
         ]
         

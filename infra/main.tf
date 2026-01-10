@@ -191,6 +191,7 @@ systemctl mask oracle-cloud-agent oracle-cloud-agent-updater 2>/dev/null || true
 # Disable ksplice (kernel live patching - very heavy)
 systemctl disable --now ksplice 2>/dev/null || true
 systemctl mask ksplice 2>/dev/null || true
+rm -f /etc/cron.d/ksplice
 
 # Disable PCP (Performance Co-Pilot) - not needed for practice
 systemctl mask pmcd pmlogger pmie pmproxy 2>/dev/null || true
@@ -269,6 +270,7 @@ systemctl mask oracle-cloud-agent oracle-cloud-agent-updater 2>/dev/null || true
 # Disable ksplice (kernel live patching - very heavy)
 systemctl disable --now ksplice 2>/dev/null || true
 systemctl mask ksplice 2>/dev/null || true
+rm -f /etc/cron.d/ksplice
 
 # Disable PCP (Performance Co-Pilot) - not needed for practice
 systemctl mask pmcd pmlogger pmie pmproxy 2>/dev/null || true

@@ -33,11 +33,11 @@ check 'stat -c %G /groups/data 2>/dev/null | grep -q "data"' \
 
 # Check no others access
 PERMS_SALES=$(stat -c %a /groups/sales 2>/dev/null)
-check '[[ "${PERMS_SALES:2:1}" == "0" ]]' \
+check '[[ "${PERMS_SALES:3:1}" == "0" ]]' \
     "/groups/sales has no access for others" \
     "/groups/sales allows access to others"
 
 PERMS_DATA=$(stat -c %a /groups/data 2>/dev/null)
-check '[[ "${PERMS_DATA:2:1}" == "0" ]]' \
+check '[[ "${PERMS_DATA:3:1}" == "0" ]]' \
     "/groups/data has no access for others" \
     "/groups/data allows access to others"
