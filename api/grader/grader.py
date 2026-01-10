@@ -313,12 +313,12 @@ def create_grader_from_session(
         # Get session
         if session_id:
             cursor.execute("""
-                SELECT session_id, node1_ip, node2_ip, ssh_private_key 
+                SELECT session_id, node1_ip, node2_ip, node1_private_ip, node2_private_ip, ssh_private_key 
                 FROM sessions WHERE session_id = ?
             """, (session_id,))
         else:
             cursor.execute("""
-                SELECT session_id, node1_ip, node2_ip, ssh_private_key 
+                SELECT session_id, node1_ip, node2_ip, node1_private_ip, node2_private_ip, ssh_private_key 
                 FROM sessions 
                 WHERE state IN ('ready', 'active')
                 ORDER BY created_at DESC
@@ -344,9 +344,9 @@ def create_grader_from_session(
             grader.set_env('NODE2_IP', row['node2_ip'])
         
         # Set private IPs (useful for tasks that need to reference other nodes)
-        if row.get('node1_private_ip'):
+        if row['node1_private_ip']:
             grader.set_env('NODE1_PRIVATE_IP', row['node1_private_ip'])
-        if row.get('node2_private_ip'):
+        if row['node2_private_ip']:
             grader.set_env('NODE2_PRIVATE_IP', row['node2_private_ip'])
         
         # Create remote executors
