@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create 1GiB ext4 partition with label "stdlabel". Mount persistently on /mnt/stdfs1.
+# Task: Using /dev/loop1, create a 1GiB ext4 partition with label "stdlabel". Mount persistently on /mnt/stdfs1.
 # Title: Create Labeled ext4 Partition
 # Category: local-storage
 

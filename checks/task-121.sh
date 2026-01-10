@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create 4GiB VG with 2MiB physical extent size. Create 1GiB LV "myfiles" with ext3, mount on /myfiles.
+# Task: Using /dev/loop0, create 4GiB VG with 2MiB physical extent size. Create 1GiB LV "myfiles" with ext3, mount on /myfiles.
 # Title: Create Volume Group and Logical Volume
 # Category: file-systems
 # Target: node1

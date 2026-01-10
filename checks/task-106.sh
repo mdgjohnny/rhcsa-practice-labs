@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a 1GB vfat partition on /dev/sdb. Label it "mylabel" and mount persistently on /mydata.
+# Task: Using /dev/loop0, create a 1GB vfat partition. Label it "mylabel" and mount persistently on /mydata.
 # Title: Create VFAT Partition
 # Category: file-systems
 # Target: node1

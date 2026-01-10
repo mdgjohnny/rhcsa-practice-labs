@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create 280MB LV "lvol1" in "vgtest". Format ext4 and mount on /mnt/mnt1.
+# Task: Using /dev/loop0, create a 280MB LV "lvol1" in VG "vgtest". Format ext4 and mount on /mnt/mnt1.
 # Title: Create Logical Volume
 # Category: local-storage
 

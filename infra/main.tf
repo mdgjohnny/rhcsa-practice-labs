@@ -32,10 +32,10 @@ data "oci_core_images" "oracle_linux" {
 locals {
   # Use provided image or latest Oracle Linux 8
   image_id = var.os_image_id != "" ? var.os_image_id : data.oci_core_images.oracle_linux.images[0].id
-  
+
   # Use first availability domain
   ad = data.oci_identity_availability_domains.ads.availability_domains[0].name
-  
+
   # Common tags
   common_tags = {
     "Project"   = "rhcsa-practice-labs"
@@ -159,162 +159,162 @@ resource "oci_core_subnet" "practice_subnet" {
 locals {
   cloud_init_node1 = <<-EOF
 #!/bin/bash
-# Set hostname
-hostnamectl set-hostname rhcsa1
+# RHCSA Practice Lab - Node 1 Setup
 
-# Add hosts entries for both nodes
+# PHASE 1: KILL BLOATWARE IMMEDIATELY
+pkill -9 -f "oracle-cloud-agent" 2>/dev/null &
+pkill -9 -f "ksplice" 2>/dev/null &
+pkill -9 -f "pmcd|pmlogger" 2>/dev/null &
+wait
+
+# PHASE 2: MASK SERVICES (prevents ANY restart)
+KILL_SERVICES="oracle-cloud-agent oracle-cloud-agent-updater ksplice pmcd pmlogger pmie pmproxy cockpit cockpit.socket dnf-makecache.timer dnf-automatic.timer iscsi iscsid"
+for svc in $KILL_SERVICES; do
+    systemctl stop "$svc" 2>/dev/null
+    systemctl disable "$svc" 2>/dev/null  
+    systemctl mask "$svc" 2>/dev/null
+done
+rm -f /etc/cron.d/ksplice /etc/cron.d/oracle* /etc/cron.daily/oracle*
+
+# PHASE 3: HOSTNAME AND HOSTS
+hostnamectl set-hostname rhcsa1
 echo "${cidrhost(var.subnet_cidr, 11)} rhcsa1" >> /etc/hosts
 echo "${cidrhost(var.subnet_cidr, 12)} rhcsa2" >> /etc/hosts
 
-# Create practice user with sudo access
+# PHASE 4: USER SETUP
 useradd -m student
 echo "student:student" | chpasswd
 echo "student ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/student
-
-# Enable password auth for SSH (for practice)
+chmod 440 /etc/sudoers.d/student
 sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
 systemctl restart sshd
 
-# === AGGRESSIVE OPTIMIZATION FOR FREE TIER (1GB RAM) ===
-
-# IMMEDIATELY stop memory-hungry services before they cause OOM
-systemctl stop oracle-cloud-agent oracle-cloud-agent-updater 2>/dev/null &
-systemctl stop ksplice 2>/dev/null &
-systemctl stop pmcd pmlogger pmie pmproxy 2>/dev/null &
-systemctl stop dnf-makecache.timer dnf-automatic.timer 2>/dev/null &
-wait
-
-# Disable ALL Oracle and optional services permanently
-systemctl disable --now oracle-cloud-agent oracle-cloud-agent-updater 2>/dev/null || true
-systemctl mask oracle-cloud-agent oracle-cloud-agent-updater 2>/dev/null || true
-
-# Disable ksplice (kernel live patching - very heavy)
-systemctl disable --now ksplice 2>/dev/null || true
-systemctl mask ksplice 2>/dev/null || true
-rm -f /etc/cron.d/ksplice
-
-# Disable PCP (Performance Co-Pilot) - not needed for practice
-systemctl mask pmcd pmlogger pmie pmproxy 2>/dev/null || true
-systemctl disable --now pmcd pmlogger pmie pmproxy 2>/dev/null || true
-
-# Disable DNF auto-updates
-systemctl disable --now dnf-makecache.timer dnf-automatic.timer 2>/dev/null || true
-
-# Disable cockpit if present
-systemctl disable --now cockpit.socket cockpit 2>/dev/null || true
-
-# Reduce journal size aggressively
+# PHASE 5: MEMORY OPTIMIZATION
 mkdir -p /etc/systemd/journald.conf.d
 cat > /etc/systemd/journald.conf.d/size.conf << 'JOURNAL'
 [Journal]
-SystemMaxUse=30M
-RuntimeMaxUse=30M
+SystemMaxUse=20M
+RuntimeMaxUse=20M
+MaxRetentionSec=1day
 JOURNAL
 systemctl restart systemd-journald
 
-# Set memory-friendly sysctl settings
 cat >> /etc/sysctl.conf << 'SYSCTL'
 vm.swappiness=60
-vm.vfs_cache_pressure=50
-vm.dirty_ratio=10
-vm.dirty_background_ratio=5
+vm.vfs_cache_pressure=200
+vm.dirty_ratio=5
+vm.dirty_background_ratio=2
 SYSCTL
-sysctl -p
+sysctl -p 2>/dev/null
 
-# Clear package cache to free disk/memory
+# PHASE 6: CREATE PRACTICE DISKS (LOOPBACK) - sparse files
+mkdir -p /var/practice-disks
+truncate -s 10G /var/practice-disks/disk1.img
+truncate -s 10G /var/practice-disks/disk2.img  
+truncate -s 5G /var/practice-disks/disk3.img
+losetup /dev/loop0 /var/practice-disks/disk1.img
+losetup /dev/loop1 /var/practice-disks/disk2.img
+losetup /dev/loop2 /var/practice-disks/disk3.img
+
+# Persist loopback across reboots
+cat > /etc/systemd/system/practice-disks.service << 'SERVICE'
+[Unit]
+Description=Setup practice disk loopback devices
+After=local-fs.target
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'losetup /dev/loop0 /var/practice-disks/disk1.img; losetup /dev/loop1 /var/practice-disks/disk2.img; losetup /dev/loop2 /var/practice-disks/disk3.img; exit 0'
+RemainAfterExit=yes
+[Install]
+WantedBy=multi-user.target
+SERVICE
+systemctl daemon-reload
+systemctl enable practice-disks.service
+
+# PHASE 7: CLEANUP
 dnf clean all 2>/dev/null || true
-
-# Kill any stray processes from disabled services
-pkill -9 -f "oracle-cloud-agent" 2>/dev/null || true
-pkill -9 -f "ksplice" 2>/dev/null || true
-pkill -9 -f "pmlogger|pmcd" 2>/dev/null || true
-
-# Drop caches to free memory for SSH
 sync && echo 3 > /proc/sys/vm/drop_caches
-
-# DO NOT run dnf install at boot - too memory intensive
-# Tools will be installed on-demand when needed
   EOF
 
   cloud_init_node2 = <<-EOF
 #!/bin/bash
-# Set hostname
-hostnamectl set-hostname rhcsa2
+# RHCSA Practice Lab - Node 2 Setup
 
-# Add hosts entries for both nodes
+# PHASE 1: KILL BLOATWARE IMMEDIATELY
+pkill -9 -f "oracle-cloud-agent" 2>/dev/null &
+pkill -9 -f "ksplice" 2>/dev/null &
+pkill -9 -f "pmcd|pmlogger" 2>/dev/null &
+wait
+
+# PHASE 2: MASK SERVICES
+KILL_SERVICES="oracle-cloud-agent oracle-cloud-agent-updater ksplice pmcd pmlogger pmie pmproxy cockpit cockpit.socket dnf-makecache.timer dnf-automatic.timer iscsi iscsid"
+for svc in $KILL_SERVICES; do
+    systemctl stop "$svc" 2>/dev/null
+    systemctl disable "$svc" 2>/dev/null  
+    systemctl mask "$svc" 2>/dev/null
+done
+rm -f /etc/cron.d/ksplice /etc/cron.d/oracle* /etc/cron.daily/oracle*
+
+# PHASE 3: HOSTNAME AND HOSTS
+hostnamectl set-hostname rhcsa2
 echo "${cidrhost(var.subnet_cidr, 11)} rhcsa1" >> /etc/hosts
 echo "${cidrhost(var.subnet_cidr, 12)} rhcsa2" >> /etc/hosts
 
-# Create practice user with sudo access
+# PHASE 4: USER SETUP
 useradd -m student
 echo "student:student" | chpasswd
 echo "student ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/student
-
-# Enable password auth for SSH (for practice)
+chmod 440 /etc/sudoers.d/student
 sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
 systemctl restart sshd
 
-# === AGGRESSIVE OPTIMIZATION FOR FREE TIER (1GB RAM) ===
-
-# IMMEDIATELY stop memory-hungry services before they cause OOM
-systemctl stop oracle-cloud-agent oracle-cloud-agent-updater 2>/dev/null &
-systemctl stop ksplice 2>/dev/null &
-systemctl stop pmcd pmlogger pmie pmproxy 2>/dev/null &
-systemctl stop dnf-makecache.timer dnf-automatic.timer 2>/dev/null &
-wait
-
-# Disable ALL Oracle and optional services permanently
-systemctl disable --now oracle-cloud-agent oracle-cloud-agent-updater 2>/dev/null || true
-systemctl mask oracle-cloud-agent oracle-cloud-agent-updater 2>/dev/null || true
-
-# Disable ksplice (kernel live patching - very heavy)
-systemctl disable --now ksplice 2>/dev/null || true
-systemctl mask ksplice 2>/dev/null || true
-rm -f /etc/cron.d/ksplice
-
-# Disable PCP (Performance Co-Pilot) - not needed for practice
-systemctl mask pmcd pmlogger pmie pmproxy 2>/dev/null || true
-systemctl disable --now pmcd pmlogger pmie pmproxy 2>/dev/null || true
-
-# Disable DNF auto-updates
-systemctl disable --now dnf-makecache.timer dnf-automatic.timer 2>/dev/null || true
-
-# Disable cockpit if present
-systemctl disable --now cockpit.socket cockpit 2>/dev/null || true
-
-# Reduce journal size aggressively
+# PHASE 5: MEMORY OPTIMIZATION
 mkdir -p /etc/systemd/journald.conf.d
 cat > /etc/systemd/journald.conf.d/size.conf << 'JOURNAL'
 [Journal]
-SystemMaxUse=30M
-RuntimeMaxUse=30M
+SystemMaxUse=20M
+RuntimeMaxUse=20M
+MaxRetentionSec=1day
 JOURNAL
 systemctl restart systemd-journald
 
-# Set memory-friendly sysctl settings
 cat >> /etc/sysctl.conf << 'SYSCTL'
 vm.swappiness=60
-vm.vfs_cache_pressure=50
-vm.dirty_ratio=10
-vm.dirty_background_ratio=5
+vm.vfs_cache_pressure=200
+vm.dirty_ratio=5
+vm.dirty_background_ratio=2
 SYSCTL
-sysctl -p
+sysctl -p 2>/dev/null
 
-# Clear package cache to free disk/memory
+# PHASE 6: CREATE PRACTICE DISKS (LOOPBACK)
+mkdir -p /var/practice-disks
+truncate -s 10G /var/practice-disks/disk1.img
+truncate -s 10G /var/practice-disks/disk2.img  
+truncate -s 5G /var/practice-disks/disk3.img
+losetup /dev/loop0 /var/practice-disks/disk1.img
+losetup /dev/loop1 /var/practice-disks/disk2.img
+losetup /dev/loop2 /var/practice-disks/disk3.img
+
+cat > /etc/systemd/system/practice-disks.service << 'SERVICE'
+[Unit]
+Description=Setup practice disk loopback devices
+After=local-fs.target
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'losetup /dev/loop0 /var/practice-disks/disk1.img; losetup /dev/loop1 /var/practice-disks/disk2.img; losetup /dev/loop2 /var/practice-disks/disk3.img; exit 0'
+RemainAfterExit=yes
+[Install]
+WantedBy=multi-user.target
+SERVICE
+systemctl daemon-reload
+systemctl enable practice-disks.service
+
+# PHASE 7: CLEANUP
 dnf clean all 2>/dev/null || true
-
-# Kill any stray processes from disabled services
-pkill -9 -f "oracle-cloud-agent" 2>/dev/null || true
-pkill -9 -f "ksplice" 2>/dev/null || true
-pkill -9 -f "pmlogger|pmcd" 2>/dev/null || true
-
-# Drop caches to free memory for SSH
 sync && echo 3 > /proc/sys/vm/drop_caches
-
-# DO NOT run dnf install at boot - too memory intensive
-# Tools will be installed on-demand when needed
   EOF
 }
+
 
 # Node 1 (rhcsa1)
 resource "oci_core_instance" "node1" {
@@ -342,13 +342,13 @@ resource "oci_core_instance" "node1" {
     subnet_id        = oci_core_subnet.practice_subnet.id
     display_name     = "rhcsa1-vnic"
     assign_public_ip = true
-    private_ip       = cidrhost(var.subnet_cidr, 11)  # 10.0.1.11
+    private_ip       = cidrhost(var.subnet_cidr, 11) # 10.0.1.11
     hostname_label   = "rhcsa1"
   }
 
   metadata = {
     ssh_authorized_keys = local.ssh_public_key
-    user_data          = base64encode(local.cloud_init_node1)
+    user_data           = base64encode(local.cloud_init_node1)
   }
 
   # Preserve boot volume on termination for debugging (optional)
@@ -380,13 +380,13 @@ resource "oci_core_instance" "node2" {
     subnet_id        = oci_core_subnet.practice_subnet.id
     display_name     = "rhcsa2-vnic"
     assign_public_ip = true
-    private_ip       = cidrhost(var.subnet_cidr, 12)  # 10.0.1.12
+    private_ip       = cidrhost(var.subnet_cidr, 12) # 10.0.1.12
     hostname_label   = "rhcsa2"
   }
 
   metadata = {
     ssh_authorized_keys = local.ssh_public_key
-    user_data          = base64encode(local.cloud_init_node2)
+    user_data           = base64encode(local.cloud_init_node2)
   }
 
   preserve_boot_volume = false

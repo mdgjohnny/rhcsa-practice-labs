@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create 200MB swap partition on secondary disk. Mount persistently using UUID in /etc/fstab.
+# Task: Using /dev/loop0, create a 200MB swap partition. Enable persistently using UUID in /etc/fstab.
 # Title: Create Swap with UUID
 # Category: local-storage
 

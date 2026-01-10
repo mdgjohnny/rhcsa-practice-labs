@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create 400MiB LV "lvo2" in "vgo2". Format vfat and mount on /mnt/vfatfs.
+# Task: Using /dev/loop1, create a 400MiB LV "lvo2" in VG "vgo2". Format vfat and mount on /mnt/vfatfs.
 # Title: Create VFAT Logical Volume
 # Category: local-storage
 

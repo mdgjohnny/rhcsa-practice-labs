@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a 2GiB swap partition and enable it persistently via /etc/fstab.
+# Task: Using /dev/loop0, create a 2GiB swap partition and enable it persistently via /etc/fstab.
 # Title: Create Swap Partition
 # Category: file-systems
 # Target: node1

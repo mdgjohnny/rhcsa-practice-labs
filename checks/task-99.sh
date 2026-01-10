@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create Stratis pool on new 10GiB disk. Create volume and mount persistently.
+# Task: Using /dev/loop0, create Stratis pool "practicepool". Create volume "stratisvol" and mount persistently.
 # Title: Create Stratis Volume
 # Category: local-storage
 # Target: node1

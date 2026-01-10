@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: On a new 10GiB disk, create a 5GiB LVM logical volume for swap. Enable persistently.
+# Task: Using /dev/loop0 (10GiB), create a 5GiB LVM logical volume for swap. Enable persistently.
 # Title: Create LVM Swap
 # Category: file-systems
 # Target: node1

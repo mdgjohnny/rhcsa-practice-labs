@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create 1GiB volume group with 512MiB swap logical volume. Mount swap persistently.
+# Task: Using /dev/loop0, create 1GiB volume group with 512MiB swap logical volume. Mount swap persistently.
 # Title: Create Swap Logical Volume
 # Category: file-systems
 # Target: node1
