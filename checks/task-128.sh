@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a user named "student". Configure a MariaDB container to run as a systemd user service for this user. The container should be running when graded.
+# Task: The "student" user is pre-created. Configure a MariaDB container to run as a systemd user service for this user. The container should be running when graded.
 # Title: MariaDB Container User Service
 # Category: containers
 # Target: node1

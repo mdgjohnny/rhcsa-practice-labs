@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a user named "student". Configure the HTTP container (from task-102) as a systemd user service that starts automatically at boot.
+# Task: The "student" user is pre-created. Configure the HTTP container (from task-102) as a systemd user service that starts automatically at boot.
 # Title: HTTP Container Systemd Service
 # Category: operate-systems
 # Target: node1
