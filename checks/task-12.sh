@@ -2,6 +2,7 @@
 # Task: Create /groups/dbadmin and /groups/accounting directories. Configure setgid bit and no access for others.
 # Title: Create Shared Directories with SetGID
 # Category: file-systems
+# Target: node1
 
 check '[[ -d /groups/dbadmin ]]' \
     "Directory /groups/dbadmin exists" \

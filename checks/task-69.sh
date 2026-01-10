@@ -2,6 +2,7 @@
 # Task: As user20: Launch a ubi9 container with SHELL and HOSTNAME environment variables set. Enable linger for user20 for auto-start capability. The container should persist across reboots.
 # Title: Container with Environment Variables
 # Category: containers
+# Target: node1
 # Auto-start via systemd without login
 
 check 'su - user20 -c "podman ps -a 2>/dev/null | grep -qi ubi9"' \

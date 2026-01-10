@@ -2,6 +2,7 @@
 # Task: Install "Development Tools" package group. Capture package info to /var/tmp/systemtools.out
 # Title: Install Package Group
 # Category: deploy-maintain
+# Target: node1
 
 check 'dnf group list installed 2>/dev/null | grep -qi "development tools"' \
     "Development Tools group is installed" \

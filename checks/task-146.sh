@@ -5,9 +5,9 @@
 # Target: node1
 
 
-check 'id account &>/dev/null' \
-    "User account exists" \
-    "User account does not exist"
-check '[[ $(id -u account 2>/dev/null) == "2929" ]]' \
-    "User account has UID 2929" \
-    "User account does not have UID 2929"
+check 'id user40 &>/dev/null' \
+    "User user40 exists" \
+    "User user40 does not exist"
+check '[[ $(id -u user40 2>/dev/null) == "2929" ]]' \
+    "User user40 has UID 2929" \
+    "User user40 does not have UID 2929"

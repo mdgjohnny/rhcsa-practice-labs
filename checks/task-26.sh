@@ -2,6 +2,7 @@
 # Task: Create cron job for user70: find files named "core" in /var, copy to /var/tmp/coredir1, run Mon 1:20 AM.
 # Title: Schedule Cron Job
 # Category: deploy-maintain
+# Target: node1
 
 check '[[ -d /var/tmp/coredir1 ]]' \
     "Directory /var/tmp/coredir1 exists" \

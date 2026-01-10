@@ -2,6 +2,7 @@
 # Task: Search for "essential" (case-insensitive) in /usr/share/dict/linux.words. Save to /var/tmp/pattern.txt
 # Title: Search Files with grep
 # Category: essential-tools
+# Target: node1
 
 check '[[ -f /var/tmp/pattern.txt ]]' \
     "File /var/tmp/pattern.txt exists" \

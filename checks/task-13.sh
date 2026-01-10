@@ -2,6 +2,7 @@
 # Task: Find all files owned by user "edwin" and copy them to /root/edwinfiles/. Preserve file attributes.
 # Title: Find Files by Owner
 # Category: essential-tools
+# Target: node1
 
 check '[[ -d /root/edwinfiles ]]' \
     "Directory /root/edwinfiles exists" \

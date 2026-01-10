@@ -2,6 +2,7 @@
 # Task: Create directories /groups/sales and /groups/account with appropriate structure.
 # Title: Create Group Directories
 # Category: file-systems
+# Target: node1
 # Alex can delete all files (ACL)
 
 check '[[ -d /groups/sales ]]' \

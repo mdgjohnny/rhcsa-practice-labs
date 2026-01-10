@@ -2,6 +2,7 @@
 # Task: Enable the nfs_export_all_rw SELinux boolean persistently. Verify with: getsebool nfs_export_all_rw
 # Title: Toggle SELinux Boolean
 # Category: security
+# Target: node1
 
 check 'getsebool nfs_export_all_rw | grep -q "on"' \
     "Boolean nfs_export_all_rw is on" \

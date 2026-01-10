@@ -2,6 +2,7 @@
 # Task: Configure httpd with DocumentRoot /webfiles. Create index.html with "hello world".
 # Title: Configure Apache DocumentRoot
 # Category: deploy-maintain
+# Target: node1
 # rhcsa2 should be able to access via curl
 
 check '[[ -d /webfiles ]]' \

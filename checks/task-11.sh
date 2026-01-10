@@ -2,6 +2,7 @@
 # Task: Create users edwin and santos in group "dbadmin", and serene and alex in group "accounting". User santos must have UID 1234 and no login shell.
 # Title: Create Users and Groups
 # Category: users-groups
+# Target: node1
 
 check 'id edwin &>/dev/null' \
     "User edwin exists" \

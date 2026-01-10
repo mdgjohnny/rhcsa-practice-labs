@@ -2,6 +2,7 @@
 # Task: Using /dev/loop0, create a 200MB swap partition. Enable persistently using UUID in /etc/fstab.
 # Title: Create Swap with UUID
 # Category: local-storage
+# Target: node1
 
 check 'swapon --show | grep -q partition' \
     "Swap partition is active" \

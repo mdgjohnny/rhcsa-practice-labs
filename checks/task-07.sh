@@ -2,6 +2,7 @@
 # Task: Set the system timezone to America/New_York. Verify with: timedatectl
 # Title: Set System Timezone
 # Category: deploy-maintain
+# Target: node1
 
 TIMEZONE=$(timedatectl show | awk -F'=' '/Timezone/ {print $2}')
 EXPECTED_TIMEZONE="America/New_York"

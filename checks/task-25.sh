@@ -2,6 +2,7 @@
 # Task: Create user "user50" with a non-interactive shell (/sbin/nologin or similar).
 # Title: Create Non-interactive User
 # Category: users-groups
+# Target: node1
 
 check 'id user50 &>/dev/null' \
     "User user50 exists" \

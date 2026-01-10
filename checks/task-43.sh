@@ -2,6 +2,7 @@
 # Task: Search all man pages for keyword "password". Save results to /var/tmp/man.out
 # Title: Search Man Pages
 # Category: essential-tools
+# Target: node1
 
 check '[[ -f /var/tmp/man.out ]]' \
     "File /var/tmp/man.out exists" \

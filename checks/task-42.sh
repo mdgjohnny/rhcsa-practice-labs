@@ -2,6 +2,7 @@
 # Task: Create group "sysadmins" and add users linda and anna as members.
 # Title: Create Group with Members
 # Category: users-groups
+# Target: node1
 # Members can run all admin commands via sudo
 
 check 'getent group sysadmins &>/dev/null' \

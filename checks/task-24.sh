@@ -2,6 +2,7 @@
 # Task: Create user70 with UID 7000, comment "I am user70", and maximum 30 days account inactivity.
 # Title: Create User with Attributes
 # Category: users-groups
+# Target: node1
 
 check 'id user70 &>/dev/null' \
     "User user70 exists" \

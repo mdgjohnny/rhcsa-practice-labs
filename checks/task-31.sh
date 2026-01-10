@@ -2,6 +2,7 @@
 # Task: Create group "group30" with GID 3000. Add user60 and user80 as members.
 # Title: Create Group with GID
 # Category: users-groups
+# Target: node1
 # Create /sdata with setgid, group write, owned by root:group30
 
 check 'getent group group30 &>/dev/null' \

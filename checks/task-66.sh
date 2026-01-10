@@ -2,6 +2,7 @@
 # Task: Add port 8400/UDP to the public firewall zone. Change must be persistent across reboots.
 # Title: Add Firewall UDP Port
 # Category: security
+# Target: node1
 
 check 'firewall-cmd --zone=public --list-ports | grep -q "8400/udp"' \
     "Port 8400/UDP is open in public zone" \

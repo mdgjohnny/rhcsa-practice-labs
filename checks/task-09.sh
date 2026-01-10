@@ -2,6 +2,7 @@
 # Task: Configure /etc/skel so that all new users automatically get a file named "CONGRATS" in their home directory.
 # Title: Configure Skeleton Directory
 # Category: users-groups
+# Target: node1
 # after user creation
 
 check ' [[ -f /etc/skel/CONGRATS ]] ' \

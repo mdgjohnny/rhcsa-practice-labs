@@ -4,8 +4,10 @@
 # Category: users-groups
 # Target: node1
 
+check 'grep -E "^PASS_MIN_LEN[[:space:]]+[6-9]|^PASS_MIN_LEN[[:space:]]+[0-9][0-9]" /etc/login.defs &>/dev/null' \
+    "Minimum password length is 6 or more" \
+    "Minimum password length not set to 6+"
 
-check 'id password &>/dev/null' \
-    "User password exists" \
-    "User password does not exist"
-# Check /etc/login.defs for password policies
+check 'grep -E "^PASS_MIN_DAYS[[:space:]]+[3-9]|^PASS_MIN_DAYS[[:space:]]+[0-9][0-9]" /etc/login.defs &>/dev/null' \
+    "Minimum password age is 3 days or more" \
+    "Minimum password age not set to 3+ days"

@@ -2,6 +2,7 @@
 # Task: Set the SELinux type of /usr/testfile1 to shadow_t. The change must be persistent.
 # Title: Set SELinux File Type
 # Category: security
+# Target: node1
 # Context should survive relabeling
 
 check '[[ -f /usr/testfile1 ]]' \

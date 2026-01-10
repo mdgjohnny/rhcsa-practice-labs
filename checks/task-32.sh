@@ -2,6 +2,7 @@
 # Task: Create /var/dir1 with full permissions (777) and sticky bit set.
 # Title: Create Directory with Sticky Bit
 # Category: file-systems
+# Target: node1
 # Non-owners cannot delete files
 
 check '[[ -d /var/dir1 ]]' \

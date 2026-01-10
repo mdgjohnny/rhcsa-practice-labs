@@ -2,6 +2,7 @@
 # Task: Using /dev/loop0, create a 280MB LV "lvol1" in VG "vgtest". Format ext4 and mount on /mnt/mnt1.
 # Title: Create Logical Volume
 # Category: local-storage
+# Target: node1
 
 check 'lvs vgtest/lvol1 &>/dev/null' \
     "Logical volume lvol1 exists in vgtest" \

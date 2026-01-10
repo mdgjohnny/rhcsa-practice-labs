@@ -2,6 +2,7 @@
 # Task: Create directory /direct01 and apply the same SELinux context as /root. Context must persist after relabeling.
 # Title: Apply SELinux Contexts
 # Category: security
+# Target: node1
 
 check '[[ -d /direct01 ]]' \
     "Directory /direct01 exists" \

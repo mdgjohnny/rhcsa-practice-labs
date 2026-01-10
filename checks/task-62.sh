@@ -2,6 +2,7 @@
 # Task: Configure Chrony to sync with hardware clock. Remove all other NTP server sources.
 # Title: Configure Time Synchronization
 # Category: deploy-maintain
+# Target: node1
 
 check 'systemctl is-active chronyd &>/dev/null' \
     "chronyd service is running" \

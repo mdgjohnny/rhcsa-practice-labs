@@ -2,6 +2,7 @@
 # Task: Using /dev/loop1, create a 400MiB LV "lvo2" in VG "vgo2". Format vfat and mount on /mnt/vfatfs.
 # Title: Create VFAT Logical Volume
 # Category: local-storage
+# Target: node1
 
 check 'lvs vgo2/lvo2 &>/dev/null' \
     "Logical volume lvo2 exists in vgo2" \

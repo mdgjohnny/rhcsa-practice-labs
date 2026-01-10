@@ -2,6 +2,7 @@
 # Task: Create directory for group100 (with user100, user200). Set sticky bit to prevent deletion of others' files.
 # Title: Create Collaborative Directory
 # Category: file-systems
+# Target: node1
 
 check '[[ -d /shared ]]' \
     "Directory /shared exists" \

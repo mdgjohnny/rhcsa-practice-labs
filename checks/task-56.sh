@@ -2,6 +2,7 @@
 # Task: Set the tuned profile to "powersave" for power optimization.
 # Title: Set Powersave Tuned Profile
 # Category: operate-systems
+# Target: node1
 
 ACTIVE_PROFILE=$(tuned-adm active 2>/dev/null | awk '{print $NF}')
 

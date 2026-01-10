@@ -2,6 +2,7 @@
 # Task: Create user "bob" with a shell that only allows password changes, preventing normal command execution.
 # Title: Create Restricted User
 # Category: users-groups
+# Target: node1
 
 check 'id bob &>/dev/null' \
     "User bob exists" \

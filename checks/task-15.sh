@@ -2,6 +2,7 @@
 # Task: List files from "setup" package containing "hosts". Save output to /var/tmp/setup.pkg
 # Title: List Package Files
 # Category: deploy-maintain
+# Target: node1
 
 check '[[ -f /var/tmp/setup.pkg ]]' \
     "File /var/tmp/setup.pkg exists" \

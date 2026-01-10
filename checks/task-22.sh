@@ -2,6 +2,7 @@
 # Task: Export homes for user100, user200, user300 via NFS. Auto-mount under /home1 using autofs.
 # Title: NFS Autofs Home Directories
 # Category: file-systems
+# Target: node1
 
 check 'id user100 &>/dev/null' \
     "User user100 exists" \

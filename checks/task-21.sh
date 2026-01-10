@@ -2,6 +2,7 @@
 # Task: Create group "group10" with user20 and user30 as secondary members.
 # Title: Create Group with Members
 # Category: users-groups
+# Target: node1
 
 check 'getent group group10 &>/dev/null' \
     "Group group10 exists" \

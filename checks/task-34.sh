@@ -2,6 +2,7 @@
 # Task: Using /dev/loop1, create a 1GiB ext4 partition with label "stdlabel". Mount persistently on /mnt/stdfs1.
 # Title: Create Labeled ext4 Partition
 # Category: local-storage
+# Target: node1
 
 check '[[ -d /mnt/stdfs1 ]]' \
     "Directory /mnt/stdfs1 exists" \

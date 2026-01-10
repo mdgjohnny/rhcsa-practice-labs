@@ -2,6 +2,7 @@
 # Task: Lock the user70 account. Save the lock line from /etc/shadow to /var/tmp/user70.lock
 # Title: Lock User Account
 # Category: users-groups
+# Target: node1
 
 check 'passwd -S user70 2>/dev/null | grep -qE "^user70 L|^user70.*locked"' \
     "User user70 account is locked" \

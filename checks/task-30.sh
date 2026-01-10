@@ -2,6 +2,7 @@
 # Task: Change group ownership of /mnt/mnt1 to "group10".
 # Title: Set Directory Group
 # Category: file-systems
+# Target: node1
 # rwx for group, no access for others
 
 check 'stat -c %G /mnt/mnt1 2>/dev/null | grep -q group10' \

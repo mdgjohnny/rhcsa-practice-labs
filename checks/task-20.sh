@@ -2,6 +2,7 @@
 # Task: Create user10, user20, user30 with password "Temp1234". Expire user10 and user30 on Dec 31, 2025.
 # Title: Create Users with Expiry
 # Category: users-groups
+# Target: node1
 
 check 'id user10 &>/dev/null' \
     "User user10 exists" \
