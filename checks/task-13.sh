@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Find all files owned by user edwin and copy them to /root/edwinfiles
-# Title: Find Files by Owner (edwin)
+# Task: Find all files owned by user "edwin" and copy them to /root/edwinfiles/. Preserve file attributes.
+# Title: Find Files by Owner
 # Category: essential-tools
 
 check '[[ -d /root/edwinfiles ]]' \

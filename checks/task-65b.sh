@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Verify /var/tmp/remote contains copied files from node1
-# Title: Verify SSH Copy (node2)
+# Task: Verify that /var/tmp/remote contains files copied from node1 via SSH.
+# Title: Verify SSH Copy
 # Category: security
 # Target: node2
 

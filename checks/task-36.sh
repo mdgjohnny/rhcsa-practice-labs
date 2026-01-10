@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Add group20, change /mnt/lvfs1 group to group20, rwx for all
-# Title: Set Directory Group
+# Task: Change /mnt/lvfs1 group to "group20". Set permissions rwx for all.
+# Title: Set Directory Group Ownership
 # Category: file-systems
 # Target: node2
 

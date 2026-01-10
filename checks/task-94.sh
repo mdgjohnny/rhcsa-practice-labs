@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create edwin/santos in livingopensource, serene/alex in operations; santos UID 1234 no shell
-# Title: Create Users (livingopensource/operations)
+# Task: Create edwin/santos in "livingopensource" group, serene/alex in "operations". Santos: UID 1234, no shell.
+# Title: Create Users in Groups
 # Category: users-groups
 # Target: node1
 

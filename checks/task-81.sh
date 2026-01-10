@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Set up passwordless SSH-based authentication between both nodes
-# Title: Passwordless SSH (both nodes)
+# Task: Set up passwordless SSH authentication between both nodes in both directions.
+# Title: Configure Bidirectional SSH Keys
 # Category: networking
 # Target: both
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Schedule cron job to run 'touch /etc/motd' Mon-Fri at 2am
+# Task: Create cron job to run "touch /etc/motd" Monday through Friday at 2:00 AM.
 # Title: Schedule Cron Job
 # Category: operate-systems
 # Target: node1

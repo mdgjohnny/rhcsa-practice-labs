@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create sales/account groups with joana/john in sales, laura/beatrix in account
-# Title: Create Users in Groups (sales/account)
+# Task: Create sales group (joana, john) and account group (laura, beatrix).
+# Title: Create Users in Groups
 # Category: users-groups
 # Target: node1
 

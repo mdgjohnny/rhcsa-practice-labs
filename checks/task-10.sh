@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Set password policy: expire after 90 days, minimum 9 characters
-# Title: Password Expiry Policy
+# Task: Configure password aging: maximum 90 days validity. Apply to /etc/login.defs for new users.
+# Title: Set Password Aging Policy
 # Category: users-groups
 
 

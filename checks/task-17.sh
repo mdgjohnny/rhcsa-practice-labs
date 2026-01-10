@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Export /share1 on rhcsa1 via NFS
-# Title: NFS Export (node1)
+# Task: Create /share1 directory and export it via NFS. Ensure nfs-server service is running.
+# Title: Export Directory via NFS
 # Category: file-systems
 # Target: node1
 

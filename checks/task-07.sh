@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Set system timezone to America/New_York on node1
+# Task: Set the system timezone to America/New_York. Verify with: timedatectl
 # Title: Set System Timezone
 # Category: deploy-maintain
 

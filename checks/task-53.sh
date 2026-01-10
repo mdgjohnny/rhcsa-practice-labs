@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Set bootloader timeout to 2 seconds
+# Task: Set GRUB bootloader timeout to 2 seconds.
 # Title: Set Bootloader Timeout
 # Category: deploy-maintain
 # Target: node2

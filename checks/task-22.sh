@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: NFS export homes for user100/200/300, auto-mount under /home1 on rhcsa1
+# Task: Export homes for user100, user200, user300 via NFS. Auto-mount under /home1 using autofs.
 # Title: NFS Autofs Home Directories
 # Category: file-systems
 

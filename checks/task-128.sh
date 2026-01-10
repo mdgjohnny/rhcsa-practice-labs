@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Configure mariadb container as systemd user service
-# Title: Container Systemd User Service
+# Task: Configure mariadb container as systemd user service.
+# Title: Container User Service
 # Category: containers
 # Target: node1
 

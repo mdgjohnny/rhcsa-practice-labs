@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Determine and apply recommended tuned profile
+# Task: Determine the recommended tuned profile for this system and apply it.
 # Title: Apply Tuned Profile
 # Category: operate-systems
 # Target: node2

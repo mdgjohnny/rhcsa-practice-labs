@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: group100 (user100, user200) collaborates on /shared with sticky bit (no delete others' files)
-# Title: Collaborative Directory (sticky bit)
+# Task: Create directory for group100 (with user100, user200). Set sticky bit to prevent deletion of others' files.
+# Title: Create Collaborative Directory
 # Category: file-systems
 
 check '[[ -d /shared ]]' \

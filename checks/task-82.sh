@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Ensure that both nodes support graphical applications through the SSH session
-# Title: SSH X11 Forwarding
+# Task: Configure SSH to support X11 forwarding for graphical applications.
+# Title: Enable SSH X11 Forwarding
 # Category: networking
 # Target: both
 

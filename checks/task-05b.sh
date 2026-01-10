@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Configure /etc/hosts so node2 can ping rhcsa1 by hostname
-# Title: Configure /etc/hosts (node2)
+# Task: Add an entry to /etc/hosts so that "rhcsa1" resolves to the correct IP address. Verify with: ping rhcsa1
+# Title: Configure Host Resolution
 # Category: networking
 # Target: node2
 

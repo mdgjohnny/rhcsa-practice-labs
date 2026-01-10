@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Extend lv1 by 64MB without unmounting
-# Title: Extend LV Online
+# Task: Extend logical volume lv1 by 64MB without unmounting. Resize filesystem to use new space.
+# Title: Extend Logical Volume Online
 # Category: file-systems
 # Target: node2
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create LV lvol1 (280MB) in vgtest, mount ext4 on /mnt/mnt1
-# Title: Create LV & Mount (ext4)
+# Task: Create 280MB LV "lvol1" in "vgtest". Format ext4 and mount on /mnt/mnt1.
+# Title: Create Logical Volume
 # Category: local-storage
 
 check 'lvs vgtest/lvol1 &>/dev/null' \

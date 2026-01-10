@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create group10 with user20 and user30 as secondary members
+# Task: Create group "group10" and add user20 and user30 as secondary group members.
 # Title: Create Group with Members
 # Category: users-groups
 # Target: node1

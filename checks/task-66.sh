@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Add HTTP port 8400/UDP to public firewall zone persistently
-# Title: Firewall UDP Port
+# Task: Add port 8400/UDP to the public firewall zone. Change must be persistent across reboots.
+# Title: Add Firewall UDP Port
 # Category: security
 
 check 'firewall-cmd --zone=public --list-ports | grep -q "8400/udp"' \

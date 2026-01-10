@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: List files from setup package containing "hosts" to /var/tmp/setup.pkg
+# Task: List files from "setup" package containing "hosts". Save output to /var/tmp/setup.pkg
 # Title: List Package Files
 # Category: deploy-maintain
 

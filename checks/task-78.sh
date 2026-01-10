@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Redirect both stdout and stderr of 'ls -al wergihl *' to /tmp/lsoutput
-# Title: Redirect stdout/stderr
+# Task: Redirect both stdout and stderr of "ls -al wergihl *" to /tmp/lsoutput.
+# Title: Redirect Output Streams
 # Category: essential-tools
 # Target: node1
 

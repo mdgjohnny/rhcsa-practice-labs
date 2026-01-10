@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Set SELinux type shadow_t on /usr/testfile1
+# Task: Set the SELinux type of /usr/testfile1 to shadow_t. The change must be persistent.
 # Title: Set SELinux File Type
 # Category: security
 # Context should survive relabeling

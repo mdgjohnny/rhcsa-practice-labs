@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create users laura/linda in group livingopensource, lisa/lori in group operations
-# Title: Create Users in Groups
+# Task: Create users laura and linda in group "livingopensource", and users lisa and lori in group "operations".
+# Title: Create Users with Group Membership
 # Category: users-groups
 # Target: node1
 

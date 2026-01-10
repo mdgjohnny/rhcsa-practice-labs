@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Configure mariadb container from task-75 as systemd user container
+# Task: Configure MariaDB container from task-75 as systemd user service for auto-start.
 # Title: Container Systemd Service
 # Category: containers
 # Target: node2

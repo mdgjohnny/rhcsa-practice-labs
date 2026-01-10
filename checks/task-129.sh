@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create 500MiB ext4 partition on second disk, mount on /mydata with label mydata
-# Title: Create ext4 Partition with Label
+# Task: Create 500MiB ext4 partition on second disk with label "mydata". Mount persistently on /mydata.
+# Title: Create Labeled Partition
 # Category: file-systems
 # Target: node1
 

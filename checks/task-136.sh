@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Install httpd and configure to listen on port 8080
-# Title: Apache on Port 8080
+# Task: Install httpd and configure it to listen on port 8080 instead of default port 80.
+# Title: Configure Apache on Custom Port
 # Category: deploy-maintain
 # Target: node1
 

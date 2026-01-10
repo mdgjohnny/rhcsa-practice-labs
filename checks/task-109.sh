@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create shared directories /groups/livingopensource and /groups/operations with proper permissions
-# Title: Shared Group Directories
+# Task: Create /groups/livingopensource and /groups/operations with proper ownership and permissions.
+# Title: Create Shared Directories
 # Category: users-groups
 # Target: node1
 

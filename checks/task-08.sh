@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Attach RHEL 9 ISO as /rhel9.iso, mount on /repo, configure BaseOS and AppStream repos
-# Title: Mount RHEL ISO & Configure Repos
+# Task: Mount RHEL 9 ISO at /rhel9.iso to /repo directory. Configure both BaseOS and AppStream yum repositories from the mount.
+# Title: Mount ISO and Configure Repositories
 # Category: file-systems
 
 ISO_FILENAME="${ISO_FILENAME:-rhel9.iso}"

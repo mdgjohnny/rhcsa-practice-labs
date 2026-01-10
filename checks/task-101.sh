@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Install and enable vsftpd service to start at boot
-# Title: Install & Enable vsftpd
+# Task: Install vsftpd package and configure it to start automatically at boot. Verify: systemctl is-enabled vsftpd
+# Title: Install and Enable vsftpd
 # Category: operate-systems
 # Target: node1
 

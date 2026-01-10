@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create compressed archive of /usr/lib as /var/tmp/usr.tar.bz2
+# Task: Create bzip2-compressed tar archive of /usr/lib. Save as /var/tmp/usr.tar.bz2
 # Title: Create Compressed Archive
 # Category: essential-tools
 # Target: node2

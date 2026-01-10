@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create Stratis volume on new 10GiB disk, mount persistently
-# Title: Stratis Volume on New Disk
+# Task: Create Stratis pool on new 10GiB disk. Create volume and mount persistently.
+# Title: Create Stratis Volume
 # Category: local-storage
 # Target: node1
 

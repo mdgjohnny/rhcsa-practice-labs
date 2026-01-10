@@ -1156,10 +1156,12 @@
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2 mb-1">
                                         <span class="text-xs font-mono text-gray-400 bg-gray-700/50 px-1.5 py-0.5 rounded">${t.id}</span>
+                                        <span class="text-xs px-1.5 py-0.5 rounded bg-gray-700/30 text-gray-400 border border-white/5">${t.target || 'node1'}</span>
                                         <span class="text-xs font-bold px-1.5 py-0.5 rounded ${(t.points || 1) >= 3 ? 'text-red-400 border border-red-500/20 bg-red-500/10' : (t.points || 1) >= 2 ? 'text-yellow-400 border border-yellow-500/20 bg-yellow-500/10' : 'text-green-400 border border-green-500/20 bg-green-500/10'}">${(t.points || 1) >= 3 ? 'HARD' : (t.points || 1) >= 2 ? 'MED' : 'EASY'}</span>
                                         <span class="ml-auto text-xs text-gray-500">${t.points || 1}pt</span>
                                     </div>
-                                    <p class="text-gray-300 text-sm leading-relaxed group-hover/item:text-white">${t.description || t.id}</p>
+                                    <h4 class="text-white font-medium mb-1 group-hover/item:text-primary transition-colors">${t.title || t.id}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.description || ''}</p>
                                 </div>
                             </label>
                         `).join('')}
@@ -1188,6 +1190,7 @@
             let filtered = allTasks;
             if (cat) filtered = filtered.filter(t => t.category === cat);
             if (search) filtered = filtered.filter(t => 
+                (t.title || '').toLowerCase().includes(search) ||
                 (t.description || '').toLowerCase().includes(search) || 
                 (t.id || '').toLowerCase().includes(search)
             );

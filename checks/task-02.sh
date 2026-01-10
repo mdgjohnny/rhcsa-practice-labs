@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Configure network on node2 with IP 192.168.0.242/24, gateway 192.168.0.1, DNS 192.168.0.1
-# Title: Configure Network (node2)
+# Task: Configure the network interface with static IP 192.168.0.242/24, gateway 192.168.0.1, and DNS server 192.168.0.1. Changes must persist across reboots.
+# Title: Configure Static IP Address
 # Category: networking
 # Target: node2
 

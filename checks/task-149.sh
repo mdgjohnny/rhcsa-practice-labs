@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Set /mnt/mnt1 group to group10 with rwx for group, no access for others
-# Title: Set Directory Group & Permissions
+# Task: Set /mnt/mnt1 group to "group10". Configure rwx for group members, no access for others.
+# Title: Set Directory Permissions
 # Category: users-groups
 # Target: node1
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Flip the SELinux boolean nfs_export_all_rw persistently
-# Title: Set SELinux Boolean
+# Task: Enable the nfs_export_all_rw SELinux boolean persistently. Verify with: getsebool nfs_export_all_rw
+# Title: Toggle SELinux Boolean
 # Category: security
 
 check 'getsebool nfs_export_all_rw | grep -q "on"' \

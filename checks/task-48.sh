@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Allow user20 to use sudo without password prompt
-# Title: Passwordless Sudo (user20)
+# Task: Configure user20 to execute sudo commands without password prompt.
+# Title: Configure Passwordless Sudo
 # Category: users-groups
 
 check 'grep -rq "user20.*NOPASSWD.*ALL\|user20.*NOPASSWD:.*ALL" /etc/sudoers /etc/sudoers.d/ 2>/dev/null' \

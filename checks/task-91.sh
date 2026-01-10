@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Mount installation ISO on /repo, configure as only repository
+# Task: Mount installation ISO on /repo. Configure as the only yum repository.
 # Title: Configure ISO Repository
 # Category: deploy-maintain
 # Target: node1

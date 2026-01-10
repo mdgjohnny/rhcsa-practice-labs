@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Configure /etc/skel to copy NEWFILE to new user home directories
-# Title: Configure /etc/skel (NEWFILE)
+# Task: Configure /etc/skel to include a file named "NEWFILE" for all new user accounts.
+# Title: Configure Skeleton Directory
 # Category: users-groups
 # Target: node1
 

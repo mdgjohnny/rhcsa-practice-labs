@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create group sysadmins, add linda and anna
+# Task: Create group "sysadmins" and add users linda and anna as members.
 # Title: Create Group with Members
 # Category: users-groups
 # Members can run all admin commands via sudo

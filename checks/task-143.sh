@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Configure root prompt to show hostname, username, and working directory
+# Task: Configure root shell prompt to show hostname, username, and working directory.
 # Title: Customize Shell Prompt
 # Category: networking
 # Target: node1

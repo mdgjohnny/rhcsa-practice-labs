@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Set SELinux to permissive mode
-# Title: SELinux Permissive Mode
+# Task: Set SELinux to permissive mode persistently. System must boot in permissive mode.
+# Title: Set SELinux Mode
 # Category: security
 # Target: node1
 

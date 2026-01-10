@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Rootless container as user80 with /data01 mount, auto-start via systemd
-# Title: Rootless Container (user80)
+# Task: As user80, create rootless container with /data01 mount. Configure systemd auto-start.
+# Title: Rootless Container Service
 # Category: containers
 # Target: node2
 

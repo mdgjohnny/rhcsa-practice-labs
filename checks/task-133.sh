@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Find all SUID files and save list to /root/suidfiles
-# Title: Find SUID Files
+# Task: Find all files with the SetUID bit set on the system. Save the list to /root/suidfiles.
+# Title: Find SetUID Files
 # Category: users-groups
 # Target: node1
 

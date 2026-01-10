@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Launch ubi9 container as user20 with SHELL and HOSTNAME env vars, auto-start via systemd
+# Task: As user20, launch ubi9 container with SHELL and HOSTNAME env vars. Configure systemd auto-start.
 # Title: Container with Env Variables
 # Category: containers
 # Target: node1

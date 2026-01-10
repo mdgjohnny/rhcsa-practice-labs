@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create LV lv1 (10 LEs) in vg1 (PE size 8MB), XFS filesystem, mount on /mnt/lvfs1
-# Title: Create LV (custom PE size)
+# Task: Create VG "vg1" with 8MB PE size. Create LV "lv1" with 10 extents. Format XFS and mount on /mnt/lvfs1.
+# Title: Create LV with Custom PE Size
 # Category: local-storage
 # Target: node2
 

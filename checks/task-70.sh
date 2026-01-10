@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Launch rootless container as user100 with /data01 mount
+# Task: As user100, launch rootless container with /data01 bind mount.
 # Title: Rootless Container with Mount
 # Category: containers
 # KERN and SHELL variables, auto-start via systemd

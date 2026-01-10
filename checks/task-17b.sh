@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Mount /share1 from rhcsa1 to /share2 on rhcsa2 persistently
-# Title: NFS Mount (node2)
+# Task: Mount /share1 from rhcsa1 to /share2 on this host. Mount must be persistent across reboots.
+# Title: Mount NFS Share
 # Category: file-systems
 # Target: node2
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Add http service to external firewalld zone persistently
-# Title: Firewall HTTP Service
+# Task: Add the http service to the external firewalld zone persistently.
+# Title: Add Firewall Service
 # Category: security
 
 check 'firewall-cmd --zone=external --list-services | grep -q "http"' \

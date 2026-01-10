@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Disable graphical interface, enable text login (tty6 switches back)
+# Task: Set system to boot to text mode (multi-user target). Ensure tty6 returns to text mode.
 # Title: Disable Graphical Interface
 # Category: operate-systems
 # Target: node1

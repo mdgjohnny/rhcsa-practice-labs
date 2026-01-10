@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create shared directories /groups/sales and /groups/data with proper permissions
-# Title: Shared Directories (sales/data)
+# Task: Create /groups/sales and /groups/data with appropriate group ownership and permissions.
+# Title: Create Shared Directories
 # Category: users-groups
 # Target: node1
 

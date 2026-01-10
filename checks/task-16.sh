@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Set default boot target to multi-user.target on node1
-# Title: Set Boot Target (node1)
+# Task: Set the default boot target to multi-user.target (non-graphical). System must boot to this target.
+# Title: Set Default Boot Target
 # Category: deploy-maintain
 # Target: node1
 

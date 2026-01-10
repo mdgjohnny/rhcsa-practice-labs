@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Launch container as user20 using ubi8
-# Title: Launch Container (ubi8)
+# Task: As user20, launch a container using the ubi8 image.
+# Title: Launch Container
 # Category: containers
 # Auto-start at boot without user login
 

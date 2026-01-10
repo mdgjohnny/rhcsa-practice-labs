@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Find files modified in last 30 days, save to /var/tmp/modfiles.txt
+# Task: Find all files modified in the last 30 days. Save the list to /var/tmp/modfiles.txt
 # Title: Find Recently Modified Files
 # Category: essential-tools
 # Target: node2

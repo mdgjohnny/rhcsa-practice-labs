@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Add custom message to /var/log/messages, output to /root/customlogmessage
+# Task: Log custom message to /var/log/messages. Save the log entry to /root/customlogmessage.
 # Title: Add Custom Log Message
 # Category: operate-systems
 # Target: node2

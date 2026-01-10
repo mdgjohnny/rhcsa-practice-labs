@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Configure httpd with document root /webfiles, create index.html with 'hello world'
-# Title: Apache Custom DocumentRoot
+# Task: Configure httpd with DocumentRoot /webfiles. Create index.html containing "hello world".
+# Title: Configure Apache DocumentRoot
 # Category: operate-systems
 # Target: node1
 

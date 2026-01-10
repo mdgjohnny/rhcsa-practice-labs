@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Configure passwordless sudo for user20
-# Title: Passwordless Sudo
+# Task: Configure user20 to use sudo without password prompt. Test with: sudo -u user20 sudo whoami
+# Title: Configure Passwordless Sudo
 # Category: users-groups
 # Target: node1
 

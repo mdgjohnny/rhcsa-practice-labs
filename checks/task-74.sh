@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: SSH config: allow root, port 2022
-# Title: SSH Config (port 2022)
+# Task: Configure SSH: allow root login, change port to 2022.
+# Title: Configure SSH
 # Category: security
 # Target: node2
 

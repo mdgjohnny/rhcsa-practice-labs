@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Configure passwordless SSH for user100 from rhcsa1 to rhcsa2
-# Title: Passwordless SSH (user100)
+# Task: Set up SSH key-based authentication for user100 to connect from rhcsa1 to rhcsa2 without password.
+# Title: Configure Passwordless SSH
 # Category: security
 # Target: node1
 

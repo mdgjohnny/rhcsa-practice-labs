@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: MySQL container as rootless (user santos), password "password"
+# Task: As user santos, create MySQL container with root password "password".
 # Title: MySQL Rootless Container
 # Category: containers
 # Target: node2

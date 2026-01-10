@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Configure SSH server per requirements
+# Task: Configure SSH server with required security settings as specified in the task requirements.
 # Title: Configure SSH Server
 # Category: networking
 # Target: node1

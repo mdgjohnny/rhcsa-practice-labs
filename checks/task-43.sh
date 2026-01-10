@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Search man pages for "password", output to /var/tmp/man.out
+# Task: Search all man pages for keyword "password". Save results to /var/tmp/man.out
 # Title: Search Man Pages
 # Category: essential-tools
 

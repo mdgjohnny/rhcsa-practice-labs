@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Enable root SSH login
+# Task: Configure SSH to permit root login with password authentication.
 # Title: Enable Root SSH Login
 # Category: networking
 # Target: node1

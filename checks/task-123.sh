@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Apply tuned profile for throughput optimization
-# Title: Tuned Profile (throughput)
+# Task: Apply the tuned profile optimized for throughput performance. Verify with: tuned-adm active
+# Title: Apply Tuned Performance Profile
 # Category: operate-systems
 # Target: node1
 

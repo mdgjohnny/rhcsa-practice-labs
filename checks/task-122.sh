@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create sysadmins group with linda/anna, grant sudo access
-# Title: Sudo Group (sysadmins)
+# Task: Create group "sysadmins" with members linda and anna. Grant the group full sudo access.
+# Title: Configure Sudo Group
 # Category: users-groups
 # Target: node1
 

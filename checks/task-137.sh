@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Grant user laura full sudo privileges
-# Title: Sudo Privileges (laura)
+# Task: Grant user "laura" full sudo privileges to execute any command as any user.
+# Title: Grant Sudo Access
 # Category: users-groups
 # Target: node1
 

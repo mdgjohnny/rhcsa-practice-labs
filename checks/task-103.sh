@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Configure container from task-102 as a systemd user service
-# Title: Container Systemd Service
+# Task: Configure the HTTP container from task-102 as a systemd user service for automatic startup.
+# Title: Create Container Systemd Service
 # Category: operate-systems
 # Target: node1
 

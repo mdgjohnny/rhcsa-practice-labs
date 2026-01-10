@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Change Apache document root to /web with index.html 'welcome to my web server', fix SELinux
-# Title: Apache SELinux Fix
+# Task: Change Apache DocumentRoot to /web. Create index.html with "welcome to my web server". Fix SELinux contexts.
+# Title: Fix Apache SELinux
 # Category: deploy-maintain
 # Target: node1
 

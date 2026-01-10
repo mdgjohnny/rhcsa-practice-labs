@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create tar gzip archive of /etc, store in /var/tmp
-# Title: Create tar.gz Archive
+# Task: Create gzip-compressed tar archive of /etc directory. Store in /var/tmp.
+# Title: Create Gzip Archive
 # Category: essential-tools
 
 check 'ls /var/tmp/*.tar.gz &>/dev/null || ls /var/tmp/*.tgz &>/dev/null' \

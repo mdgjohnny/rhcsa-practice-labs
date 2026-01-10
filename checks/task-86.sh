@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Configure NFS server sharing /home on node2
-# Title: NFS Server (/home)
+# Task: Configure NFS server to export /home directory to the network.
+# Title: Configure NFS Server
 # Category: networking
 # Target: node2
 

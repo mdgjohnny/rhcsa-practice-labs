@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Configure MySQL container from docker.io/library/mysql:latest
-# Title: Configure MySQL Container
+# Task: Create a container using docker.io/library/mysql:latest image with appropriate configuration.
+# Title: Deploy MySQL Container
 # Category: containers
 # Target: node1
 

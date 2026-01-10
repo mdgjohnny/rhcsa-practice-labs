@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Install "Development Tools" group, capture info to /var/tmp/systemtools.out
+# Task: Install "Development Tools" package group. Capture package info to /var/tmp/systemtools.out
 # Title: Install Package Group
 # Category: deploy-maintain
 

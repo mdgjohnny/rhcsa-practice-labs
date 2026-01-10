@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Rootful container with port 443 mapped, auto-start via systemd
-# Title: Rootful Container (port 443)
+# Task: Create rootful container with port 443 mapped. Configure auto-start via systemd.
+# Title: Rootful Container with Port Mapping
 # Category: containers
 # Target: node2
 

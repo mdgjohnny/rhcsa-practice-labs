@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create /direct01 with SELinux contexts from /root (persistent)
-# Title: Apply SELinux Contexts (/direct01)
+# Task: Create directory /direct01 and apply the same SELinux context as /root. Context must persist after relabeling.
+# Title: Apply SELinux Contexts
 # Category: security
 
 check '[[ -d /direct01 ]]' \

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create user bob with shell that only allows password change
-# Title: Create Restricted User (bob)
+# Task: Create user "bob" with a shell that only allows password changes, preventing normal command execution.
+# Title: Create Restricted User
 # Category: users-groups
 
 check 'id bob &>/dev/null' \

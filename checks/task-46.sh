@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Enable atd for user20, deny for user30
+# Task: Enable atd service access for user20, deny access for user30.
 # Title: Configure atd Access
 # Category: deploy-maintain
 # Target: node2

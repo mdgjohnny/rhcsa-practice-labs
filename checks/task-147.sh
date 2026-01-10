@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Mount RHEL 9 ISO persistently on /mnt/cdrom, configure both repos
-# Title: Mount ISO & Configure Repos
+# Task: Mount RHEL 9 ISO persistently on /mnt/cdrom. Configure both BaseOS and AppStream repositories.
+# Title: Mount ISO and Configure Repos
 # Category: file-systems
 # Target: both
 

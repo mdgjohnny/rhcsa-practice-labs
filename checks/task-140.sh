@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Set default boot target to multi-user
-# Title: Set Boot Target (multi-user)
+# Task: Set the default systemd target to multi-user.target. Verify: systemctl get-default
+# Title: Set Boot Target
 # Category: operate-systems
 # Target: node1
 

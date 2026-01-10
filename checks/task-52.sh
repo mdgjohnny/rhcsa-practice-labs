@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Configure journald for persistent storage under /var/log/journal
-# Title: Configure Persistent Journal
+# Task: Configure systemd-journald for persistent storage in /var/log/journal. Logs must survive reboots.
+# Title: Enable Persistent Journaling
 # Category: operate-systems
 
 check '[[ -d /var/log/journal ]]' \

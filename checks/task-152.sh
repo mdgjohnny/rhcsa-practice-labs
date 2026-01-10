@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create /dir1/dir2/dir3/dir4 with SELinux contexts from /etc
+# Task: Create /dir1/dir2/dir3/dir4 directory structure with SELinux contexts matching /etc.
 # Title: Apply SELinux Contexts
 # Category: security
 # Target: node1

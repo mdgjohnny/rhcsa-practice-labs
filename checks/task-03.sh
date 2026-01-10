@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Set hostname to rhcsa1 on node1
-# Title: Set Hostname (node1)
+# Task: Set the system hostname to "rhcsa1". The hostname must persist across reboots and be resolvable locally.
+# Title: Set System Hostname
 # Category: networking
 # Target: node1
 

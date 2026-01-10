@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create lnfile1 in /var/tmp with 3 hard links
+# Task: Create file "lnfile1" in /var/tmp with exactly 3 hard links pointing to it.
 # Title: Create Hard Links
 # Category: essential-tools
 # Target: node2

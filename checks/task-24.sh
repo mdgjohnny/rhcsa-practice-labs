@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create user70 with UID 7000, comment "I am user70", max inactivity 30 days
-# Title: Create User (UID, comment, inactivity)
+# Task: Create user70 with UID 7000, comment "I am user70", and maximum 30 days account inactivity.
+# Title: Create User with Attributes
 # Category: users-groups
 
 check 'id user70 &>/dev/null' \

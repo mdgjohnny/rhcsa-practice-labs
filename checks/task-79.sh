@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create /root/essentials.tar with /home and /etc, copy to /tmp, hard link to /
-# Title: Create Archive & Hard Link
+# Task: Create tar archive of /home and /etc as /root/essentials.tar. Copy to /tmp and create hard link in /.
+# Title: Create Archive with Hard Link
 # Category: essential-tools
 # Target: node1
 

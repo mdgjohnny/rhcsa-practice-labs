@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Install and enable httpd web server
-# Title: Install & Enable httpd
+# Task: Install Apache httpd and enable it to start at boot. Verify the service is running.
+# Title: Install and Enable httpd
 # Category: deploy-maintain
 # Target: node1
 

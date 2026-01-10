@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Lock user70 account, capture lock line to /var/tmp/user70.lock
+# Task: Lock the user70 account. Save the lock line from /etc/shadow to /var/tmp/user70.lock
 # Title: Lock User Account
 # Category: users-groups
 

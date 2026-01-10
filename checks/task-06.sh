@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Add HTTP port 8081/TCP to SELinux policy
-# Title: SELinux HTTP Port Policy
+# Task: Add port 8081/TCP to the SELinux http_port_t type. This allows HTTP services to bind to port 8081.
+# Title: Add SELinux HTTP Port
 # Category: security
 # DB persistently
 

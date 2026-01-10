@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Boot messages should be present (not silenced)
+# Task: Configure boot process to show boot messages (not silent mode).
 # Title: Enable Boot Messages
 # Category: deploy-maintain
 

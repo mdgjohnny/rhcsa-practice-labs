@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create user50 with non-interactive shell
+# Task: Create user "user50" with a non-interactive shell (/sbin/nologin or similar).
 # Title: Create Non-interactive User
 # Category: users-groups
 
