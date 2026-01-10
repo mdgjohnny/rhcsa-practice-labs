@@ -193,6 +193,7 @@ systemctl disable --now ksplice 2>/dev/null || true
 systemctl mask ksplice 2>/dev/null || true
 
 # Disable PCP (Performance Co-Pilot) - not needed for practice
+systemctl mask pmcd pmlogger pmie pmproxy 2>/dev/null || true
 systemctl disable --now pmcd pmlogger pmie pmproxy 2>/dev/null || true
 
 # Disable DNF auto-updates
@@ -270,6 +271,7 @@ systemctl disable --now ksplice 2>/dev/null || true
 systemctl mask ksplice 2>/dev/null || true
 
 # Disable PCP (Performance Co-Pilot) - not needed for practice
+systemctl mask pmcd pmlogger pmie pmproxy 2>/dev/null || true
 systemctl disable --now pmcd pmlogger pmie pmproxy 2>/dev/null || true
 
 # Disable DNF auto-updates
