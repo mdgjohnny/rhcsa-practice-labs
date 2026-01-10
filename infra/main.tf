@@ -175,27 +175,63 @@ echo "student ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/student
 sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
 systemctl restart sshd
 
-# === OPTIMIZE FOR FREE TIER (1GB RAM) ===
-# Disable dnf automatic cache updates (huge memory hog)
-systemctl disable --now dnf-makecache.timer
-systemctl disable --now dnf-automatic.timer 2>/dev/null || true
+# === AGGRESSIVE OPTIMIZATION FOR FREE TIER (1GB RAM) ===
 
-# Disable Oracle Cloud Agent plugins (saves ~200MB RAM)
-systemctl stop oracle-cloud-agent 2>/dev/null || true
-systemctl disable oracle-cloud-agent 2>/dev/null || true
+# IMMEDIATELY stop memory-hungry services before they cause OOM
+systemctl stop oracle-cloud-agent oracle-cloud-agent-updater 2>/dev/null &
+systemctl stop ksplice 2>/dev/null &
+systemctl stop pmcd pmlogger pmie pmproxy 2>/dev/null &
+systemctl stop dnf-makecache.timer dnf-automatic.timer 2>/dev/null &
+wait
 
-# Reduce journal size
+# Disable ALL Oracle and optional services permanently
+systemctl disable --now oracle-cloud-agent oracle-cloud-agent-updater 2>/dev/null || true
+systemctl mask oracle-cloud-agent oracle-cloud-agent-updater 2>/dev/null || true
+
+# Disable ksplice (kernel live patching - very heavy)
+systemctl disable --now ksplice 2>/dev/null || true
+systemctl mask ksplice 2>/dev/null || true
+
+# Disable PCP (Performance Co-Pilot) - not needed for practice
+systemctl disable --now pmcd pmlogger pmie pmproxy 2>/dev/null || true
+
+# Disable DNF auto-updates
+systemctl disable --now dnf-makecache.timer dnf-automatic.timer 2>/dev/null || true
+
+# Disable cockpit if present
+systemctl disable --now cockpit.socket cockpit 2>/dev/null || true
+
+# Reduce journal size aggressively
 mkdir -p /etc/systemd/journald.conf.d
-echo -e "[Journal]
-SystemMaxUse=50M" > /etc/systemd/journald.conf.d/size.conf
+cat > /etc/systemd/journald.conf.d/size.conf << 'JOURNAL'
+[Journal]
+SystemMaxUse=30M
+RuntimeMaxUse=30M
+JOURNAL
 systemctl restart systemd-journald
 
-# Set swappiness lower to reduce swap thrashing
-echo "vm.swappiness=10" >> /etc/sysctl.conf
+# Set memory-friendly sysctl settings
+cat >> /etc/sysctl.conf << 'SYSCTL'
+vm.swappiness=60
+vm.vfs_cache_pressure=50
+vm.dirty_ratio=10
+vm.dirty_background_ratio=5
+SYSCTL
 sysctl -p
 
-# Install common tools (minimal dependencies)
-dnf install -y vim nano wget curl bind-utils net-tools --setopt=install_weak_deps=False
+# Clear package cache to free disk/memory
+dnf clean all 2>/dev/null || true
+
+# Kill any stray processes from disabled services
+pkill -9 -f "oracle-cloud-agent" 2>/dev/null || true
+pkill -9 -f "ksplice" 2>/dev/null || true
+pkill -9 -f "pmlogger|pmcd" 2>/dev/null || true
+
+# Drop caches to free memory for SSH
+sync && echo 3 > /proc/sys/vm/drop_caches
+
+# DO NOT run dnf install at boot - too memory intensive
+# Tools will be installed on-demand when needed
   EOF
 
   cloud_init_node2 = <<-EOF
@@ -216,27 +252,63 @@ echo "student ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/student
 sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
 systemctl restart sshd
 
-# === OPTIMIZE FOR FREE TIER (1GB RAM) ===
-# Disable dnf automatic cache updates (huge memory hog)
-systemctl disable --now dnf-makecache.timer
-systemctl disable --now dnf-automatic.timer 2>/dev/null || true
+# === AGGRESSIVE OPTIMIZATION FOR FREE TIER (1GB RAM) ===
 
-# Disable Oracle Cloud Agent plugins (saves ~200MB RAM)
-systemctl stop oracle-cloud-agent 2>/dev/null || true
-systemctl disable oracle-cloud-agent 2>/dev/null || true
+# IMMEDIATELY stop memory-hungry services before they cause OOM
+systemctl stop oracle-cloud-agent oracle-cloud-agent-updater 2>/dev/null &
+systemctl stop ksplice 2>/dev/null &
+systemctl stop pmcd pmlogger pmie pmproxy 2>/dev/null &
+systemctl stop dnf-makecache.timer dnf-automatic.timer 2>/dev/null &
+wait
 
-# Reduce journal size
+# Disable ALL Oracle and optional services permanently
+systemctl disable --now oracle-cloud-agent oracle-cloud-agent-updater 2>/dev/null || true
+systemctl mask oracle-cloud-agent oracle-cloud-agent-updater 2>/dev/null || true
+
+# Disable ksplice (kernel live patching - very heavy)
+systemctl disable --now ksplice 2>/dev/null || true
+systemctl mask ksplice 2>/dev/null || true
+
+# Disable PCP (Performance Co-Pilot) - not needed for practice
+systemctl disable --now pmcd pmlogger pmie pmproxy 2>/dev/null || true
+
+# Disable DNF auto-updates
+systemctl disable --now dnf-makecache.timer dnf-automatic.timer 2>/dev/null || true
+
+# Disable cockpit if present
+systemctl disable --now cockpit.socket cockpit 2>/dev/null || true
+
+# Reduce journal size aggressively
 mkdir -p /etc/systemd/journald.conf.d
-echo -e "[Journal]
-SystemMaxUse=50M" > /etc/systemd/journald.conf.d/size.conf
+cat > /etc/systemd/journald.conf.d/size.conf << 'JOURNAL'
+[Journal]
+SystemMaxUse=30M
+RuntimeMaxUse=30M
+JOURNAL
 systemctl restart systemd-journald
 
-# Set swappiness lower to reduce swap thrashing
-echo "vm.swappiness=10" >> /etc/sysctl.conf
+# Set memory-friendly sysctl settings
+cat >> /etc/sysctl.conf << 'SYSCTL'
+vm.swappiness=60
+vm.vfs_cache_pressure=50
+vm.dirty_ratio=10
+vm.dirty_background_ratio=5
+SYSCTL
 sysctl -p
 
-# Install common tools (minimal dependencies)
-dnf install -y vim nano wget curl bind-utils net-tools --setopt=install_weak_deps=False
+# Clear package cache to free disk/memory
+dnf clean all 2>/dev/null || true
+
+# Kill any stray processes from disabled services
+pkill -9 -f "oracle-cloud-agent" 2>/dev/null || true
+pkill -9 -f "ksplice" 2>/dev/null || true
+pkill -9 -f "pmlogger|pmcd" 2>/dev/null || true
+
+# Drop caches to free memory for SSH
+sync && echo 3 > /proc/sys/vm/drop_caches
+
+# DO NOT run dnf install at boot - too memory intensive
+# Tools will be installed on-demand when needed
   EOF
 }
 
