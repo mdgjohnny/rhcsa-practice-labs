@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Configure MariaDB container from task-75 as systemd user service for auto-start.
-# Title: Container Systemd Service
+# Task: For user edwin (from task-75): Configure the MariaDB container as a systemd user service. Create ~/.config/systemd/user/ directory and place the service file there. Enable the service.
+# Title: MariaDB Systemd User Service
 # Category: containers
 # Target: node2
 

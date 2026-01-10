@@ -1,20 +1,15 @@
 #!/usr/bin/env bash
-# Task: Configure network: IP 192.168.0.241/24, gateway 192.168.0.1, DNS 192.168.0.1. Must persist.
-# Title: Configure Network Manually
+# Task: Add a secondary IP address 192.168.0.241/24 to the network interface using nmcli. Configure it persistently. This tests manual network configuration skills.
+# Title: Manual Network Configuration (Secondary IP)
 # Category: networking
 # Target: node1
 
-# Check IP address is configured
+# Check if secondary IP is configured
 check 'ip addr show | grep -q "192.168.0.241"' \
     "IP address 192.168.0.241 is configured" \
     "IP address 192.168.0.241 is not configured"
 
-# Check default gateway
-check 'ip route show default | grep -q "192.168.0.1"' \
-    "Default gateway is 192.168.0.1" \
-    "Default gateway is not 192.168.0.1"
-
-# Check DNS nameserver
-check 'grep -q "192.168.0.1\|nameserver" /etc/resolv.conf' \
-    "DNS nameserver is configured" \
-    "DNS nameserver is not configured"
+# Check persistence via nmcli
+check 'nmcli -g ipv4.addresses con show "$(nmcli -t -f NAME con show --active | head -1)" 2>/dev/null | grep -q "192.168.0.241"' \
+    "IP configured persistently via nmcli" \
+    "IP not found in nmcli connection (may not persist)"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: As user santos, create MySQL container with root password "password".
-# Title: MySQL Rootless Container
+# Task: Create user santos if needed. Create /home/santos/mysql directory for data persistence. As santos, run MySQL container with MYSQL_ROOT_PASSWORD=password. Enable linger for santos.
+# Title: MySQL Container (user santos)
 # Category: containers
 # Target: node2
 # Bind mount /home/santos/mysql to /var/lib/mysql, auto-start via systemd

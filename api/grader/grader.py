@@ -343,6 +343,12 @@ def create_grader_from_session(
         if row['node2_ip']:
             grader.set_env('NODE2_IP', row['node2_ip'])
         
+        # Set private IPs (useful for tasks that need to reference other nodes)
+        if row.get('node1_private_ip'):
+            grader.set_env('NODE1_PRIVATE_IP', row['node1_private_ip'])
+        if row.get('node2_private_ip'):
+            grader.set_env('NODE2_PRIVATE_IP', row['node2_private_ip'])
+        
         # Create remote executors
         if row['ssh_private_key']:
             node1_executor = RemoteExecutor(

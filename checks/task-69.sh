@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: As user20, launch ubi9 container with SHELL and HOSTNAME environment variables set.
+# Task: As user20: Launch a ubi9 container with SHELL and HOSTNAME environment variables set. Enable linger for user20 for auto-start capability. The container should persist across reboots.
 # Title: Container with Environment Variables
 # Category: containers
 # Auto-start via systemd without login

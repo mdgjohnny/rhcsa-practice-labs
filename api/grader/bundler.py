@@ -55,6 +55,7 @@ class TaskMetadata:
     category: str = 'uncategorized'
     description: str = ''
     target: str = 'node1'  # node1, node2, or both
+    cloud_compatible: bool = True  # False if task can't run in cloud (e.g., changes primary IP)
     
     @classmethod
     def from_content(cls, task_id: str, content: str) -> 'TaskMetadata':
@@ -71,6 +72,9 @@ class TaskMetadata:
                 metadata.description = line.replace('# Task:', '').strip()
             elif line.startswith('# Target:'):
                 metadata.target = line.replace('# Target:', '').strip()
+            elif line.startswith('# CloudCompatible:'):
+                val = line.replace('# CloudCompatible:', '').strip().lower()
+                metadata.cloud_compatible = val not in ('false', 'no', '0')
         
         # Infer target from description if not specified
         if not metadata.target or metadata.target == 'node1':
@@ -187,5 +191,6 @@ class TaskBundler:
                 'category': metadata.category,
                 'description': metadata.description,
                 'target': metadata.target,
+                'cloud_compatible': metadata.cloud_compatible,
             })
         return tasks

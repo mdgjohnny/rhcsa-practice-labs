@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: As user20, launch a container using the ubi8 image.
-# Title: Launch Container
+# Task: As user20: Pull and run a container using the ubi8 image. Configure it as a systemd user service with auto-start. Enable linger for user20 so the container starts at boot without requiring login. Verify: loginctl show-user user20 | grep Linger
+# Title: Launch ubi8 Container (user20)
 # Category: containers
 # Auto-start at boot without user login
 

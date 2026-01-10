@@ -1,24 +1,17 @@
 #!/usr/bin/env bash
-# Task: Configure the network interface with static IP 192.168.0.241/24, gateway 192.168.0.1, and DNS server 192.168.0.1. Changes must persist across reboots.
-# Title: Configure Static IP Address
+# Task: Add a secondary IP address 192.168.0.241/24 to the primary network interface. The IP must be configured persistently using nmcli or network-scripts. Verify with: ip addr show | grep 192.168.0.241
+# Title: Configure Secondary IP Address
 # Category: networking
+# Target: node1
 
-IPV4_ADDR="${IPV4_ADDR:-192.168.0.241/24}"
-IPV4_GW="${IPV4_GW:-192.168.0.1}"
-IPV4_DNS="${IPV4_DNS:-192.168.0.1}"
+SECONDARY_IP="${SECONDARY_IP:-192.168.0.241}"
 
-IPV4_ADDR_LOCAL=$(hostname -I | awk '{print $1}')
-IPV4_GW_LOCAL=$(ip route show default | awk '/default/ {print $3}')
-IPV4_DNS_LOCAL=$(awk '/nameserver/{print $2; exit}' /etc/resolv.conf)
+# Check if secondary IP is configured on any interface
+check 'ip addr show | grep -q "192.168.0.241"' \
+    "Secondary IP $SECONDARY_IP is configured" \
+    "Secondary IP $SECONDARY_IP is not configured on any interface"
 
-check '[[ "$IPV4_ADDR_LOCAL" == "$IPV4_ADDR" ]]' \
-    "IPv4 address set to $IPV4_ADDR" \
-    "IPv4 address not set to $IPV4_ADDR (got $IPV4_ADDR_LOCAL)"
-
-check '[[ "$IPV4_GW_LOCAL" == "$IPV4_GW" ]]' \
-    "IPv4 gateway set to $IPV4_GW" \
-    "IPv4 gateway not set to $IPV4_GW (got $IPV4_GW_LOCAL)"
-
-check '[[ "$IPV4_DNS_LOCAL" == "$IPV4_DNS" ]]' \
-    "IPv4 DNS set to $IPV4_DNS" \
-    "IPv4 DNS not set to $IPV4_DNS (got $IPV4_DNS_LOCAL)"
+# Check if it's persistent (in nmcli or ifcfg files)
+check 'nmcli con show --active 2>/dev/null | grep -q . && nmcli -g ipv4.addresses con show "$(nmcli -t -f NAME con show --active | head -1)" 2>/dev/null | grep -q "192.168.0.241" || grep -r "192.168.0.241" /etc/sysconfig/network-scripts/ 2>/dev/null | grep -q .' \
+    "Secondary IP is configured persistently" \
+    "Secondary IP may not persist after reboot (not found in nmcli or network-scripts)"

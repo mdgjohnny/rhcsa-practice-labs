@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: As user edwin, create MariaDB container on port 3306.
-# Title: MariaDB Container
+# Task: Create user edwin if needed. Create /var/mariadb-container directory. As edwin, run MariaDB container on port 3306 with data in /var/mariadb-container. Enable linger for edwin.
+# Title: MariaDB Container (user edwin)
 # Category: containers
 # Target: node2
 # /var/mariadb-container for persistent storage

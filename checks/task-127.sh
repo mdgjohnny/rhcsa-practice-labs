@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create MariaDB container exposed on port 3306 with /var/mariadb-container as bind mount.
-# Title: Deploy MariaDB Container
+# Task: Create /var/mariadb directory. Run MariaDB container on port 3306 with /var/mariadb as bind mount. Create and enable a systemd service named "mariadb" that starts the container at boot. Verify port 3306 is listening.
+# Title: MariaDB Container Service
 # Category: containers
 # Target: node1
 

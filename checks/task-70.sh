@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: As user100, launch rootless container with /data01 bind mount.
-# Title: Rootless Container with Mount
+# Task: Create user100 if needed. Create directory /data01. As user100, launch a rootless container with /data01 mounted inside. Enable linger for user100 to allow auto-start.
+# Title: Rootless Container with Bind Mount
 # Category: containers
 # KERN and SHELL variables, auto-start via systemd
 

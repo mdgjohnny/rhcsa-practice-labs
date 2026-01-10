@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create MariaDB container on port 3206 with MYSQL_ROOT_PASSWORD=password, database "mydb", and /opt/mariadb mount.
-# Title: MariaDB Container with Database
+# Task: Run MariaDB container on port 3206 (not default 3306). Set MYSQL_ROOT_PASSWORD=password and create database "mydb". Create /opt/mariadb directory and configure as bind mount for data persistence.
+# Title: MariaDB Container (port 3206)
 # Category: containers
 # Target: node1
 
