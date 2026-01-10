@@ -15,6 +15,6 @@ check 'getent passwd user70 | grep -q "I am user70"' \
     "User user70 has correct comment" \
     "User user70 comment is incorrect"
 
-check 'chage -l user70 2>/dev/null | grep -q "Password inactive.*30"' \
+check '[[ $(awk -F: "/^user70:/{print \$7}" /etc/shadow) -eq 30 ]]' \
     "User user70 inactivity set to 30 days" \
     "User user70 inactivity not set to 30 days"

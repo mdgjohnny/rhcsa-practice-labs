@@ -23,10 +23,10 @@ check '[[ -d /groups/operations ]]' \
     "Directory /groups/operations does not exist"
 
 # Check sticky bit for "delete only own files"
-check 'stat -c %a /groups/livingopensource 2>/dev/null | grep -q "1...$\|^1"' \
+check '[[ $(stat -c %a /groups/livingopensource 2>/dev/null) =~ [13][0-7]{3} ]]' \
     "/groups/livingopensource has sticky bit" \
     "/groups/livingopensource missing sticky bit"
 
-check 'stat -c %a /groups/operations 2>/dev/null | grep -q "1...$\|^1"' \
+check '[[ $(stat -c %a /groups/operations 2>/dev/null) =~ [13][0-7]{3} ]]' \
     "/groups/operations has sticky bit" \
     "/groups/operations missing sticky bit"

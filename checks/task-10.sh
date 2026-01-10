@@ -4,6 +4,6 @@
 # Category: users-groups
 
 
-check ' [[ grep PASS_MAX_DAYS.*90 /etc/login.defs &>/dev/null ]] ' \
+check 'grep -E "^PASS_MAX_DAYS[[:space:]]+90" /etc/login.defs &>/dev/null' \
     "Password validity is set to 90 days" \
     "Password validity is not set to 90 days"

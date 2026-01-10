@@ -10,6 +10,6 @@ check 'id bob &>/dev/null' \
     "User bob does not exist"
 
 # Check bob's shell is restricted (e.g., /usr/bin/passwd or similar restricted shell)
-check 'getent passwd bob | grep -qE "/usr/bin/passwd|/bin/rbash|nologin"' \
+check 'getent passwd bob | grep -qE "/usr/bin/passwd|/bin/rbash|nologin|lchsh"' \
     "User bob has a restricted shell" \
     "User bob does not have a restricted shell"
