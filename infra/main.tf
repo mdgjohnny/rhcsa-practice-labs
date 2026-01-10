@@ -158,45 +158,85 @@ resource "oci_core_subnet" "practice_subnet" {
 # Cloud-init script for initial setup
 locals {
   cloud_init_node1 = <<-EOF
-    #!/bin/bash
-    # Set hostname
-    hostnamectl set-hostname rhcsa1
-    
-    # Add hosts entries for both nodes
-    echo "${cidrhost(var.subnet_cidr, 11)} rhcsa1" >> /etc/hosts
-    echo "${cidrhost(var.subnet_cidr, 12)} rhcsa2" >> /etc/hosts
-    
-    # Create practice user with random password
-    useradd -m student
-    echo "student:$(openssl rand -base64 12)" | chpasswd
-    
-    # Enable password auth for SSH (for practice)
-    sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
-    systemctl restart sshd
-    
-    # Install common tools
-    dnf install -y vim nano wget curl bind-utils net-tools
+#!/bin/bash
+# Set hostname
+hostnamectl set-hostname rhcsa1
+
+# Add hosts entries for both nodes
+echo "${cidrhost(var.subnet_cidr, 11)} rhcsa1" >> /etc/hosts
+echo "${cidrhost(var.subnet_cidr, 12)} rhcsa2" >> /etc/hosts
+
+# Create practice user with sudo access
+useradd -m student
+echo "student:student" | chpasswd
+echo "student ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/student
+
+# Enable password auth for SSH (for practice)
+sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# === OPTIMIZE FOR FREE TIER (1GB RAM) ===
+# Disable dnf automatic cache updates (huge memory hog)
+systemctl disable --now dnf-makecache.timer
+systemctl disable --now dnf-automatic.timer 2>/dev/null || true
+
+# Disable Oracle Cloud Agent plugins (saves ~200MB RAM)
+systemctl stop oracle-cloud-agent 2>/dev/null || true
+systemctl disable oracle-cloud-agent 2>/dev/null || true
+
+# Reduce journal size
+mkdir -p /etc/systemd/journald.conf.d
+echo -e "[Journal]
+SystemMaxUse=50M" > /etc/systemd/journald.conf.d/size.conf
+systemctl restart systemd-journald
+
+# Set swappiness lower to reduce swap thrashing
+echo "vm.swappiness=10" >> /etc/sysctl.conf
+sysctl -p
+
+# Install common tools (minimal dependencies)
+dnf install -y vim nano wget curl bind-utils net-tools --setopt=install_weak_deps=False
   EOF
 
   cloud_init_node2 = <<-EOF
-    #!/bin/bash
-    # Set hostname
-    hostnamectl set-hostname rhcsa2
-    
-    # Add hosts entries for both nodes
-    echo "${cidrhost(var.subnet_cidr, 11)} rhcsa1" >> /etc/hosts
-    echo "${cidrhost(var.subnet_cidr, 12)} rhcsa2" >> /etc/hosts
-    
-    # Create practice user with random password
-    useradd -m student
-    echo "student:$(openssl rand -base64 12)" | chpasswd
-    
-    # Enable password auth for SSH (for practice)
-    sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
-    systemctl restart sshd
-    
-    # Install common tools
-    dnf install -y vim nano wget curl bind-utils net-tools
+#!/bin/bash
+# Set hostname
+hostnamectl set-hostname rhcsa2
+
+# Add hosts entries for both nodes
+echo "${cidrhost(var.subnet_cidr, 11)} rhcsa1" >> /etc/hosts
+echo "${cidrhost(var.subnet_cidr, 12)} rhcsa2" >> /etc/hosts
+
+# Create practice user with sudo access
+useradd -m student
+echo "student:student" | chpasswd
+echo "student ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/student
+
+# Enable password auth for SSH (for practice)
+sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# === OPTIMIZE FOR FREE TIER (1GB RAM) ===
+# Disable dnf automatic cache updates (huge memory hog)
+systemctl disable --now dnf-makecache.timer
+systemctl disable --now dnf-automatic.timer 2>/dev/null || true
+
+# Disable Oracle Cloud Agent plugins (saves ~200MB RAM)
+systemctl stop oracle-cloud-agent 2>/dev/null || true
+systemctl disable oracle-cloud-agent 2>/dev/null || true
+
+# Reduce journal size
+mkdir -p /etc/systemd/journald.conf.d
+echo -e "[Journal]
+SystemMaxUse=50M" > /etc/systemd/journald.conf.d/size.conf
+systemctl restart systemd-journald
+
+# Set swappiness lower to reduce swap thrashing
+echo "vm.swappiness=10" >> /etc/sysctl.conf
+sysctl -p
+
+# Install common tools (minimal dependencies)
+dnf install -y vim nano wget curl bind-utils net-tools --setopt=install_weak_deps=False
   EOF
 }
 
