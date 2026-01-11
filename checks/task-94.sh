@@ -23,6 +23,6 @@ check 'getent group livingopensource &>/dev/null' \
 check 'getent group operations &>/dev/null' \
     "Group operations exists" \
     "Group operations does not exist"
-check 'getent group ensure &>/dev/null' \
-    "Group ensure exists" \
-    "Group ensure does not exist"
+check 'getent group operations &>/dev/null' \
+    "Group operations again exists" \
+    "Group operations again does not exist"
