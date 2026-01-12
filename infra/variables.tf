@@ -56,19 +56,19 @@ variable "subnet_cidr" {
 variable "instance_shape" {
   description = "Shape of the compute instance"
   type        = string
-  default     = "VM.Standard.E2.1.Micro"  # Always Free eligible
+  default     = "VM.Standard.A1.Flex"  # ARM - Always Free: 4 OCPUs / 24GB total
 }
 
 variable "instance_ocpus" {
   description = "Number of OCPUs (for flex shapes)"
   type        = number
-  default     = 1
+  default     = 2  # 2 per VM = 4 total (free tier max)
 }
 
 variable "instance_memory_gb" {
   description = "Memory in GB (for flex shapes)"
   type        = number
-  default     = 1
+  default     = 12  # 12 per VM = 24 total (free tier max)
 }
 
 variable "os_image_id" {

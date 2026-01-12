@@ -170,3 +170,33 @@ Cloud micro instances are suitable only for tasks using pre-installed packages.
 **Recommendation:**
 Use ARM A1.Flex instances (2 OCPU, 8GB RAM each) from OCI free tier.
 Or use local VirtualBox/libvirt VMs with 2GB+ RAM.
+
+## ARM Instance Update (Jan 12 - Evening)
+
+### Changes Made
+Updated terraform to use ARM A1.Flex instances:
+- `infra/variables.tf`: Default shape changed to `VM.Standard.A1.Flex`
+- `infra/terraform.tfvars`: Updated to ARM with 2 OCPUs / 12GB RAM per VM
+
+### Test Results
+**ARM capacity issue in sa-saopaulo-1:**
+```
+500-InternalError, Out of host capacity.
+```
+
+ARM free tier (4 OCPUs / 24GB total) is available but capacity-constrained:
+- Sao Paulo region: No ARM capacity currently available
+- Other regions (us-ashburn-1, us-phoenix-1) typically have better availability
+
+### Recommendations
+1. **Change region** to us-ashburn-1 or us-phoenix-1 for ARM availability
+2. **Or** keep x86 micro instances and limit to pre-installed packages
+3. **Or** use local VMs for full RHCSA practice
+
+### Region Change (if desired)
+Edit `infra/terraform.tfvars`:
+```hcl
+region = "us-ashburn-1"  # Better ARM availability
+```
+
+Note: This requires a fresh compartment in the new region.
