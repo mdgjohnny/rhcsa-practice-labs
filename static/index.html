@@ -1125,17 +1125,20 @@
         async function destroyCloudSession() {
             if (!cloudSession) return;
             if (!confirm('Destroy this cloud session? All VMs will be terminated.')) return;
-            try {
-                showToast('info', 'Destroying session...');
-                termDisconnect();
-                await fetch(`/api/sessions/${cloudSession.session_id}`, { method: 'DELETE' });
-                cloudSession = null;
-                showToast('success', 'Session Destroyed');
-                refreshCloudSessionUI();
-                updateTerminalUI();
-            } catch (e) {
-                showToast('error', 'Error', e.message);
-            }
+            
+            const sessionId = cloudSession.session_id;
+            
+            // Immediately clear UI
+            termDisconnect();
+            cloudSession = null;
+            refreshCloudSessionUI();
+            updateTerminalUI();
+            showToast('info', 'Destroying session...', 'VMs are being terminated');
+            
+            // Destroy in background
+            fetch(`/api/sessions/${sessionId}`, { method: 'DELETE' })
+                .then(() => showToast('success', 'Session Destroyed'))
+                .catch(e => showToast('error', 'Error destroying session', e.message));
         }
 
         async function extendCloudSession() {
