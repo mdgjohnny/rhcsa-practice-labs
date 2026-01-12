@@ -209,10 +209,11 @@ sysctl -p 2>/dev/null
 
 # PHASE 6: SETUP EXTRA SWAP FOR PACKAGE INSTALLATION
 # Key insight from previous session: create swap FIRST, then dnf works!
+# NOTE: Must use dd or fallocate, NOT truncate (sparse files don't work for swap)
 mkdir -p /var/practice-disks
-truncate -s 2G /var/practice-disks/swap.img
-mkswap /var/practice-disks/swap.img
+dd if=/dev/zero of=/var/practice-disks/swap.img bs=1M count=2048 status=none
 chmod 600 /var/practice-disks/swap.img
+mkswap /var/practice-disks/swap.img
 swapon /var/practice-disks/swap.img
 echo "/var/practice-disks/swap.img swap swap defaults 0 0" >> /etc/fstab
 
@@ -337,9 +338,9 @@ sysctl -p 2>/dev/null
 
 # PHASE 6: SETUP EXTRA SWAP AND INSTALL PACKAGES (node2)
 mkdir -p /var/practice-disks
-truncate -s 2G /var/practice-disks/swap.img
-mkswap /var/practice-disks/swap.img
+dd if=/dev/zero of=/var/practice-disks/swap.img bs=1M count=2048 status=none
 chmod 600 /var/practice-disks/swap.img
+mkswap /var/practice-disks/swap.img
 swapon /var/practice-disks/swap.img
 echo "/var/practice-disks/swap.img swap swap defaults 0 0" >> /etc/fstab
 
