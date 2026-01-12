@@ -111,7 +111,7 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
      - `api_integration.py`: Flask service layer
      - `cli.py`: Command-line interface
    - **Same script runs anywhere** - local or remote via SSH
-   - **Tested:** 38 unit tests, all 158 tasks bundle successfully
+   - **Tested:** 38 unit tests, all 145 tasks bundle successfully
    - **API v2 endpoints:**
      - `GET /api/v2/tasks` - List tasks
      - `POST /api/v2/grade` - Grade multiple tasks  
@@ -137,7 +137,7 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
    - Rewrote 25 task files to remove redundant SSH layer
    - Tasks now execute directly on target nodes (no SSH-to-self)
    - Split "Target: both" tasks into separate node1/node2 tasks
-   - Task count: 154 → 158 (4 new split tasks)
+   - Task count: 145 (4 new split tasks)
    - Removed SSH_WRAPPER from bundler (no longer needed)
 
 6. **Background Session Cleanup** ✅
@@ -189,7 +189,7 @@ rhcsa-practice-labs/
 ├── static/
 │   ├── index.html          # Main practice UI
 │   └── terminal-test.html  # Terminal test page
-├── checks/                 # 158 task verification scripts
+├── checks/                 # 145 task verification scripts
 └── exam-grader.sh          # Legacy CLI grader (bash)
 ```
 
