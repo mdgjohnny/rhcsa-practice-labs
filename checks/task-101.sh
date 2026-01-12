@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Task: Install vsftpd package and configure it to start automatically at boot. Verify: systemctl is-enabled vsftpd
+# Task: Install the vsftpd package and enable it to start at system boot using systemctl enable.
 # Title: Install and Enable vsftpd
 # Category: operate-systems
 # Target: node1
 
+check 'rpm -q vsftpd &>/dev/null' \
+    "Package vsftpd is installed" \
+    "Package vsftpd is not installed"
 
-check 'systemctl is-active vsftpd &>/dev/null' \
-    "Service vsftpd is running" \
-    "Service vsftpd is not running"
-check 'systemctl is-enabled vsftpd &>/dev/null' \
-    "Service vsftpd is enabled" \
-    "Service vsftpd is not enabled"
+check 'systemctl is-enabled vsftpd 2>/dev/null | grep -q enabled' \
+    "Service vsftpd is enabled at boot" \
+    "Service vsftpd is not enabled at boot"

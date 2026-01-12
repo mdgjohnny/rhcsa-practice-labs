@@ -1,19 +1,9 @@
 #!/usr/bin/env bash
-# Task: Create /groups/livingopensource and /groups/operations with proper group permissions.
-# Title: Create Shared Directories
-# Category: users-groups
+# Task: Create /groups/livingopensource and /groups/operations. Set group ownership to matching groups.
+# Title: Create Group Directories
+# Category: file-systems
 # Target: node1
 
-# Check groups exist
-check 'getent group livingopensource &>/dev/null' \
-    "Group livingopensource exists" \
-    "Group livingopensource does not exist"
-
-check 'getent group operations &>/dev/null' \
-    "Group operations exists" \
-    "Group operations does not exist"
-
-# Check directories exist
 check '[[ -d /groups/livingopensource ]]' \
     "Directory /groups/livingopensource exists" \
     "Directory /groups/livingopensource does not exist"

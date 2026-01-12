@@ -1,20 +1,17 @@
 #!/usr/bin/env bash
-# Task: Install Apache httpd and enable it to start at boot. Verify the service is running.
+# Task: Install Apache httpd package. Enable the httpd service to start at boot using systemctl. Start the service.
 # Title: Install and Enable httpd
 # Category: deploy-maintain
 # Target: node1
 
-# Check if httpd or nginx is installed
-check 'rpm -q httpd &>/dev/null || rpm -q nginx &>/dev/null' \
-    "Web server package is installed" \
-    "No web server package installed"
+check 'rpm -q httpd &>/dev/null' \
+    "Package httpd is installed" \
+    "Package httpd is not installed"
 
-# Check if web server service is running
-check 'systemctl is-active httpd &>/dev/null || systemctl is-active nginx &>/dev/null' \
-    "Web server is running" \
-    "Web server is not running"
+check 'systemctl is-enabled httpd 2>/dev/null | grep -q enabled' \
+    "Service httpd is enabled at boot" \
+    "Service httpd is not enabled at boot"
 
-# Check if web server is enabled for automatic start
-check 'systemctl is-enabled httpd &>/dev/null || systemctl is-enabled nginx &>/dev/null' \
-    "Web server is enabled at boot" \
-    "Web server is not enabled at boot"
+check 'systemctl is-active httpd 2>/dev/null | grep -q active' \
+    "Service httpd is running" \
+    "Service httpd is not running"
