@@ -32,3 +32,22 @@ workspaces/
 # SSH keys
 *.pem
 !*.example.pem
+
+# Internal docs
+HANDOVER.md
+SETUP.md
+SRE_DEVOPS_LEARNING_ROADMAP.md
+
+# Old scripts
+exam-grader.sh
+
+# Server config
+gunicorn.conf.py
+rhcsa-labs.service
+
+# Design mockups
+stitch-pages/
+
+# Patches/temp
+*.tar.gz
+patches/
