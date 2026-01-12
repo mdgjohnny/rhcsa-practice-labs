@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Task: Using /dev/loop0, create a 2GiB swap partition and enable it persistently via /etc/fstab.
-# Title: Create Swap Partition
+# Task: Create a 2GiB swap space using /dev/loop0. The swap must be active and persist across reboots.
+# Title: Create Swap Space
 # Category: file-systems
 # Target: node1
 
+check 'swapon --show | grep -q loop0' \
+    "Swap on loop0 is active" \
+    "Swap on loop0 is not active"
 
-check 'swapon --show | grep -q .' \
-    "Swap is active" \
-    "No swap is active"
-check 'grep -q swap /etc/fstab' \
-    "Swap is configured in /etc/fstab" \
-    "Swap is not in /etc/fstab"
+check 'grep -q loop0 /etc/fstab && grep loop0 /etc/fstab | grep -q swap' \
+    "Swap is configured to persist" \
+    "Swap is not configured to persist"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Install Apache httpd package. Enable the httpd service to start at boot using systemctl. Start the service.
+# Task: Install Apache httpd and configure it to start automatically at boot. Ensure the service is running.
 # Title: Install and Enable httpd
 # Category: deploy-maintain
 # Target: node1

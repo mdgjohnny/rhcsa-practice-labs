@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-# Task: Set the default systemd target to multi-user.target. Verify: systemctl get-default
-# Title: Set Boot Target
-# Category: operate-systems
+# Task: Configure the system to boot into multi-user (text) mode by default.
+# Title: Set Default Boot Target
+# Category: deploy-maintain
 # Target: node1
 
-# Check default target is multi-user
-check 'systemctl get-default | grep -q "multi-user.target"' \
-    "Default boot target is multi-user.target" \
-    "Default boot target is not multi-user.target"
+check 'systemctl get-default | grep -q multi-user' \
+    "Default target is multi-user.target" \
+    "Default target is not multi-user.target"

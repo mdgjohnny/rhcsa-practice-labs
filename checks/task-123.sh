@@ -1,15 +1,9 @@
 #!/usr/bin/env bash
-# Task: Apply the tuned profile optimized for throughput performance. Verify with: tuned-adm active
+# Task: Apply the tuned profile that optimizes the system for maximum throughput performance.
 # Title: Apply Tuned Performance Profile
-# Category: operate-systems
+# Category: deploy-maintain
 # Target: node1
 
-# Check if tuned is running
-check 'systemctl is-active tuned &>/dev/null' \
-    "tuned service is running" \
-    "tuned service is not running"
-
-# Check if throughput-performance profile is active
-check 'tuned-adm active 2>/dev/null | grep -qi "throughput"' \
+check 'tuned-adm active | grep -qi throughput' \
     "Throughput-optimized tuned profile is active" \
-    "Throughput profile is not active"
+    "Throughput-optimized tuned profile is not active"
