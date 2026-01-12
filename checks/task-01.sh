@@ -9,7 +9,7 @@ check 'ip addr show | grep -q "10.0.99.1"' \
     "Secondary IP 10.0.99.1 is configured" \
     "Secondary IP 10.0.99.1 is not configured"
 
-# Check if it's persistent (in nmcli connection)
-check 'nmcli -g ipv4.addresses con show 2>/dev/null | grep -q "10.0.99.1" || grep -rq "10.0.99.1" /etc/NetworkManager/system-connections/ 2>/dev/null' \
-    "Secondary IP is persistent in NetworkManager" \
+# Check if it's persistent - stored in NetworkManager connection files
+check 'grep -rq "10.0.99.1" /etc/NetworkManager/system-connections/ 2>/dev/null || grep -rq "10.0.99.1" /etc/sysconfig/network-scripts/ 2>/dev/null' \
+    "Secondary IP is persistent (saved in config)" \
     "Secondary IP is not persistent (will be lost on reboot)"
