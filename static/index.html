@@ -1693,16 +1693,34 @@
                 const statusColor = result.passed ? 'green' : 'red';
                 const statusIcon = result.passed ? 'check_circle' : 'cancel';
                 const statusText = result.passed ? 'Task Completed Successfully' : 'Task Failed';
+                
+                // Build check details HTML
+                let checksHtml = '';
+                if (result.details && result.details.length > 0) {
+                    checksHtml = `
+                        <div class="mt-4 pt-3 border-t border-white/10">
+                            <p class="text-xs text-gray-500 uppercase tracking-wider mb-2">Verification Details</p>
+                            <ul class="space-y-1">
+                                ${result.details.map(d => {
+                                    const isPassed = d.startsWith('✓');
+                                    return `<li class="text-sm ${isPassed ? 'text-green-400' : 'text-red-400'} font-mono">${d}</li>`;
+                                }).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+                
                 resultHtml = `
                     <div class="mt-6 p-4 rounded-sm border-l-4 ${result.passed ? 'border-l-green-500 bg-green-500/5 border-y border-r border-green-500/20' : 'border-l-red-500 bg-red-500/5 border-y border-r border-red-500/20'}">
                         <div class="flex items-center gap-3">
                             <span class="material-symbols-outlined ${result.passed ? 'text-green-500' : 'text-red-500'} text-2xl">${statusIcon}</span>
                             <div>
                                 <p class="font-bold ${result.passed ? 'text-green-400' : 'text-red-400'}">${statusText}</p>
-                                <p class="text-sm text-gray-400">${result.points || 0} of ${task.points || 1} points earned</p>
+                                <p class="text-sm text-gray-400">${result.points || 0} of ${result.maxPoints || task.points || 1} points earned</p>
                             </div>
                         </div>
-                        ${result.message ? `<p class="text-sm text-gray-400 mt-3 pl-9">${result.message}</p>` : ''}
+                        ${result.error ? `<p class="text-sm text-red-400 mt-3 pl-9">Error: ${result.error}</p>` : ''}
+                        ${checksHtml}
                     </div>
                 `;
             }
@@ -1822,7 +1840,12 @@
                     graded: true,
                     passed: result.passed,
                     points: result.points || (result.passed ? task.points : 0),
-                    message: result.message
+                    maxPoints: result.max_points || task.points,
+                    message: result.message,
+                    details: result.details || [],
+                    checksPasssed: result.checks_passed || 0,
+                    checksTotal: result.checks_total || 0,
+                    error: result.error
                 });
                 
                 showTaskDetail(taskId);
