@@ -118,3 +118,26 @@ See coverage report in conversation for detailed matrix.
 Since cloud VMs can't interrupt boot:
 - Task 255: Password reset via sudo user
 - Task 256-259: Document/script the recovery procedure
+
+## OCI Free Tier Limitations (Important!)
+
+**1GB RAM micro instances cannot reliably run `dnf install`:**
+- DNF metadata download needs ~500MB+ memory
+- Package installation causes swap thrashing
+- VM becomes unresponsive or crashes
+- Even small packages like `autofs` fail to install
+
+**Workaround Options:**
+1. Use pre-installed packages only (nfs-utils, at, tuned, chrony, tar, vim)
+2. Use larger ARM A1.Flex instances (4 OCPUs, 24GB free tier total)
+3. For package installation tasks, users need local VMs or larger cloud instances
+
+**Tasks Affected:**
+- Container tasks (need podman/skopeo/buildah)
+- Autofs tasks (need autofs package)  
+- httpd/vsftpd tasks
+- SELinux troubleshooting (setroubleshoot-server)
+
+**Recommendation:** 
+For full RHCSA practice, use VirtualBox/libvirt locally with 2GB+ RAM per VM.
+Cloud micro instances are suitable only for tasks using pre-installed packages.
