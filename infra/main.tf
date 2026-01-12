@@ -217,18 +217,16 @@ mkswap /var/practice-disks/swap.img
 swapon /var/practice-disks/swap.img
 echo "/var/practice-disks/swap.img swap swap defaults 0 0" >> /etc/fstab
 
-# Now with ~4GB total swap, we can safely install packages
-# Clear caches first
+# Now with ~4GB total swap, install the most critical package: autofs
+# Skip heavier packages (httpd, podman) - they may crash the VM
+# Users can install them as needed with safe-install
 rm -rf /var/cache/dnf/* /var/cache/yum/*
 sync && echo 3 > /proc/sys/vm/drop_caches
 
-# Install essential RHCSA packages one at a time
-for pkg in autofs httpd podman policycoreutils-python-utils; do
-    dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 "$pkg" 2>/dev/null || true
-    rm -rf /var/cache/dnf/*
-    sync && echo 3 > /proc/sys/vm/drop_caches
-    sleep 2
-done
+# Install only autofs (small, critical for NFS autofs tasks)
+dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 autofs 2>/dev/null || true
+rm -rf /var/cache/dnf/*
+sync && echo 3 > /proc/sys/vm/drop_caches
 
 # Enable atd (pre-installed)
 systemctl enable atd 2>/dev/null || true
@@ -347,12 +345,10 @@ echo "/var/practice-disks/swap.img swap swap defaults 0 0" >> /etc/fstab
 rm -rf /var/cache/dnf/* /var/cache/yum/*
 sync && echo 3 > /proc/sys/vm/drop_caches
 
-for pkg in autofs httpd podman policycoreutils-python-utils; do
-    dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 "$pkg" 2>/dev/null || true
-    rm -rf /var/cache/dnf/*
-    sync && echo 3 > /proc/sys/vm/drop_caches
-    sleep 2
-done
+# Install only autofs
+dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 autofs 2>/dev/null || true
+rm -rf /var/cache/dnf/*
+sync && echo 3 > /proc/sys/vm/drop_caches
 
 systemctl enable atd 2>/dev/null || true
 systemctl start atd 2>/dev/null || true
