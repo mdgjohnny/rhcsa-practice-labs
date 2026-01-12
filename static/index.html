@@ -1104,10 +1104,10 @@
             
             showToast('info', 'Starting VM provisioning...', 'This takes 1-2 minutes');
             
-            // Optimistically show provisioning state
+            // Optimistically show provisioning state immediately
             cloudSession.state = 'provisioning';
-            cloudSession.created_at = new Date().toISOString(); // Reset timer
-            refreshCloudSessionUI();
+            cloudSession.created_at = new Date().toISOString(); // Reset timer for progress bar
+            renderCloudSessionUI(cloudSession);  // Render directly, don't re-fetch
             
             // Start provisioning (don't await - let it run in background)
             fetch(`/api/sessions/${sessionId}/provision`, { method: 'POST' })
@@ -1115,10 +1115,13 @@
                 .then(data => {
                     if (data.error) {
                         showToast('error', 'Provisioning Failed', data.error);
+                        cloudSession.state = 'failed';
                     } else {
                         showToast('success', 'VMs Ready!', 'You can now use the terminal');
+                        cloudSession = data; // Update with actual data from server
                     }
-                    refreshCloudSessionUI();
+                    renderCloudSessionUI(cloudSession);
+                    updateTerminalUI();
                 })
                 .catch(e => {
                     showToast('error', 'Error', e.message);
