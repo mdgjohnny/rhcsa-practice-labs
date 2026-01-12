@@ -233,7 +233,14 @@
                             <span class="material-symbols-outlined text-lg">arrow_back</span> Back
                         </button>
                         <h1 class="text-3xl md:text-4xl font-bold tracking-tight uppercase">Practice by Category</h1>
-                        <p class="text-gray-400 text-lg font-light max-w-2xl">Select a topic to begin a focused practice session. Master each objective to prepare for the exam.</p>
+                        <p class="text-gray-400 text-lg font-light max-w-2xl">Select one or more categories to practice. Click cards to toggle selection.</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span id="category-selection-count" class="text-gray-400 text-sm">0 selected</span>
+                        <button onclick="startSelectedCategoriesPractice()" id="start-categories-btn" disabled class="flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:bg-primary/80">
+                            <span>Start Practice</span>
+                            <span class="material-symbols-outlined">arrow_forward</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1385,27 +1392,83 @@
                 const key = Object.keys(categoryMeta).find(k => cat.toLowerCase().includes(k)) || 'default';
                 const meta = categoryMeta[key] || categoryMeta.default;
                 return `
-                    <button onclick="startCategoryPractice('${cat}')" 
-                            class="group flex flex-col text-left h-full rounded-lg border border-white/10 bg-[#1b1b1b] p-6 hover:border-primary hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div class="absolute top-0 left-0 w-1 h-0 bg-primary group-hover:h-full transition-all duration-300"></div>
+                    <div onclick="toggleCategorySelection('${cat}', this)" 
+                         data-category="${cat}"
+                         class="category-card group flex flex-col text-left h-full rounded-lg border-2 border-white/10 bg-[#1b1b1b] p-6 hover:border-primary/50 transition-all duration-300 relative overflow-hidden cursor-pointer">
+                        <div class="absolute top-3 right-3">
+                            <div class="category-check w-6 h-6 rounded-full border-2 border-gray-600 flex items-center justify-center transition-all">
+                                <span class="material-symbols-outlined text-white text-sm opacity-0">check</span>
+                            </div>
+                        </div>
                         <div class="mb-5 flex justify-between items-start">
-                            <div class="inline-flex h-12 w-12 items-center justify-center rounded bg-white/5 text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                            <div class="inline-flex h-12 w-12 items-center justify-center rounded bg-white/5 text-primary group-hover:bg-primary/20 transition-colors duration-300">
                                 <span class="material-symbols-outlined">${meta.icon}</span>
                             </div>
-                            <span class="material-symbols-outlined text-gray-600 group-hover:text-primary transition-colors opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transform duration-300">arrow_forward</span>
                         </div>
                         <div class="flex flex-col gap-2 flex-1">
                             <h3 class="text-lg font-bold group-hover:text-primary transition-colors capitalize">${cat.replace(/-/g, ' ')}</h3>
                             <p class="text-gray-500 text-sm leading-relaxed mb-4">${meta.desc}</p>
-                            <div class="mt-auto pt-4 border-t border-white/5 group-hover:border-transparent transition-colors flex items-center justify-between text-xs font-bold uppercase tracking-wider text-gray-500">
+                            <div class="mt-auto pt-4 border-t border-white/5 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-gray-500">
                                 <span class="text-primary">Obj ${idx + 1}</span>
                                 <span>${count} Tasks</span>
                             </div>
                         </div>
-                    </button>
+                    </div>
                 `;
             }).join('');
+        }
+
+        const selectedCategories = new Set();
+
+        function toggleCategorySelection(category, element) {
+            if (selectedCategories.has(category)) {
+                selectedCategories.delete(category);
+                element.classList.remove('border-primary', 'bg-primary/5');
+                element.classList.add('border-white/10');
+                element.querySelector('.category-check').classList.remove('bg-primary', 'border-primary');
+                element.querySelector('.category-check').classList.add('border-gray-600');
+                element.querySelector('.category-check span').classList.add('opacity-0');
+            } else {
+                selectedCategories.add(category);
+                element.classList.add('border-primary', 'bg-primary/5');
+                element.classList.remove('border-white/10');
+                element.querySelector('.category-check').classList.add('bg-primary', 'border-primary');
+                element.querySelector('.category-check').classList.remove('border-gray-600');
+                element.querySelector('.category-check span').classList.remove('opacity-0');
+            }
+            updateCategorySelectionUI();
+        }
+
+        function updateCategorySelectionUI() {
+            const count = selectedCategories.size;
+            const countEl = document.getElementById('category-selection-count');
+            const btn = document.getElementById('start-categories-btn');
+            if (countEl) countEl.textContent = `${count} selected`;
+            if (btn) btn.disabled = count === 0;
+        }
+
+        function startSelectedCategoriesPractice() {
+            if (selectedCategories.size === 0) {
+                showToast('warning', 'Select at least one category');
+                return;
+            }
+            selectedTasks = allTasks.filter(t => selectedCategories.has(t.category));
+            if (!selectedTasks.length) {
+                showToast('warning', 'No tasks in selected categories');
+                return;
+            }
+            const catNames = [...selectedCategories].map(c => c.replace(/-/g, ' ')).join(', ');
+            currentMode = 'practice';
+            taskResults.clear();
+            currentTaskIndex = 0;
+            document.getElementById('breadcrumb-mode').textContent = `Practice: ${selectedCategories.size > 2 ? selectedCategories.size + ' categories' : catNames}`;
+            populateSidebarCategoryFilter();
+            renderTaskList();
+            showTaskDetail(selectedTasks[0].id);
+            updateTaskNavigation();
+            showView('exam-running');
+            saveSession();
+            selectedCategories.clear(); // Reset for next time
         }
 
         function startCategoryPractice(category) {
