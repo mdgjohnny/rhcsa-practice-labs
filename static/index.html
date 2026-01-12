@@ -378,15 +378,15 @@
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-400 mb-3">Quick Presets</label>
                     <div class="grid grid-cols-3 gap-3">
-                        <button onclick="setChallengePreset(5, 30)" class="preset-btn p-3 rounded-lg bg-background-dark border border-white/10 hover:border-amber-500/50 transition-all text-center">
+                        <button onclick="setChallengePreset(5, 30, this)" class="preset-btn p-3 rounded-lg bg-background-dark border border-white/10 hover:border-amber-500/50 transition-all text-center">
                             <div class="text-lg font-bold text-amber-500">Sprint</div>
                             <div class="text-xs text-gray-400">5 tasks · 30 min</div>
                         </button>
-                        <button onclick="setChallengePreset(10, 90)" class="preset-btn p-3 rounded-lg bg-background-dark border border-white/10 hover:border-amber-500/50 transition-all text-center">
+                        <button onclick="setChallengePreset(10, 90, this)" class="preset-btn p-3 rounded-lg bg-background-dark border border-white/10 hover:border-amber-500/50 transition-all text-center">
                             <div class="text-lg font-bold text-amber-500">Standard</div>
                             <div class="text-xs text-gray-400">10 tasks · 1.5 hr</div>
                         </button>
-                        <button onclick="setChallengePreset(15, 120)" class="preset-btn p-3 rounded-lg bg-background-dark border border-white/10 hover:border-amber-500/50 transition-all text-center">
+                        <button onclick="setChallengePreset(15, 120, this)" class="preset-btn p-3 rounded-lg bg-background-dark border border-white/10 hover:border-amber-500/50 transition-all text-center">
                             <div class="text-lg font-bold text-amber-500">Extended</div>
                             <div class="text-xs text-gray-400">15 tasks · 2 hr</div>
                         </button>
@@ -1424,12 +1424,12 @@
         }
 
         // Challenge Mode Functions
-        function setChallengePreset(tasks, minutes) {
+        function setChallengePreset(tasks, minutes, el) {
             document.getElementById('challenge-task-count').value = tasks;
             document.getElementById('challenge-time-limit').value = minutes;
             // Visual feedback
             document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('border-amber-500', 'bg-amber-500/10'));
-            event.target.closest('.preset-btn').classList.add('border-amber-500', 'bg-amber-500/10');
+            if (el) el.closest('.preset-btn').classList.add('border-amber-500', 'bg-amber-500/10');
         }
 
         async function startChallenge() {

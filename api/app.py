@@ -813,7 +813,7 @@ def get_stats():
 def random_tasks():
     """Get random task selection for exam mode."""
     count = request.args.get('count', 15, type=int)
-    count = max(13, min(20, count))  # Clamp between 13-20
+    count = max(1, min(50, count))  # Allow 1-50 tasks for challenge mode
 
     logger.info(f"random_tasks called: count={count}")
 
