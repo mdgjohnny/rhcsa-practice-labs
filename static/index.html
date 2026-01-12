@@ -993,15 +993,44 @@
                     </button>
                 `;
             } else if (session.state === 'provisioning') {
+                // Calculate elapsed time
+                const startTime = new Date(session.created_at).getTime();
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const elapsedMin = Math.floor(elapsed / 60);
+                const elapsedSec = elapsed % 60;
+                const elapsedStr = `${elapsedMin}:${String(elapsedSec).padStart(2, '0')}`;
+                
+                // Progress stages
+                let stage = 'Initializing';
+                let progress = 10;
+                if (elapsed > 15) { stage = 'Creating network'; progress = 25; }
+                if (elapsed > 30) { stage = 'Launching VMs'; progress = 45; }
+                if (elapsed > 60) { stage = 'Configuring instances'; progress = 65; }
+                if (elapsed > 90) { stage = 'Installing packages'; progress = 80; }
+                if (elapsed > 120) { stage = 'Finalizing setup'; progress = 90; }
+                
                 infoEl.innerHTML = `
-                    <p class="text-amber-400 text-sm flex items-center gap-2">
-                        <span class="animate-spin">⟳</span> Provisioning VMs... (this takes 1-3 minutes)
-                    </p>
-                    <p class="text-xs text-gray-500 mt-1">Session ID: ${session.session_id}</p>
+                    <div class="space-y-3">
+                        <p class="text-amber-400 text-sm flex items-center gap-2">
+                            <span class="animate-spin">⟳</span> Provisioning VMs...
+                        </p>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="bg-primary h-2 rounded-full transition-all duration-500" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span>${stage}</span>
+                            <span>${elapsedStr} elapsed</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Typically takes 1-2 minutes. Session: ${session.session_id.slice(-8)}</p>
+                    </div>
                 `;
-                ctrlEl.innerHTML = `<p class="text-gray-500 text-sm">Please wait...</p>`;
-                // Poll for updates
-                setTimeout(refreshCloudSessionUI, 5000);
+                ctrlEl.innerHTML = `
+                    <button onclick="destroyCloudSession()" class="text-xs text-gray-500 hover:text-red-400 transition-colors">
+                        Cancel provisioning
+                    </button>
+                `;
+                // Poll for updates more frequently
+                setTimeout(refreshCloudSessionUI, 3000);
             } else if (session.state === 'ready' || session.state === 'active') {
                 const timeRemaining = Math.max(0, Math.floor(session.time_remaining_seconds / 60));
                 infoEl.innerHTML = `
