@@ -10,7 +10,7 @@ A SadServers-style web platform for RHCSA (Red Hat Certified System Administrato
 
 ### ✅ Working Features
 
-1. **141 Practice Tasks** - All with verification criteria shown upfront
+1. **247 Practice Tasks** - All with verification criteria shown upfront
 2. **Cloud VM Sessions** - OCI free tier, 2 VMs (rhcsa1/rhcsa2), ~2 min provision
 3. **Web Terminal** - xterm.js + Flask-SocketIO + Paramiko SSH bridge
 4. **Python Grader** - Bundles scripts, runs on VMs via SSH, detailed results
@@ -98,3 +98,23 @@ check 'test command' \
 ## Git
 
 Branch: `dev-antigravity` (ahead of origin)
+
+## Recent Updates (Jan 12 - Later)
+
+### Task Expansion (141 → 247 tasks)
+Added comprehensive coverage for all RHCSA objectives:
+
+- **Shell Scripts (18 tasks)**: if/test, for/while loops, $1/$@, command substitution
+- **SELinux (43 tasks)**: modes, contexts, ports, booleans, troubleshooting  
+- **Containers (37 tasks)**: pull, inspect, skopeo, Containerfile, volumes
+- **Process Management**: kill, nice, renice
+- **rd.break Simulation**: 5 tasks testing recovery knowledge without boot access
+
+### Objective Coverage
+Every RHCSA objective bullet point now has 5+ tasks where possible.
+See coverage report in conversation for detailed matrix.
+
+### rd.break Workaround
+Since cloud VMs can't interrupt boot:
+- Task 255: Password reset via sudo user
+- Task 256-259: Document/script the recovery procedure
