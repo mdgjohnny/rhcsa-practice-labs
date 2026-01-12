@@ -200,3 +200,18 @@ region = "us-ashburn-1"  # Better ARM availability
 ```
 
 Note: This requires a fresh compartment in the new region.
+
+### Final Status
+- **ARM not available** in sa-saopaulo-1 (Out of host capacity)
+- **x86 micro restored** as default for reliability
+- **To use ARM**: Subscribe to another region (us-ashburn-1 recommended) in OCI Console, then update `infra/terraform.tfvars`:
+  ```hcl
+  region             = "us-ashburn-1"
+  instance_shape     = "VM.Standard.A1.Flex"
+  instance_ocpus     = 2
+  instance_memory_gb = 12
+  ```
+
+### ARM Config Ready
+The terraform code fully supports ARM - just needs a region with capacity.
+`infra/variables.tf` defaults to ARM; `terraform.tfvars` overrides to x86 micro for sa-saopaulo-1.
