@@ -1096,21 +1096,30 @@
 
         async function provisionCloudSession() {
             if (!cloudSession) return;
-            try {
-                showToast('info', 'Starting VM provisioning...', 'This takes 1-3 minutes');
-                refreshCloudSessionUI(); // Show provisioning state immediately
-                const resp = await fetch(`/api/sessions/${cloudSession.session_id}/provision`, { method: 'POST' });
-                const data = await resp.json();
-                if (resp.ok) {
-                    showToast('success', 'VMs Ready!', 'You can now use the terminal');
-                } else {
-                    showToast('error', 'Provisioning Failed', data.error);
-                }
-                refreshCloudSessionUI();
-            } catch (e) {
-                showToast('error', 'Error', e.message);
-                refreshCloudSessionUI();
-            }
+            const sessionId = cloudSession.session_id;
+            
+            showToast('info', 'Starting VM provisioning...', 'This takes 1-2 minutes');
+            
+            // Optimistically show provisioning state
+            cloudSession.state = 'provisioning';
+            cloudSession.created_at = new Date().toISOString(); // Reset timer
+            refreshCloudSessionUI();
+            
+            // Start provisioning (don't await - let it run in background)
+            fetch(`/api/sessions/${sessionId}/provision`, { method: 'POST' })
+                .then(resp => resp.json())
+                .then(data => {
+                    if (data.error) {
+                        showToast('error', 'Provisioning Failed', data.error);
+                    } else {
+                        showToast('success', 'VMs Ready!', 'You can now use the terminal');
+                    }
+                    refreshCloudSessionUI();
+                })
+                .catch(e => {
+                    showToast('error', 'Error', e.message);
+                    refreshCloudSessionUI();
+                });
         }
 
         async function destroyCloudSession() {
@@ -2200,6 +2209,7 @@
         let terminal = null;
         let termFitAddon = null;
         let termCurrentNode = 'node1';
+        let termRetryCount = 0;
         let cloudSession = null;
 
         function initTerminal() {
@@ -2295,6 +2305,7 @@
 
             termSocket.on('terminal_ready', (data) => {
                 console.log('Terminal ready:', data);
+                termRetryCount = 0; // Reset retry count on success
                 termUpdateStatus(`${data.node} connected`, 'green');
                 if (terminal) {
                     terminal.clear();
@@ -2310,9 +2321,24 @@
 
             termSocket.on('terminal_error', (data) => {
                 console.error('Terminal error:', data.error);
-                termUpdateStatus('Error', 'red');
-                if (terminal) {
-                    terminal.write(`\r\n\x1b[31mError: ${data.error}\x1b[0m\r\n`);
+                const isConnectionError = data.error.includes('Failed to connect') || data.error.includes('timed out');
+                
+                if (isConnectionError && termRetryCount < 3) {
+                    termRetryCount++;
+                    termUpdateStatus(`Retrying (${termRetryCount}/3)...`, 'amber');
+                    if (terminal) {
+                        terminal.write(`\r\n\x1b[33mVM still booting, retrying in 10 seconds... (${termRetryCount}/3)\x1b[0m\r\n`);
+                    }
+                    setTimeout(() => termConnectNode(termCurrentNode), 10000);
+                } else {
+                    termUpdateStatus('Error', 'red');
+                    termRetryCount = 0;
+                    if (terminal) {
+                        terminal.write(`\r\n\x1b[31mError: ${data.error}\x1b[0m\r\n`);
+                        if (isConnectionError) {
+                            terminal.write(`\r\n\x1b[33mTip: VM may still be booting. Wait 30 seconds and click refresh.\x1b[0m\r\n`);
+                        }
+                    }
                 }
             });
 
