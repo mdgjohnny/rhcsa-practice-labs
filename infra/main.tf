@@ -207,20 +207,33 @@ vm.dirty_background_ratio=2
 SYSCTL
 sysctl -p 2>/dev/null
 
-# PHASE 6: INSTALL RHCSA PRACTICE PACKAGES
-# Install packages needed for tasks (do this AFTER memory optimization)
-# Using --setopt to minimize memory usage during install
-PKGS="autofs nfs-utils httpd vsftpd podman skopeo buildah at tuned chrony"
-PKGS="$PKGS policycoreutils-python-utils setroubleshoot-server"
-PKGS="$PKGS vim bash-completion tar gzip bzip2"
+# PHASE 6: INSTALL ESSENTIAL RHCSA PACKAGES
+# Only install small, critical packages - let users install large ones as practice
+# Most packages (nfs-utils, at, tuned, chrony, vim) are pre-installed in Oracle Linux
 
-# Install in small batches to avoid OOM
-for pkg in $PKGS; do
-    dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 "$pkg" 2>/dev/null || true
+# Clear caches first to maximize available memory
+sync && echo 3 > /proc/sys/vm/drop_caches
+rm -rf /var/cache/dnf/* /var/cache/yum/*
+
+# Install autofs (small, required for NFS autofs tasks)
+dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 autofs 2>/dev/null || true
+sync && echo 3 > /proc/sys/vm/drop_caches
+
+# Install SELinux management tools (semanage, audit2why)
+dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 policycoreutils-python-utils 2>/dev/null || true
+sync && echo 3 > /proc/sys/vm/drop_caches
+
+# Container tools - try but don't fail if OOM
+# These are larger, install with extra care
+for pkg in podman skopeo; do
+    rm -rf /var/cache/dnf/*
+    sync && echo 3 > /proc/sys/vm/drop_caches
+    sleep 5  # Let memory settle
+    dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 "$pkg" 2>/dev/null || echo "Warning: Failed to install $pkg"
     sync && echo 3 > /proc/sys/vm/drop_caches
 done
 
-# Enable but don't start services (user will practice this)
+# Enable atd (usually pre-installed)
 systemctl enable atd 2>/dev/null || true
 systemctl start atd 2>/dev/null || true
 
@@ -314,13 +327,21 @@ vm.dirty_background_ratio=2
 SYSCTL
 sysctl -p 2>/dev/null
 
-# PHASE 6: INSTALL RHCSA PRACTICE PACKAGES
-PKGS="autofs nfs-utils httpd vsftpd podman skopeo buildah at tuned chrony"
-PKGS="$PKGS policycoreutils-python-utils setroubleshoot-server"
-PKGS="$PKGS vim bash-completion tar gzip bzip2"
+# PHASE 6: INSTALL ESSENTIAL RHCSA PACKAGES (node2)
+sync && echo 3 > /proc/sys/vm/drop_caches
+rm -rf /var/cache/dnf/* /var/cache/yum/*
 
-for pkg in $PKGS; do
-    dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 "$pkg" 2>/dev/null || true
+dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 autofs 2>/dev/null || true
+sync && echo 3 > /proc/sys/vm/drop_caches
+
+dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 policycoreutils-python-utils 2>/dev/null || true
+sync && echo 3 > /proc/sys/vm/drop_caches
+
+for pkg in podman skopeo; do
+    rm -rf /var/cache/dnf/*
+    sync && echo 3 > /proc/sys/vm/drop_caches
+    sleep 5
+    dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 "$pkg" 2>/dev/null || echo "Warning: Failed to install $pkg"
     sync && echo 3 > /proc/sys/vm/drop_caches
 done
 
