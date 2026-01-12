@@ -207,32 +207,46 @@ vm.dirty_background_ratio=2
 SYSCTL
 sysctl -p 2>/dev/null
 
-# PHASE 6: PREPARE FOR RHCSA TASKS
-# SKIP package installation - 1GB RAM micro instances can't handle dnf properly
-# Users will install packages as part of practice tasks (this IS a learning objective!)
-# Pre-installed in Oracle Linux: nfs-utils, at, tuned, chrony, tar, vim
+# PHASE 6: SETUP EXTRA SWAP FOR PACKAGE INSTALLATION
+# Key insight from previous session: create swap FIRST, then dnf works!
+mkdir -p /var/practice-disks
+truncate -s 2G /var/practice-disks/swap.img
+mkswap /var/practice-disks/swap.img
+chmod 600 /var/practice-disks/swap.img
+swapon /var/practice-disks/swap.img
+echo "/var/practice-disks/swap.img swap swap defaults 0 0" >> /etc/fstab
 
-# Just enable pre-installed services
+# Now with ~4GB total swap, we can safely install packages
+# Clear caches first
+rm -rf /var/cache/dnf/* /var/cache/yum/*
+sync && echo 3 > /proc/sys/vm/drop_caches
+
+# Install essential RHCSA packages one at a time
+for pkg in autofs httpd podman policycoreutils-python-utils; do
+    dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 "$pkg" 2>/dev/null || true
+    rm -rf /var/cache/dnf/*
+    sync && echo 3 > /proc/sys/vm/drop_caches
+    sleep 2
+done
+
+# Enable atd (pre-installed)
 systemctl enable atd 2>/dev/null || true
 systemctl start atd 2>/dev/null || true
 
-# Create helper script for users to install packages safely
+# Create helper script for additional packages
 cat > /usr/local/bin/safe-install << 'SCRIPT'
 #!/bin/bash
-# Safe package installer for low-memory systems
 echo "Clearing caches before install..."
 sync && echo 3 > /proc/sys/vm/drop_caches
 rm -rf /var/cache/dnf/* 2>/dev/null
 echo "Installing $@..."
 dnf install -y --setopt=install_weak_deps=False "$@"
-echo "Cleaning up..."
 rm -rf /var/cache/dnf/*
 sync && echo 3 > /proc/sys/vm/drop_caches
 SCRIPT
 chmod +x /usr/local/bin/safe-install
 
 # PHASE 7: CREATE PRACTICE DISKS (LOOPBACK) - sparse files for LVM/partition practice
-mkdir -p /var/practice-disks
 truncate -s 10G /var/practice-disks/disk0.img  # loop0 - main practice disk
 truncate -s 5G /var/practice-disks/disk1.img   # loop1 - ext4/vfat tasks  
 truncate -s 2G /var/practice-disks/disk2.img   # loop2 - GPT partition
@@ -321,16 +335,31 @@ vm.dirty_background_ratio=2
 SYSCTL
 sysctl -p 2>/dev/null
 
-# PHASE 6: PREPARE FOR RHCSA TASKS (node2)
+# PHASE 6: SETUP EXTRA SWAP AND INSTALL PACKAGES (node2)
+mkdir -p /var/practice-disks
+truncate -s 2G /var/practice-disks/swap.img
+mkswap /var/practice-disks/swap.img
+chmod 600 /var/practice-disks/swap.img
+swapon /var/practice-disks/swap.img
+echo "/var/practice-disks/swap.img swap swap defaults 0 0" >> /etc/fstab
+
+rm -rf /var/cache/dnf/* /var/cache/yum/*
+sync && echo 3 > /proc/sys/vm/drop_caches
+
+for pkg in autofs httpd podman policycoreutils-python-utils; do
+    dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 "$pkg" 2>/dev/null || true
+    rm -rf /var/cache/dnf/*
+    sync && echo 3 > /proc/sys/vm/drop_caches
+    sleep 2
+done
+
 systemctl enable atd 2>/dev/null || true
 systemctl start atd 2>/dev/null || true
 
 cat > /usr/local/bin/safe-install << 'SCRIPT'
 #!/bin/bash
-echo "Clearing caches before install..."
 sync && echo 3 > /proc/sys/vm/drop_caches
 rm -rf /var/cache/dnf/* 2>/dev/null
-echo "Installing $@..."
 dnf install -y --setopt=install_weak_deps=False "$@"
 rm -rf /var/cache/dnf/*
 sync && echo 3 > /proc/sys/vm/drop_caches
@@ -338,7 +367,6 @@ SCRIPT
 chmod +x /usr/local/bin/safe-install
 
 # PHASE 7: CREATE PRACTICE DISKS (LOOPBACK)
-mkdir -p /var/practice-disks
 truncate -s 10G /var/practice-disks/disk0.img
 truncate -s 5G /var/practice-disks/disk1.img
 truncate -s 2G /var/practice-disks/disk2.img
