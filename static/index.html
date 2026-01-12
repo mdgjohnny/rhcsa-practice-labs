@@ -967,6 +967,10 @@
         // Cloud Session Management
         async function refreshCloudSessionUI() {
             const session = await checkCloudSession();
+            renderCloudSessionUI(session);
+        }
+        
+        function renderCloudSessionUI(session) {
             const infoEl = document.getElementById('cloud-session-info');
             const ctrlEl = document.getElementById('cloud-session-controls');
             
@@ -1128,10 +1132,10 @@
             
             const sessionId = cloudSession.session_id;
             
-            // Immediately clear UI
+            // Immediately clear UI without re-fetching
             termDisconnect();
             cloudSession = null;
-            refreshCloudSessionUI();
+            renderCloudSessionUI(null);  // Render empty state directly
             updateTerminalUI();
             showToast('info', 'Destroying session...', 'VMs are being terminated');
             
