@@ -208,32 +208,31 @@ SYSCTL
 sysctl -p 2>/dev/null
 
 # PHASE 6: INSTALL ESSENTIAL RHCSA PACKAGES
-# Only install small, critical packages - let users install large ones as practice
-# Most packages (nfs-utils, at, tuned, chrony, vim) are pre-installed in Oracle Linux
+# MINIMAL install to avoid OOM on 1GB micro instances
+# Users will install larger packages (httpd, podman) as part of practice tasks
 
-# Clear caches first to maximize available memory
+# Clear caches aggressively
+sync && echo 3 > /proc/sys/vm/drop_caches
+rm -rf /var/cache/dnf/* /var/cache/yum/* /var/log/dnf* 2>/dev/null
+
+# Only install absolutely essential small packages
+# autofs: ~400KB, required for NFS autofs tasks
+# policycoreutils-python-utils: ~600KB, required for semanage
+dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 --setopt=tsflags=nodocs autofs policycoreutils-python-utils 2>/dev/null &
+DNF_PID=$!
+
+# Wait max 5 minutes, then kill if stuck
+for i in $(seq 1 60); do
+    if ! kill -0 $DNF_PID 2>/dev/null; then break; fi
+    sleep 5
+done
+kill $DNF_PID 2>/dev/null || true
+
+# Cleanup
 sync && echo 3 > /proc/sys/vm/drop_caches
 rm -rf /var/cache/dnf/* /var/cache/yum/*
 
-# Install autofs (small, required for NFS autofs tasks)
-dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 autofs 2>/dev/null || true
-sync && echo 3 > /proc/sys/vm/drop_caches
-
-# Install SELinux management tools (semanage, audit2why)
-dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 policycoreutils-python-utils 2>/dev/null || true
-sync && echo 3 > /proc/sys/vm/drop_caches
-
-# Container tools - try but don't fail if OOM
-# These are larger, install with extra care
-for pkg in podman skopeo; do
-    rm -rf /var/cache/dnf/*
-    sync && echo 3 > /proc/sys/vm/drop_caches
-    sleep 5  # Let memory settle
-    dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 "$pkg" 2>/dev/null || echo "Warning: Failed to install $pkg"
-    sync && echo 3 > /proc/sys/vm/drop_caches
-done
-
-# Enable atd (usually pre-installed)
+# Enable atd (pre-installed)
 systemctl enable atd 2>/dev/null || true
 systemctl start atd 2>/dev/null || true
 
@@ -329,21 +328,18 @@ sysctl -p 2>/dev/null
 
 # PHASE 6: INSTALL ESSENTIAL RHCSA PACKAGES (node2)
 sync && echo 3 > /proc/sys/vm/drop_caches
-rm -rf /var/cache/dnf/* /var/cache/yum/*
+rm -rf /var/cache/dnf/* /var/cache/yum/* /var/log/dnf* 2>/dev/null
 
-dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 autofs 2>/dev/null || true
-sync && echo 3 > /proc/sys/vm/drop_caches
-
-dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 policycoreutils-python-utils 2>/dev/null || true
-sync && echo 3 > /proc/sys/vm/drop_caches
-
-for pkg in podman skopeo; do
-    rm -rf /var/cache/dnf/*
-    sync && echo 3 > /proc/sys/vm/drop_caches
+dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 --setopt=tsflags=nodocs autofs policycoreutils-python-utils 2>/dev/null &
+DNF_PID=$!
+for i in $(seq 1 60); do
+    if ! kill -0 $DNF_PID 2>/dev/null; then break; fi
     sleep 5
-    dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 "$pkg" 2>/dev/null || echo "Warning: Failed to install $pkg"
-    sync && echo 3 > /proc/sys/vm/drop_caches
 done
+kill $DNF_PID 2>/dev/null || true
+
+sync && echo 3 > /proc/sys/vm/drop_caches
+rm -rf /var/cache/dnf/* /var/cache/yum/*
 
 systemctl enable atd 2>/dev/null || true
 systemctl start atd 2>/dev/null || true
