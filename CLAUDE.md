@@ -4,237 +4,97 @@
 
 A SadServers-style web platform for RHCSA (Red Hat Certified System Administrator) exam practice. Users get a web terminal connected to real cloud VMs where they can practice Linux administration tasks.
 
+**Live:** https://sun-indigo.exe.xyz:8080/
+
+## Current State (Jan 12, 2026)
+
+### ✅ Working Features
+
+1. **141 Practice Tasks** - All with verification criteria shown upfront
+2. **Cloud VM Sessions** - OCI free tier, 2 VMs (rhcsa1/rhcsa2), ~2 min provision
+3. **Web Terminal** - xterm.js + Flask-SocketIO + Paramiko SSH bridge
+4. **Python Grader** - Bundles scripts, runs on VMs via SSH, detailed results
+5. **Challenge Mode** - Custom time (5-240 min) and task count (1-50)
+6. **Practice Mode** - No timer, select specific tasks or categories
+7. **Exam Mode** - 3 hours, 15-20 random tasks
+
+### Task Quality
+
+- Descriptions describe GOALS, not methods (no answer giveaways)
+- Verification criteria shown before attempting each task
+- Detailed pass/fail feedback after grading
+- Points breakdown per check (typically 10 pts each)
+
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  Browser                                                        │
-│  ┌─────────────────┐  ┌─────────────────────────────────────┐  │
-│  │  Practice UI    │  │  xterm.js Terminal                  │  │
-│  │  (tasks/grader) │  │  (WebSocket → SSH → VMs)            │  │
-│  └─────────────────┘  └─────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Flask Backend (api/app_socketio.py)                            │
-│  ├── REST API: /api/tasks, /api/grade, /api/sessions            │
-│  ├── WebSocket: /terminal namespace (Flask-SocketIO)            │
-│  └── Session Manager: Terraform wrapper for VM lifecycle        │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Oracle Cloud Infrastructure (Free Tier)                        │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  VCN (10.0.0.0/16) + Public Subnet                      │   │
-│  │  ┌──────────────┐      ┌──────────────┐                 │   │
-│  │  │   rhcsa1     │      │   rhcsa2     │                 │   │
-│  │  │  (node1)     │◄────►│  (node2)     │                 │   │
-│  │  │ Oracle Linux │      │ Oracle Linux │                 │   │
-│  │  └──────────────┘      └──────────────┘                 │   │
-│  └─────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
+Browser (xterm.js) → Flask-SocketIO → Paramiko SSH → OCI VMs (rhcsa1/rhcsa2)
+                  → REST API → Python Grader → SSH → VMs
 ```
-
-## Current State (as of Jan 2026)
-
-### ✅ Completed
-
-1. **OCI Infrastructure (Terraform)** - `infra/`
-   - Full working Terraform config for Oracle Cloud
-   - Creates: VCN, subnet, security lists, internet gateway, 2 compute instances
-   - Oracle Linux 8 (RHEL-compatible, free tier)
-   - Auto-generated SSH keys per session
-   - Cloud-init for hostname setup (`rhcsa1`, `rhcsa2`)
-   - Credentials configured in `~/.oci/` and `infra/terraform.tfvars`
-   - **Tested and working** - VMs provision in ~40 seconds
-
-2. **Session Management** - `api/oci_manager/`
-   - `session_manager.py`: SQLite-backed session lifecycle
-   - `terraform_wrapper.py`: Python wrapper for Terraform CLI
-   - Session states: `pending` → `provisioning` → `ready` → `terminated`
-   - SSH keys stored in DB (never exposed to browser)
-   - 30-minute default timeout
-
-3. **API Endpoints** - `api/app_socketio.py`
-   - `POST /api/sessions` - Create new session
-   - `GET /api/sessions/<id>` - Get session details
-   - `POST /api/sessions/<id>/provision` - Start VM provisioning
-   - `DELETE /api/sessions/<id>` - Destroy session & VMs
-   - `GET /api/sessions/active` - Get current active session
-
-4. **Web Terminal Foundation** - `api/terminal.py`, `static/terminal-test.html`
-   - xterm.js frontend terminal emulator
-   - Flask-SocketIO WebSocket backend
-   - Paramiko SSH bridge
-   - Session-based auth (connects via session_id, not raw keys)
-
-5. **Original Practice System** (pre-existing)
-   - 150+ RHCSA tasks in `checks/task-*.sh`
-   - Grader script `exam-grader.sh`
-   - Flask API in `api/app.py`
-   - Web UI in `static/index.html`
-
-### ⚠️ Known Issues
-
-1. **WebSocket Terminal Instability**
-   - The `start_session_terminal` event sometimes doesn't reach the handler
-   - Connections drop after ~25 seconds (ping timeout)
-   - Likely cause: Flask's dev server + threading mode not ideal for WebSocket
-   - **Fix needed**: Use production WSGI server (gunicorn + eventlet/gevent) or debug further
-
-### ✅ Recently Completed (Jan 2026)
-
-1. **Fix WebSocket Terminal** ✅
-   - Switched from `threading` to `eventlet` async mode in SocketIO
-   - Added eventlet monkey-patching at module start
-   - Replaced threading.Thread with eventlet.spawn for SSH reader
-   - Terminal connections now stable, no timeout issues
-
-2. **Integrate Terminal into Main UI** ✅
-   - Added split-pane layout: task panel left, terminal panel right
-   - Added node tabs (rhcsa1/rhcsa2) for switching between VMs
-   - Added cloud session management in Settings page
-   - Terminal connects automatically when cloud session is ready
-
-### ✅ Recently Completed (Jan 2026)
-
-3. **Python Grader Module with Clean Abstraction** ✅
-   - New `api/grader/` module replaces shell-script-based grading
-   - **Architecture:**
-     - `bundler.py`: Creates self-contained scripts from task files
-       - Injects JSON-outputting check() function
-       - Extracts metadata (target, category, title)
-     - `executor.py`: Execution backends (LocalExecutor, RemoteExecutor)
-     - `grader.py`: Main grading orchestration
-     - `api_integration.py`: Flask service layer
-     - `cli.py`: Command-line interface
-   - **Same script runs anywhere** - local or remote via SSH
-   - **Tested:** 38 unit tests, all 145 tasks bundle successfully
-   - **API v2 endpoints:**
-     - `GET /api/v2/tasks` - List tasks
-     - `POST /api/v2/grade` - Grade multiple tasks  
-     - `POST /api/v2/grade/<task_id>` - Grade single task
-     - `GET /api/v2/status` - Check grader/session status
-   - **CLI usage:**
-     ```bash
-     python -m api.grader.cli list              # List tasks
-     python -m api.grader.cli grade task-100    # Grade task
-     python -m api.grader.cli bundle task-07    # Show bundled script
-     python -m api.grader.cli test              # Run tests
-     ```
-
-### ✅ Recently Completed (Jan 2026)
-
-4. **Frontend v2 API Integration** ✅
-   - Updated `loadTasks()` to use `/api/v2/tasks`
-   - Updated `gradeTask()` to use `/api/v2/grade/{taskId}`
-   - Proper JSON headers for POST requests
-   - Tested end-to-end with task selection and grading
-
-5. **Eliminated run_ssh Abstraction** ✅
-   - Rewrote 25 task files to remove redundant SSH layer
-   - Tasks now execute directly on target nodes (no SSH-to-self)
-   - Split "Target: both" tasks into separate node1/node2 tasks
-   - Task count: 145 (4 new split tasks)
-   - Removed SSH_WRAPPER from bundler (no longer needed)
-
-6. **Background Session Cleanup** ✅
-   - Added `session_cleanup_worker()` in app_socketio.py
-   - Runs every 5 minutes via eventlet.spawn
-   - Auto-terminates expired sessions
-
-7. **OCI Setup / User Onboarding** ✅
-   - Added `SETUP.md` with comprehensive setup guide
-   - Added `scripts/setup-oci.sh` for automated configuration
-   - Added `infra/terraform.tfvars.example` template
-   - Covers prerequisites, OCI CLI, Terraform, troubleshooting
-
-8. **Production Hardening** ✅
-   - `gunicorn.conf.py` - Production WSGI config with eventlet
-   - `requirements.txt` - Frozen dependencies
-   - `scripts/run-production.sh` - Production startup script
-   - `rhcsa-labs.service` - Systemd service file
-   - Rate limiting via Flask-Limiter (5 sessions/hour)
-   - Max 1 active session enforced in session manager
-
-### 🔲 TODO
-
-*All major tasks completed!*
 
 ## Key Files
 
 ```
 rhcsa-practice-labs/
 ├── api/
-│   ├── app.py              # Flask API (includes v2 grader endpoints)
-│   ├── app_socketio.py     # Extended API with WebSocket + sessions
-│   ├── terminal.py         # WebSocket terminal handler
-│   ├── grader/             # NEW: Python grader module
-│   │   ├── bundler.py      # Creates self-contained scripts
-│   │   ├── executor.py     # Local/Remote execution backends
-│   │   ├── grader.py       # Main grading logic
-│   │   ├── api_integration.py  # Flask service layer
-│   │   ├── cli.py          # Command-line interface
-│   │   └── test_grader.py  # 39 unit tests
-│   └── oci_manager/        # OCI/Terraform session management
-│       ├── session_manager.py
-│       └── terraform_wrapper.py
-├── infra/                  # Terraform configs
-│   ├── main.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   └── terraform.tfvars    # OCI credentials (gitignored)
-├── static/
-│   ├── index.html          # Main practice UI
-│   └── terminal-test.html  # Terminal test page
-├── checks/                 # 145 task verification scripts
-└── exam-grader.sh          # Legacy CLI grader (bash)
+│   ├── app_socketio.py      # Main app with WebSocket terminal
+│   ├── grader/              # Python grader module
+│   │   ├── bundler.py       # Task script bundling + check extraction
+│   │   ├── executor.py      # Local/Remote SSH execution
+│   │   ├── grader.py        # Grading orchestration
+│   │   └── api_integration.py
+│   └── oci_manager/         # Session/Terraform management
+├── checks/                  # 141 task-*.sh verification scripts
+├── static/index.html        # Complete UI (single file)
+├── infra/                   # Terraform for OCI
+└── sessions.db              # SQLite session storage
 ```
 
-## Running Locally
+## Running
 
 ```bash
-cd rhcsa-practice-labs
+cd /home/exedev/rhcsa-practice-labs
 source .venv/bin/activate
-
-# Start the app with WebSocket support
-python api/app_socketio.py
-
-# Or original app without terminal/sessions
-python api/app.py
+python api/app_socketio.py   # Port 8080
 ```
 
-## Testing Sessions Manually
+## CLI Commands
 
 ```bash
-# Create session
-curl -X POST -H "Content-Type: application/json" \
-  http://localhost:8080/api/sessions -d '{}'
-
-# Provision VMs (takes 2-5 min)
-curl -X POST http://localhost:8080/api/sessions/<session_id>/provision
-
-# Check status
-curl http://localhost:8080/api/sessions/<session_id>
-
-# Destroy when done
-curl -X DELETE http://localhost:8080/api/sessions/<session_id>
+python -m api.grader.cli list              # List all tasks
+python -m api.grader.cli grade task-01     # Grade single task
+python -m api.grader.cli bundle task-01    # Show bundled script
 ```
 
-## OCI Free Tier Limits
+## Task File Format
 
-- 2x VM.Standard.E2.1.Micro (1 OCPU, 1GB RAM each)
-- Region: sa-saopaulo-1
-- Credentials in `~/.oci/config`
+```bash
+#!/usr/bin/env bash
+# Task: Description of what to accomplish (no hints!)
+# Title: Short Title
+# Category: networking|users-groups|file-systems|security|...
+# Target: node1|node2|both
 
-## Production Notes
+check 'test command' \
+    "Pass message" \
+    "Fail message"
+```
 
-- Remove `/api/mock-stats` endpoint before production
-- WebSocket needs production WSGI server
-- Consider Redis for session state in multi-worker setup
+## Session Management
 
-## Commit Messages
+- Sessions auto-expire after 30 minutes
+- Max 1 active session enforced
+- VMs destroyed on session end
+- SSH keys stored in sessions.db (never exposed to browser)
 
-- Do not include Claude Code attribution in commit messages
+## Recent Fixes (Jan 12)
+
+1. Removed answer hints from task descriptions
+2. Added verification criteria display
+3. Fixed secondary IP persistence checks
+4. Added Challenge mode with presets
+5. Improved grading feedback (shows each check)
+
+## Git
+
+Branch: `dev-antigravity` (ahead of origin)
