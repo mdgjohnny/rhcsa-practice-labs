@@ -173,20 +173,27 @@
             <h1 class="text-4xl font-bold mb-2 text-center">Select Mode</h1>
             <p class="text-gray-400 mb-10 text-center">Choose how you want to practice</p>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
                 <button onclick="showView('practice-choice')" class="group flex flex-col h-56 p-8 rounded-2xl bg-surface-dark border border-white/5 hover:border-emerald-500/50 transition-all hover:-translate-y-1 text-left">
                     <div class="size-12 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
                         <span class="material-symbols-outlined text-2xl">school</span>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">Practice Mode</h3>
-                    <p class="text-gray-400 text-sm">Select specific tasks. No time limit. Great for learning.</p>
+                    <h3 class="text-xl font-bold mb-2">Practice</h3>
+                    <p class="text-gray-400 text-sm">No time limit. Select tasks freely.</p>
+                </button>
+                <button onclick="showView('challenge-setup')" class="group flex flex-col h-56 p-8 rounded-2xl bg-surface-dark border border-white/5 hover:border-amber-500/50 transition-all hover:-translate-y-1 text-left">
+                    <div class="size-12 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center mb-4">
+                        <span class="material-symbols-outlined text-2xl">bolt</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Challenge</h3>
+                    <p class="text-gray-400 text-sm">Custom time & tasks. Test yourself.</p>
                 </button>
                 <button onclick="selectMode('exam')" class="group flex flex-col h-56 p-8 rounded-2xl bg-surface-dark border border-white/5 hover:border-primary/50 transition-all hover:-translate-y-1 text-left">
                     <div class="size-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4">
                         <span class="material-symbols-outlined text-2xl">timer</span>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">Exam Mode</h3>
-                    <p class="text-gray-400 text-sm">Random 13-20 tasks. 3 hour time limit. Like the real thing.</p>
+                    <h3 class="text-xl font-bold mb-2">Exam</h3>
+                    <p class="text-gray-400 text-sm">3 hours, 15-20 tasks. Like the real thing.</p>
                 </button>
             </div>
         </div>
@@ -355,7 +362,68 @@
             </div>
         </div>
 
-        <!-- VIEW: Exam/Practice Running (Active Session) -->
+        <!-- VIEW: Challenge Setup -->
+        <div id="view-challenge-setup" class="view flex-col items-center py-12 px-6 max-w-2xl mx-auto w-full animate-fade-in">
+            <button onclick="showView('mode-select')" class="self-start flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span> Back
+            </button>
+            
+            <div class="w-full bg-surface-dark rounded-xl border border-white/5 p-8">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                    <span class="material-symbols-outlined text-amber-500">bolt</span>
+                    Challenge Mode
+                </h2>
+                
+                <!-- Presets -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-400 mb-3">Quick Presets</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button onclick="setChallengePreset(5, 30)" class="preset-btn p-3 rounded-lg bg-background-dark border border-white/10 hover:border-amber-500/50 transition-all text-center">
+                            <div class="text-lg font-bold text-amber-500">Sprint</div>
+                            <div class="text-xs text-gray-400">5 tasks · 30 min</div>
+                        </button>
+                        <button onclick="setChallengePreset(10, 90)" class="preset-btn p-3 rounded-lg bg-background-dark border border-white/10 hover:border-amber-500/50 transition-all text-center">
+                            <div class="text-lg font-bold text-amber-500">Standard</div>
+                            <div class="text-xs text-gray-400">10 tasks · 1.5 hr</div>
+                        </button>
+                        <button onclick="setChallengePreset(15, 120)" class="preset-btn p-3 rounded-lg bg-background-dark border border-white/10 hover:border-amber-500/50 transition-all text-center">
+                            <div class="text-lg font-bold text-amber-500">Extended</div>
+                            <div class="text-xs text-gray-400">15 tasks · 2 hr</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Custom Settings -->
+                <div class="border-t border-white/10 pt-6 mb-6">
+                    <label class="block text-sm font-medium text-gray-400 mb-3">Custom Settings</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Number of Tasks</label>
+                            <input type="number" id="challenge-task-count" value="10" min="1" max="30" 
+                                   class="w-full px-4 py-2 rounded-lg bg-background-dark border border-white/10 text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Time Limit (minutes)</label>
+                            <input type="number" id="challenge-time-limit" value="60" min="5" max="240" 
+                                   class="w-full px-4 py-2 rounded-lg bg-background-dark border border-white/10 text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Category (optional)</label>
+                    <select id="challenge-category" class="w-full px-4 py-2 rounded-lg bg-background-dark border border-white/10 text-white focus:border-amber-500">
+                        <option value="">All Categories (Random)</option>
+                    </select>
+                </div>
+                
+                <button onclick="startChallenge()" class="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-black font-bold transition-all">
+                    <span class="material-symbols-outlined">bolt</span> Start Challenge
+                </button>
+            </div>
+        </div>
+
         <!-- VIEW: Exam/Practice Running (Active Session) -->
         <div id="view-exam-running" class="view w-full animate-fade-in" style="height: calc(100vh - 4rem); max-height: calc(100vh - 4rem);">
             <div class="flex h-full overflow-hidden">
@@ -713,7 +781,7 @@
         let gradingAborted = false;
         let previousView = null;
         let cachedConfig = null;
-        const EXAM_DURATION = 3 * 60 * 60 * 1000;
+        let examDuration = 3 * 60 * 60 * 1000; // Default 3 hours, can be changed for challenges
         const SESSION_KEY = 'rhcsa_session';
 
         // Toast Notifications
@@ -760,7 +828,7 @@
             
             if (viewId === 'exam-running') {
                 sidebar?.classList.remove('hidden');
-                if (currentMode === 'exam') timer?.classList.remove('hidden');
+                if (currentMode === 'exam' || currentMode === 'challenge') timer?.classList.remove('hidden');
             } else {
                 sidebar?.classList.add('hidden');
                 timer?.classList.add('hidden');
@@ -776,6 +844,7 @@
             // Load data for specific views
             if (viewId === 'practice-setup') loadTasks();
             if (viewId === 'practice-category') populateCategoryGrid();
+            if (viewId === 'challenge-setup') populateChallengeCategoryFilter();
             if (viewId === 'stats') loadStats();
             if (viewId === 'welcome') checkForSavedSession();
             if (viewId === 'setup') {
@@ -1334,6 +1403,7 @@
 
         async function startExam() {
             const count = parseInt(document.getElementById('exam-task-count').value) || 15;
+            examDuration = 3 * 60 * 60 * 1000; // Reset to 3 hours for exam
             try {
                 const res = await fetch(`/api/random-tasks?count=${count}`);
                 selectedTasks = await res.json();
@@ -1353,6 +1423,60 @@
             }
         }
 
+        // Challenge Mode Functions
+        function setChallengePreset(tasks, minutes) {
+            document.getElementById('challenge-task-count').value = tasks;
+            document.getElementById('challenge-time-limit').value = minutes;
+            // Visual feedback
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('border-amber-500', 'bg-amber-500/10'));
+            event.target.closest('.preset-btn').classList.add('border-amber-500', 'bg-amber-500/10');
+        }
+
+        async function startChallenge() {
+            const count = parseInt(document.getElementById('challenge-task-count').value) || 10;
+            const minutes = parseInt(document.getElementById('challenge-time-limit').value) || 60;
+            const category = document.getElementById('challenge-category').value;
+            
+            examDuration = minutes * 60 * 1000;
+            
+            try {
+                let url = `/api/random-tasks?count=${count}`;
+                if (category) url += `&category=${encodeURIComponent(category)}`;
+                
+                const res = await fetch(url);
+                selectedTasks = await res.json();
+                
+                if (selectedTasks.length === 0) {
+                    showToast('warning', 'No tasks found', 'Try a different category or increase task count');
+                    return;
+                }
+                
+                taskResults.clear();
+                currentTaskIndex = 0;
+                currentMode = 'challenge';
+                examStartTime = Date.now();
+                startTimer();
+                document.getElementById('breadcrumb-mode').textContent = `Challenge (${minutes}min)`;
+                populateSidebarCategoryFilter();
+                renderTaskList();
+                showTaskDetail(selectedTasks[0].id);
+                updateTaskNavigation();
+                showView('exam-running');
+                saveSession();
+            } catch (e) {
+                showToast('error', 'Failed to start challenge', e.message);
+            }
+        }
+
+        // Populate challenge category dropdown
+        function populateChallengeCategoryFilter() {
+            const select = document.getElementById('challenge-category');
+            if (!select) return;
+            const categories = [...new Set(allTasks.map(t => t.category))].sort();
+            select.innerHTML = '<option value="">All Categories (Random)</option>' +
+                categories.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
         // Timer
         function startTimer() {
             const timerEl = document.getElementById('timer');
@@ -1360,7 +1484,7 @@
             
             timerInterval = setInterval(() => {
                 const elapsed = Date.now() - examStartTime;
-                const remaining = Math.max(0, EXAM_DURATION - elapsed);
+                const remaining = Math.max(0, examDuration - elapsed);
                 
                 if (remaining <= 0) {
                     clearInterval(timerInterval);
