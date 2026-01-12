@@ -997,8 +997,8 @@
                     </button>
                 `;
             } else if (session.state === 'provisioning') {
-                // Calculate elapsed time
-                const startTime = new Date(session.created_at).getTime();
+                // Calculate elapsed time from when provisioning started
+                const startTime = session.provisioningStartTime || Date.now();
                 const elapsed = Math.floor((Date.now() - startTime) / 1000);
                 const elapsedMin = Math.floor(elapsed / 60);
                 const elapsedSec = elapsed % 60;
@@ -1106,7 +1106,7 @@
             
             // Optimistically show provisioning state immediately
             cloudSession.state = 'provisioning';
-            cloudSession.created_at = new Date().toISOString(); // Reset timer for progress bar
+            cloudSession.provisioningStartTime = Date.now(); // Track when provisioning started
             renderCloudSessionUI(cloudSession);  // Render directly, don't re-fetch
             
             // Start provisioning (don't await - let it run in background)
