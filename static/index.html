@@ -1775,13 +1775,25 @@
                     <h3 class="text-white text-xl font-bold mb-4 flex items-center gap-2 border-l-4 border-primary pl-3 h-8">
                         Description
                     </h3>
-                    <p class="text-white text-base leading-relaxed mb-6 font-medium">
+                    <p class="text-white text-base leading-relaxed mb-4 font-medium">
                         ${task.description || 'Complete this task according to the requirements.'}
                     </p>
-                    ${task.details ? `
-                    <p class="text-gray-300 leading-relaxed mb-4 text-sm">
-                        ${task.details}
-                    </p>
+                    
+                    ${task.checks && task.checks.length > 0 ? `
+                    <div class="mt-4 p-4 bg-surface-dark rounded-lg border border-border-dark">
+                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-lg">checklist</span>
+                            Verification Criteria (${task.checks.length} checks, ${task.points || task.checks.length * 10} points)
+                        </h4>
+                        <ul class="space-y-2">
+                            ${task.checks.map((c, i) => `
+                                <li class="flex items-start gap-2 text-sm">
+                                    <span class="text-gray-500 font-mono">${i + 1}.</span>
+                                    <span class="text-gray-300">${c.pass}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
                     ` : ''}
                 </div>
                 

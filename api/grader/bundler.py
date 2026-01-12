@@ -178,13 +178,44 @@ class TaskBundler:
         
         return '\n'.join(parts)
     
+    def extract_checks(self, content: str) -> list:
+        """Extract check descriptions from task content.
+        
+        Parses lines like:
+            check 'condition' \\
+                'pass_msg' \\
+                'fail_msg'
+        
+        Returns list of dicts with 'pass_msg' and 'fail_msg'.
+        """
+        checks = []
+        
+        # First, join continuation lines (backslash + newline)
+        content = content.replace('\\\n', ' ')
+        
+        # Match check 'condition' 'ok_msg' 'fail_msg' patterns
+        # The condition can contain anything, messages are in quotes
+        # Pattern: check 'anything' 'pass_msg' 'fail_msg'
+        pattern = r"check\s+'[^']*'\s+\"([^\"]+)\"\s+\"([^\"]+)\""
+        
+        for match in re.finditer(pattern, content):
+            pass_msg = match.group(1).strip()
+            fail_msg = match.group(2).strip()
+            checks.append({
+                'pass': pass_msg,
+                'fail': fail_msg
+            })
+        
+        return checks
+    
     def list_tasks(self) -> list:
-        """List all available tasks with metadata."""
+        """List all available tasks with metadata and checks."""
         tasks = []
         for task_file in sorted(self.checks_dir.glob('task-*.sh')):
             task_id = task_file.stem
             content = task_file.read_text()
             metadata = TaskMetadata.from_content(task_id, content)
+            checks = self.extract_checks(content)
             tasks.append({
                 'id': metadata.id,
                 'title': metadata.title,
@@ -192,5 +223,7 @@ class TaskBundler:
                 'description': metadata.description,
                 'target': metadata.target,
                 'cloud_compatible': metadata.cloud_compatible,
+                'checks': checks,
+                'points': len(checks) * 10,  # 10 points per check
             })
         return tasks
