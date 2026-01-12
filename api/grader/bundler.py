@@ -194,17 +194,20 @@ class TaskBundler:
         content = content.replace('\\\n', ' ')
         
         # Match check 'condition' 'ok_msg' 'fail_msg' patterns
-        # The condition can contain anything, messages are in quotes
-        # Pattern: check 'anything' 'pass_msg' 'fail_msg'
-        pattern = r"check\s+'[^']*'\s+\"([^\"]+)\"\s+\"([^\"]+)\""
+        # Handle both single and double quotes for messages
+        # Pattern 1: check 'condition' "pass_msg" "fail_msg"
+        pattern1 = r'check\s+\'[^\']*\'\s+"([^"]+)"\s+"([^"]+)"'
+        # Pattern 2: check 'condition' 'pass_msg' 'fail_msg'
+        pattern2 = r"check\s+'[^']*'\s+'([^']+)'\s+'([^']+)'"
         
-        for match in re.finditer(pattern, content):
-            pass_msg = match.group(1).strip()
-            fail_msg = match.group(2).strip()
-            checks.append({
-                'pass': pass_msg,
-                'fail': fail_msg
-            })
+        for pattern in [pattern1, pattern2]:
+            for match in re.finditer(pattern, content):
+                pass_msg = match.group(1).strip()
+                fail_msg = match.group(2).strip()
+                checks.append({
+                    'pass': pass_msg,
+                    'fail': fail_msg
+                })
         
         return checks
     
