@@ -207,34 +207,29 @@ vm.dirty_background_ratio=2
 SYSCTL
 sysctl -p 2>/dev/null
 
-# PHASE 6: INSTALL ESSENTIAL RHCSA PACKAGES
-# MINIMAL install to avoid OOM on 1GB micro instances
-# Users will install larger packages (httpd, podman) as part of practice tasks
+# PHASE 6: PREPARE FOR RHCSA TASKS
+# SKIP package installation - 1GB RAM micro instances can't handle dnf properly
+# Users will install packages as part of practice tasks (this IS a learning objective!)
+# Pre-installed in Oracle Linux: nfs-utils, at, tuned, chrony, tar, vim
 
-# Clear caches aggressively
-sync && echo 3 > /proc/sys/vm/drop_caches
-rm -rf /var/cache/dnf/* /var/cache/yum/* /var/log/dnf* 2>/dev/null
-
-# Only install absolutely essential small packages
-# autofs: ~400KB, required for NFS autofs tasks
-# policycoreutils-python-utils: ~600KB, required for semanage
-dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 --setopt=tsflags=nodocs autofs policycoreutils-python-utils 2>/dev/null &
-DNF_PID=$!
-
-# Wait max 5 minutes, then kill if stuck
-for i in $(seq 1 60); do
-    if ! kill -0 $DNF_PID 2>/dev/null; then break; fi
-    sleep 5
-done
-kill $DNF_PID 2>/dev/null || true
-
-# Cleanup
-sync && echo 3 > /proc/sys/vm/drop_caches
-rm -rf /var/cache/dnf/* /var/cache/yum/*
-
-# Enable atd (pre-installed)
+# Just enable pre-installed services
 systemctl enable atd 2>/dev/null || true
 systemctl start atd 2>/dev/null || true
+
+# Create helper script for users to install packages safely
+cat > /usr/local/bin/safe-install << 'SCRIPT'
+#!/bin/bash
+# Safe package installer for low-memory systems
+echo "Clearing caches before install..."
+sync && echo 3 > /proc/sys/vm/drop_caches
+rm -rf /var/cache/dnf/* 2>/dev/null
+echo "Installing $@..."
+dnf install -y --setopt=install_weak_deps=False "$@"
+echo "Cleaning up..."
+rm -rf /var/cache/dnf/*
+sync && echo 3 > /proc/sys/vm/drop_caches
+SCRIPT
+chmod +x /usr/local/bin/safe-install
 
 # PHASE 7: CREATE PRACTICE DISKS (LOOPBACK) - sparse files for LVM/partition practice
 mkdir -p /var/practice-disks
@@ -326,23 +321,21 @@ vm.dirty_background_ratio=2
 SYSCTL
 sysctl -p 2>/dev/null
 
-# PHASE 6: INSTALL ESSENTIAL RHCSA PACKAGES (node2)
-sync && echo 3 > /proc/sys/vm/drop_caches
-rm -rf /var/cache/dnf/* /var/cache/yum/* /var/log/dnf* 2>/dev/null
-
-dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 --setopt=tsflags=nodocs autofs policycoreutils-python-utils 2>/dev/null &
-DNF_PID=$!
-for i in $(seq 1 60); do
-    if ! kill -0 $DNF_PID 2>/dev/null; then break; fi
-    sleep 5
-done
-kill $DNF_PID 2>/dev/null || true
-
-sync && echo 3 > /proc/sys/vm/drop_caches
-rm -rf /var/cache/dnf/* /var/cache/yum/*
-
+# PHASE 6: PREPARE FOR RHCSA TASKS (node2)
 systemctl enable atd 2>/dev/null || true
 systemctl start atd 2>/dev/null || true
+
+cat > /usr/local/bin/safe-install << 'SCRIPT'
+#!/bin/bash
+echo "Clearing caches before install..."
+sync && echo 3 > /proc/sys/vm/drop_caches
+rm -rf /var/cache/dnf/* 2>/dev/null
+echo "Installing $@..."
+dnf install -y --setopt=install_weak_deps=False "$@"
+rm -rf /var/cache/dnf/*
+sync && echo 3 > /proc/sys/vm/drop_caches
+SCRIPT
+chmod +x /usr/local/bin/safe-install
 
 # PHASE 7: CREATE PRACTICE DISKS (LOOPBACK)
 mkdir -p /var/practice-disks
