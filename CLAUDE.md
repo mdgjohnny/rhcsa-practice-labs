@@ -141,3 +141,32 @@ Since cloud VMs can't interrupt boot:
 **Recommendation:** 
 For full RHCSA practice, use VirtualBox/libvirt locally with 2GB+ RAM per VM.
 Cloud micro instances are suitable only for tasks using pre-installed packages.
+
+## Package Installation Testing Results (Jan 12)
+
+**Attempted approaches:**
+1. Direct dnf install - OOM, VM crash
+2. Extra swap (2GB) before install - autofs installs but VM dies during cleanup
+3. One package at a time - still crashes
+4. swap-first approach with cache clearing - installs autofs but unreliable
+
+**The fundamental issue:**
+- DNF repo metadata alone is ~400MB (Oracle Software repo: 258MB)
+- DNF needs ~500MB+ RAM even for small package installs
+- 1GB + 4GB swap = constant thrashing, random crashes
+- Some packages install, but cleanup/cache operations kill VM
+
+**What works:**
+- Session creation: ~1 minute
+- Basic tasks (no dnf): Work fine
+- Loop devices: 6 devices available (loop0-5)
+- Pre-installed packages: nfs-utils, at, tuned, chrony, vim, tar
+
+**What doesn't reliably work on micro instances:**
+- Any dnf install operation (random crash)
+- autofs, httpd, podman installation
+- Container tasks (need podman)
+
+**Recommendation:**
+Use ARM A1.Flex instances (2 OCPU, 8GB RAM each) from OCI free tier.
+Or use local VirtualBox/libvirt VMs with 2GB+ RAM.
