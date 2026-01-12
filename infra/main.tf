@@ -207,14 +207,38 @@ vm.dirty_background_ratio=2
 SYSCTL
 sysctl -p 2>/dev/null
 
-# PHASE 6: CREATE PRACTICE DISKS (LOOPBACK) - sparse files
+# PHASE 6: INSTALL RHCSA PRACTICE PACKAGES
+# Install packages needed for tasks (do this AFTER memory optimization)
+# Using --setopt to minimize memory usage during install
+PKGS="autofs nfs-utils httpd vsftpd podman skopeo buildah at tuned chrony"
+PKGS="$PKGS policycoreutils-python-utils setroubleshoot-server"
+PKGS="$PKGS vim bash-completion tar gzip bzip2"
+
+# Install in small batches to avoid OOM
+for pkg in $PKGS; do
+    dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 "$pkg" 2>/dev/null || true
+    sync && echo 3 > /proc/sys/vm/drop_caches
+done
+
+# Enable but don't start services (user will practice this)
+systemctl enable atd 2>/dev/null || true
+systemctl start atd 2>/dev/null || true
+
+# PHASE 7: CREATE PRACTICE DISKS (LOOPBACK) - sparse files for LVM/partition practice
 mkdir -p /var/practice-disks
-truncate -s 10G /var/practice-disks/disk1.img
-truncate -s 10G /var/practice-disks/disk2.img  
-truncate -s 5G /var/practice-disks/disk3.img
-losetup /dev/loop0 /var/practice-disks/disk1.img
-losetup /dev/loop1 /var/practice-disks/disk2.img
-losetup /dev/loop2 /var/practice-disks/disk3.img
+truncate -s 10G /var/practice-disks/disk0.img  # loop0 - main practice disk
+truncate -s 5G /var/practice-disks/disk1.img   # loop1 - ext4/vfat tasks  
+truncate -s 2G /var/practice-disks/disk2.img   # loop2 - GPT partition
+truncate -s 2G /var/practice-disks/disk3.img   # loop3 - MBR partition
+truncate -s 1G /var/practice-disks/disk4.img   # loop4 - PV practice
+truncate -s 1G /var/practice-disks/disk5.img   # loop5 - VG practice
+
+losetup /dev/loop0 /var/practice-disks/disk0.img
+losetup /dev/loop1 /var/practice-disks/disk1.img
+losetup /dev/loop2 /var/practice-disks/disk2.img
+losetup /dev/loop3 /var/practice-disks/disk3.img
+losetup /dev/loop4 /var/practice-disks/disk4.img
+losetup /dev/loop5 /var/practice-disks/disk5.img
 
 # Persist loopback across reboots
 cat > /etc/systemd/system/practice-disks.service << 'SERVICE'
@@ -223,7 +247,7 @@ Description=Setup practice disk loopback devices
 After=local-fs.target
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c 'losetup /dev/loop0 /var/practice-disks/disk1.img; losetup /dev/loop1 /var/practice-disks/disk2.img; losetup /dev/loop2 /var/practice-disks/disk3.img; exit 0'
+ExecStart=/bin/bash -c 'for i in 0 1 2 3 4 5; do losetup /dev/loop$i /var/practice-disks/disk$i.img 2>/dev/null || true; done'
 RemainAfterExit=yes
 [Install]
 WantedBy=multi-user.target
@@ -231,9 +255,13 @@ SERVICE
 systemctl daemon-reload
 systemctl enable practice-disks.service
 
-# PHASE 7: CLEANUP
+# PHASE 8: CLEANUP
 dnf clean all 2>/dev/null || true
+rm -rf /var/cache/dnf/*
 sync && echo 3 > /proc/sys/vm/drop_caches
+
+# Signal that setup is complete
+touch /root/.cloud-init-complete
   EOF
 
   cloud_init_node2 = <<-EOF
@@ -286,14 +314,34 @@ vm.dirty_background_ratio=2
 SYSCTL
 sysctl -p 2>/dev/null
 
-# PHASE 6: CREATE PRACTICE DISKS (LOOPBACK)
+# PHASE 6: INSTALL RHCSA PRACTICE PACKAGES
+PKGS="autofs nfs-utils httpd vsftpd podman skopeo buildah at tuned chrony"
+PKGS="$PKGS policycoreutils-python-utils setroubleshoot-server"
+PKGS="$PKGS vim bash-completion tar gzip bzip2"
+
+for pkg in $PKGS; do
+    dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 "$pkg" 2>/dev/null || true
+    sync && echo 3 > /proc/sys/vm/drop_caches
+done
+
+systemctl enable atd 2>/dev/null || true
+systemctl start atd 2>/dev/null || true
+
+# PHASE 7: CREATE PRACTICE DISKS (LOOPBACK)
 mkdir -p /var/practice-disks
-truncate -s 10G /var/practice-disks/disk1.img
-truncate -s 10G /var/practice-disks/disk2.img  
-truncate -s 5G /var/practice-disks/disk3.img
-losetup /dev/loop0 /var/practice-disks/disk1.img
-losetup /dev/loop1 /var/practice-disks/disk2.img
-losetup /dev/loop2 /var/practice-disks/disk3.img
+truncate -s 10G /var/practice-disks/disk0.img
+truncate -s 5G /var/practice-disks/disk1.img
+truncate -s 2G /var/practice-disks/disk2.img
+truncate -s 2G /var/practice-disks/disk3.img
+truncate -s 1G /var/practice-disks/disk4.img
+truncate -s 1G /var/practice-disks/disk5.img
+
+losetup /dev/loop0 /var/practice-disks/disk0.img
+losetup /dev/loop1 /var/practice-disks/disk1.img
+losetup /dev/loop2 /var/practice-disks/disk2.img
+losetup /dev/loop3 /var/practice-disks/disk3.img
+losetup /dev/loop4 /var/practice-disks/disk4.img
+losetup /dev/loop5 /var/practice-disks/disk5.img
 
 cat > /etc/systemd/system/practice-disks.service << 'SERVICE'
 [Unit]
@@ -301,7 +349,7 @@ Description=Setup practice disk loopback devices
 After=local-fs.target
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c 'losetup /dev/loop0 /var/practice-disks/disk1.img; losetup /dev/loop1 /var/practice-disks/disk2.img; losetup /dev/loop2 /var/practice-disks/disk3.img; exit 0'
+ExecStart=/bin/bash -c 'for i in 0 1 2 3 4 5; do losetup /dev/loop$i /var/practice-disks/disk$i.img 2>/dev/null || true; done'
 RemainAfterExit=yes
 [Install]
 WantedBy=multi-user.target
@@ -309,9 +357,12 @@ SERVICE
 systemctl daemon-reload
 systemctl enable practice-disks.service
 
-# PHASE 7: CLEANUP
+# PHASE 8: CLEANUP
 dnf clean all 2>/dev/null || true
+rm -rf /var/cache/dnf/*
 sync && echo 3 > /proc/sys/vm/drop_caches
+
+touch /root/.cloud-init-complete
   EOF
 }
 
