@@ -9,7 +9,7 @@ check '[[ -d /httproot ]]' \
     "Directory /httproot exists on host" \
     "Directory /httproot does not exist - create it first"
 
-check 'podman ps --format "{{.Mounts}}" 2>/dev/null | grep -q "/httproot" || podman inspect --format "{{range .Mounts}}{{.Source}}{{end}}" $(podman ps -q 2>/dev/null) 2>/dev/null | grep -q "/httproot"' \
+check 'podman inspect --format "{{range .Mounts}}{{.Source}}{{end}}" $(podman ps -q 2>/dev/null | head -1) 2>/dev/null | grep -q "/httproot"' \
     "Container has /httproot mounted" \
     "No container with /httproot bind mount found"
 
