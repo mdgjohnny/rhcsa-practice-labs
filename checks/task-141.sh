@@ -6,5 +6,9 @@
 
 
 check 'getenforce | grep -qi permissive' \
-    "SELinux is in permissive mode" \
+    "SELinux is currently in permissive mode" \
     "SELinux is not in permissive mode"
+
+check 'grep -qi "^SELINUX=permissive" /etc/selinux/config' \
+    "SELinux config set to permissive (persistent)" \
+    "SELinux config not set to permissive"
