@@ -51,3 +51,4 @@ stitch-pages/
 # Patches/temp
 *.tar.gz
 patches/
+static_vms.json

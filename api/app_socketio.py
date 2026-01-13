@@ -58,6 +58,22 @@ BASE_DIR = Path(__file__).parent.parent
 
 # Initialize session manager if OCI is configured
 from oci_manager import SessionManager, SessionState
+import json
+
+# Check for static VM configuration (reuse existing VMs)
+static_vms_config = None
+static_vms_path = BASE_DIR / 'static_vms.json'
+if static_vms_path.exists():
+    try:
+        with open(static_vms_path) as f:
+            static_vms_config = json.load(f)
+        if static_vms_config.get('enabled'):
+            logger.info(f"Static VMs mode enabled: {static_vms_config.get('node1_ip')}, {static_vms_config.get('node2_ip')}")
+        else:
+            static_vms_config = None
+    except Exception as e:
+        logger.warning(f"Failed to load static_vms.json: {e}")
+        static_vms_config = None
 
 session_manager = None
 if (BASE_DIR / 'infra' / 'terraform.tfvars').exists():
@@ -65,7 +81,8 @@ if (BASE_DIR / 'infra' / 'terraform.tfvars').exists():
         db_path=BASE_DIR / 'sessions.db',
         infra_dir=BASE_DIR / 'infra',
         workspaces_dir=BASE_DIR / 'workspaces',
-        timeout_minutes=120  # 2 hours default
+        timeout_minutes=120,  # 2 hours default
+        static_vms=static_vms_config  # Pass static VM config
     )
     logger.info("Session manager initialized")
 else:

@@ -151,6 +151,7 @@ class SessionManager:
         encryption_key: Optional[str] = None,
         health_check_timeout: int = 300,  # 5 minutes max wait for cloud-init
         health_check_interval: int = 10,  # Check every 10 seconds
+        static_vms: Optional[dict] = None,  # Static VM configuration
     ):
         """
         Initialize session manager.
@@ -163,6 +164,7 @@ class SessionManager:
             encryption_key: Optional key for SSH key encryption
             health_check_timeout: Max seconds to wait for VM health
             health_check_interval: Seconds between health checks
+            static_vms: Dict with node1_ip, node2_ip, ssh_private_key_path for reusing existing VMs
         """
         self.db_path = Path(db_path)
         self.infra_dir = Path(infra_dir)
@@ -170,6 +172,7 @@ class SessionManager:
         self.timeout_minutes = timeout_minutes
         self.health_check_timeout = health_check_timeout
         self.health_check_interval = health_check_interval
+        self.static_vms = static_vms  # If set, skip terraform and use these VMs
 
         self.workspace_manager = WorkspaceManager(workspaces_dir, infra_dir)
         self.key_encryption = KeyEncryption(encryption_key)
@@ -442,36 +445,70 @@ class SessionManager:
         self._update_session_state(session_id, SessionState.PROVISIONING)
 
         try:
-            with self._terraform_lock():
-                # Create isolated workspace
-                workspace_dir = self.workspace_manager.create_workspace(session_id)
-                terraform = TerraformWrapper(workspace_dir)
+            # Check if using static VMs (reuse existing infrastructure)
+            if self.static_vms:
+                logger.info(f"Using static VMs for session {session_id}")
+                node1_ip = self.static_vms.get('node1_ip')
+                node2_ip = self.static_vms.get('node2_ip')
+                node1_private_ip = self.static_vms.get('node1_private_ip', '10.0.1.11')
+                node2_private_ip = self.static_vms.get('node2_private_ip', '10.0.1.12')
+                
+                # Load SSH key from file
+                ssh_key_path = self.static_vms.get('ssh_private_key_path')
+                if ssh_key_path:
+                    with open(ssh_key_path, 'r') as f:
+                        ssh_private_key = f.read()
+                else:
+                    raise RuntimeError("Static VMs configured but no ssh_private_key_path specified")
+                
+                outputs = {
+                    'node1_public_ip': node1_ip,
+                    'node2_public_ip': node2_ip,
+                    'node1_private_ip': node1_private_ip,
+                    'node2_private_ip': node2_private_ip,
+                }
+            else:
+                # Dynamic provisioning with Terraform
+                with self._terraform_lock():
+                    # Create isolated workspace
+                    workspace_dir = self.workspace_manager.create_workspace(session_id)
+                    terraform = TerraformWrapper(workspace_dir)
 
-                # Initialize and apply
-                if not terraform.init():
-                    raise RuntimeError("Terraform init failed")
+                    # Initialize and apply
+                    if not terraform.init():
+                        raise RuntimeError("Terraform init failed")
 
-                result = terraform.apply(session_id)
+                    result = terraform.apply(session_id)
 
-                if not result.success:
-                    # Clean up partial resources
-                    logger.warning(f"Terraform apply failed for {session_id}, cleaning up...")
-                    try:
-                        terraform.destroy(session_id)
-                    except Exception as cleanup_err:
-                        logger.error(f"Cleanup failed for {session_id}: {cleanup_err}")
-                    
-                    self.workspace_manager.delete_workspace(session_id)
-                    self._update_session_state(session_id, SessionState.FAILED, error=result.error)
-                    raise RuntimeError(f"Terraform apply failed: {result.error}")
+                    if not result.success:
+                        # Clean up partial resources
+                        logger.warning(f"Terraform apply failed for {session_id}, cleaning up...")
+                        try:
+                            terraform.destroy(session_id)
+                        except Exception as cleanup_err:
+                            logger.error(f"Cleanup failed for {session_id}: {cleanup_err}")
+                        
+                        self.workspace_manager.delete_workspace(session_id)
+                        self._update_session_state(session_id, SessionState.FAILED, error=result.error)
+                        raise RuntimeError(f"Terraform apply failed: {result.error}")
 
-            # Extract connection info from outputs
-            outputs = result.outputs
-            node1_ip = outputs.get("node1_public_ip")
-            node2_ip = outputs.get("node2_public_ip")
-            node1_private_ip = outputs.get("node1_private_ip")
-            node2_private_ip = outputs.get("node2_private_ip")
-            ssh_private_key = outputs.get("ssh_private_key")
+                # Extract connection info from outputs
+                outputs = result.outputs
+                node1_ip = outputs.get("node1_public_ip")
+                node2_ip = outputs.get("node2_public_ip")
+                node1_private_ip = outputs.get("node1_private_ip")
+                node2_private_ip = outputs.get("node2_private_ip")
+                ssh_private_key = outputs.get("ssh_private_key")
+                
+                # If terraform didn't generate a key (we provided our own), load from file
+                if not ssh_private_key:
+                    persistent_key_path = Path.home() / '.ssh' / 'rhcsa_practice_key'
+                    if persistent_key_path.exists():
+                        logger.info(f"Using persistent SSH key from {persistent_key_path}")
+                        with open(persistent_key_path, 'r') as f:
+                            ssh_private_key = f.read()
+                    else:
+                        raise RuntimeError("No SSH key available - terraform didn't generate one and no persistent key found")
             
             # Encrypt SSH key before storing
             encrypted_key = self.key_encryption.encrypt(ssh_private_key) if ssh_private_key else None
@@ -498,10 +535,8 @@ class SessionManager:
             conn.commit()
             conn.close()
 
-            # Skip health check - terminal has retry logic and cloud-init is slow
-            # The VMs are usable even before cloud-init completes
-            # Users just need to wait a moment if they connect immediately
-            logger.info(f"Skipping health check - VMs provisioned, cloud-init may still be running")
+            # Skip health check - terminal has retry logic
+            logger.info(f"VMs ready for session {session_id}")
             
             # Mark as ready
             self._update_session_state(session_id, SessionState.READY)
@@ -541,7 +576,12 @@ class SessionManager:
         self._update_session_state(session_id, SessionState.TERMINATING)
 
         try:
-            self._cleanup_workspace(session_id)
+            # For static VMs, just mark as terminated (don't destroy the VMs)
+            if self.static_vms:
+                logger.info(f"Static VMs mode - keeping VMs alive, just ending session {session_id}")
+            else:
+                self._cleanup_workspace(session_id)
+            
             self._update_session_state(session_id, SessionState.TERMINATED)
             logger.info(f"Session {session_id} terminated successfully")
             return True
