@@ -2,7 +2,7 @@
 # Task: Configure system-wide default umask to 077 for all users. New files should be readable only by owner.
 # Title: Configure System-wide umask
 # Category: security
-# Target: node1
+# Target: node2
 
 # Check umask in profile files OR login.defs
 check 'grep -rqE "umask.*077|UMASK.*077" /etc/profile /etc/profile.d/*.sh /etc/bashrc /etc/login.defs 2>/dev/null' \
