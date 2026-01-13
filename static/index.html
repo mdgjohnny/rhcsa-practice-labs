@@ -1133,9 +1133,12 @@
                     if (data.error) {
                         showToast('error', 'Provisioning Failed', data.error);
                         cloudSession.state = 'failed';
+                        stopSessionMonitor();
                     } else {
                         showToast('success', 'VMs Ready!', 'You can now use the terminal');
                         cloudSession = data; // Update with actual data from server
+                        startSessionMonitor();  // Start monitoring for expiry
+                        expiryWarningShown = false;  // Reset warning flag
                     }
                     renderCloudSessionUI(cloudSession);
                     updateTerminalUI();
@@ -1155,6 +1158,7 @@
             
             // Immediately clear UI without re-fetching
             termDisconnect();
+            stopSessionMonitor();  // Stop monitoring
             cloudSession = null;
             renderCloudSessionUI(null);  // Render empty state directly
             updateTerminalUI();
@@ -1176,6 +1180,7 @@
                 });
                 if (resp.ok) {
                     showToast('success', 'Extended +30 minutes');
+                    expiryWarningShown = false;  // Reset so warning can show again
                     refreshCloudSessionUI();
                 } else {
                     const data = await resp.json();
@@ -2241,6 +2246,8 @@
         let cloudSession = null;
         let provisioningTimer = null;
         let provisioningStartTime = null;
+        let sessionMonitorTimer = null;
+        let expiryWarningShown = false;  // Track if we've shown the 10-min warning
 
         function initTerminal() {
             if (terminal) return;
@@ -2403,6 +2410,12 @@
                 // Return the first non-terminated session
                 cloudSession = sessions.find(s => !['terminated', 'failed'].includes(s.state)) || null;
                 updateTerminalUI();
+                
+                // Check for expiry warning
+                if (cloudSession && ['ready', 'active'].includes(cloudSession.state)) {
+                    checkSessionExpiry(cloudSession);
+                }
+                
                 return cloudSession;
             } catch (e) {
                 console.error('Failed to check cloud session:', e);
@@ -2410,6 +2423,69 @@
                 updateTerminalUI();
                 return null;
             }
+        }
+        
+        function checkSessionExpiry(session) {
+            const timeRemaining = session.time_remaining_seconds;
+            
+            // Warning at 10 minutes
+            if (timeRemaining <= 600 && timeRemaining > 0 && !expiryWarningShown) {
+                expiryWarningShown = true;
+                showExpiryWarning(Math.ceil(timeRemaining / 60));
+            }
+            
+            // Session expired
+            if (timeRemaining <= 0) {
+                showToast('error', 'Session Expired', 'Your cloud session has been terminated.');
+                expiryWarningShown = false;
+                cloudSession = null;
+                renderCloudSessionUI(null);
+            }
+        }
+        
+        function showExpiryWarning(minutesLeft) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.id = 'expiry-warning-toast';
+            toast.className = 'flex flex-col gap-3 p-4 rounded-lg border-l-4 border-amber-500 bg-amber-500/20 backdrop-blur-sm animate-fade-in';
+            toast.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-amber-400">warning</span>
+                    <div>
+                        <p class="font-medium text-amber-200">Session Expiring Soon</p>
+                        <p class="text-sm text-amber-300/80">Your cloud session will terminate in ${minutesLeft} minutes.</p>
+                    </div>
+                </div>
+                <div class="flex gap-2 ml-9">
+                    <button onclick="extendCloudSession(); document.getElementById('expiry-warning-toast').remove();" 
+                            class="px-3 py-1.5 rounded bg-amber-500 hover:bg-amber-400 text-black text-sm font-medium transition-all">
+                        Extend +30 min
+                    </button>
+                    <button onclick="document.getElementById('expiry-warning-toast').remove();"
+                            class="px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-white text-sm transition-all">
+                        Dismiss
+                    </button>
+                </div>
+            `;
+            container.appendChild(toast);
+        }
+        
+        function startSessionMonitor() {
+            // Check session status every 30 seconds
+            if (sessionMonitorTimer) clearInterval(sessionMonitorTimer);
+            sessionMonitorTimer = setInterval(async () => {
+                if (cloudSession && ['ready', 'active'].includes(cloudSession.state)) {
+                    await refreshCloudSessionUI();
+                }
+            }, 30000);  // Every 30 seconds
+        }
+        
+        function stopSessionMonitor() {
+            if (sessionMonitorTimer) {
+                clearInterval(sessionMonitorTimer);
+                sessionMonitorTimer = null;
+            }
+            expiryWarningShown = false;
         }
 
         function updateTerminalUI() {
@@ -2431,7 +2507,13 @@
         document.addEventListener('DOMContentLoaded', () => {
             showView('welcome');
             loadConfig();
-            checkCloudSession().then(() => refreshCloudSessionUI());
+            checkCloudSession().then(() => {
+                refreshCloudSessionUI();
+                // Start monitor if session already exists
+                if (cloudSession && ['ready', 'active'].includes(cloudSession.state)) {
+                    startSessionMonitor();
+                }
+            });
         });
     </script>
 </body>

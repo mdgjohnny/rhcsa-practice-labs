@@ -65,7 +65,7 @@ if (BASE_DIR / 'infra' / 'terraform.tfvars').exists():
         db_path=BASE_DIR / 'sessions.db',
         infra_dir=BASE_DIR / 'infra',
         workspaces_dir=BASE_DIR / 'workspaces',
-        timeout_minutes=30
+        timeout_minutes=120  # 2 hours default
     )
     logger.info("Session manager initialized")
 else:
@@ -110,7 +110,7 @@ def create_session():
         return jsonify({'error': 'OCI not configured'}), 503
     
     data = request.get_json() or {}
-    timeout = data.get('timeout_minutes', 30)
+    timeout = data.get('timeout_minutes', 120)  # 2 hours default
     
     # Check for existing active session
     active = session_manager.get_active_session()
