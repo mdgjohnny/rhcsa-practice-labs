@@ -869,7 +869,9 @@
         function saveSession() {
             if (selectedTasks.length === 0) return;
             const session = {
-                selectedTasks, currentMode, currentTaskIndex,
+                // Store only task IDs - descriptions will be re-fetched on resume
+                selectedTaskIds: selectedTasks.map(t => t.id),
+                currentMode, currentTaskIndex,
                 taskResults: Array.from(taskResults.entries()),
                 timestamp: Date.now()
             };
@@ -894,10 +896,12 @@
             const banner = document.getElementById('resume-session-banner');
             const info = document.getElementById('resume-session-info');
             
-            if (session?.selectedTasks?.length > 0) {
+            // Support both old format (selectedTasks) and new format (selectedTaskIds)
+            const taskCount = session?.selectedTaskIds?.length || session?.selectedTasks?.length || 0;
+            if (taskCount > 0) {
                 const graded = session.taskResults?.filter(([k, v]) => v?.graded).length || 0;
                 const modeLabel = session.currentMode === 'exam' ? 'Exam' : 'Practice';
-                info.textContent = `${modeLabel} mode - ${graded}/${session.selectedTasks.length} tasks graded`;
+                info.textContent = `${modeLabel} mode - ${graded}/${taskCount} tasks graded`;
                 banner?.classList.remove('hidden');
             } else {
                 banner?.classList.add('hidden');
@@ -908,9 +912,29 @@
             const session = loadSavedSession();
             if (!session) return;
             
-            selectedTasks = session.selectedTasks;
+            // Fetch fresh task data from API to get current descriptions
+            if (allTasks.length === 0) {
+                try {
+                    const res = await fetch('/api/v2/tasks');
+                    allTasks = await res.json();
+                } catch (e) {
+                    showToast('error', 'Failed to load tasks', e.message);
+                    return;
+                }
+            }
+            
+            // Support both old format (selectedTasks) and new format (selectedTaskIds)
+            const taskIds = session.selectedTaskIds || session.selectedTasks?.map(t => t.id) || [];
+            selectedTasks = allTasks.filter(t => taskIds.includes(t.id));
+            
+            if (selectedTasks.length === 0) {
+                showToast('error', 'Session Invalid', 'Tasks no longer available');
+                clearSavedSession();
+                return;
+            }
+            
             currentMode = session.currentMode;
-            currentTaskIndex = session.currentTaskIndex || 0;
+            currentTaskIndex = Math.min(session.currentTaskIndex || 0, selectedTasks.length - 1);
             taskResults = new Map(session.taskResults || []);
             
             document.getElementById('breadcrumb-mode').textContent = currentMode === 'exam' ? 'Exam' : 'Practice';
