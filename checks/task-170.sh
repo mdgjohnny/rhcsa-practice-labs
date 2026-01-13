@@ -4,10 +4,12 @@
 # Category: security
 # Target: node1
 
-check 'grep -rq "umask.*077" /etc/profile /etc/profile.d/*.sh /etc/bashrc 2>/dev/null' \
+# Check umask in profile files OR login.defs
+check 'grep -rqE "umask.*077|UMASK.*077" /etc/profile /etc/profile.d/*.sh /etc/bashrc /etc/login.defs 2>/dev/null' \
     "System-wide umask 077 is configured" \
-    "umask 077 not found in /etc/profile, /etc/profile.d/, or /etc/bashrc"
+    "umask 077 not configured system-wide"
 
-check 'source /etc/profile 2>/dev/null; [[ $(umask) == "0077" ]]' \
-    "umask 077 is active after sourcing /etc/profile" \
-    "umask is not 077 after sourcing profile"
+# Verify umask is effective (test with new shell)
+check 'bash -l -c "umask" 2>/dev/null | grep -q "0077"' \
+    "umask 077 is active in new login shell" \
+    "umask is not 077 in new login shell"
