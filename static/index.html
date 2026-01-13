@@ -781,6 +781,26 @@
         </div>
     </div>
 
+    <!-- Extend Session Modal -->
+    <div id="extend-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm" onclick="if(event.target === this) hideExtendModal()">
+        <div class="bg-surface-dark rounded-xl border border-white/10 p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Extend Session</h2>
+                <button onclick="hideExtendModal()" class="text-gray-400 hover:text-white">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <p class="text-gray-400 mb-4">How much time do you need?</p>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button onclick="doExtendSession(30)" class="px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium transition-all">+30 min</button>
+                <button onclick="doExtendSession(60)" class="px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium transition-all">+1 hour</button>
+                <button onclick="doExtendSession(120)" class="px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium transition-all">+2 hours</button>
+                <button onclick="doExtendSession(240)" class="px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium transition-all">+4 hours</button>
+            </div>
+            <p class="text-xs text-gray-500 text-center">Max 4 hours per extension. Max 8 hours total session time.</p>
+        </div>
+    </div>
+
     <script>
         // State
         let allTasks = [];
@@ -1194,16 +1214,29 @@
                 .catch(e => showToast('error', 'Error destroying session', e.message));
         }
 
-        async function extendCloudSession() {
+        function extendCloudSession() {
             if (!cloudSession) return;
+            document.getElementById('extend-modal').classList.remove('hidden');
+        }
+
+        function hideExtendModal() {
+            document.getElementById('extend-modal').classList.add('hidden');
+        }
+
+        async function doExtendSession(minutes) {
+            if (!cloudSession) return;
+            hideExtendModal();
             try {
                 const resp = await fetch(`/api/sessions/${cloudSession.session_id}/extend`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ minutes: 30 })
+                    body: JSON.stringify({ minutes })
                 });
                 if (resp.ok) {
-                    showToast('success', 'Extended +30 minutes');
+                    const hrs = Math.floor(minutes / 60);
+                    const mins = minutes % 60;
+                    const timeStr = hrs > 0 ? (mins > 0 ? `${hrs}h ${mins}m` : `${hrs} hour${hrs > 1 ? 's' : ''}`) : `${mins} minutes`;
+                    showToast('success', `Extended +${timeStr}`);
                     expiryWarningShown = false;  // Reset so warning can show again
                     refreshCloudSessionUI();
                 } else {

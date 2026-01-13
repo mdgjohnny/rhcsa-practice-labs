@@ -193,6 +193,25 @@ def extend_session(session_id):
     data = request.get_json() or {}
     minutes = data.get('minutes', 30)
     
+    # Limits: min 15 mins, max 4 hours per extension
+    MIN_EXTEND = 15
+    MAX_EXTEND = 240
+    MAX_TOTAL_HOURS = 8  # Can't extend beyond 8 hours total session time
+    
+    if minutes < MIN_EXTEND:
+        return jsonify({'error': f'Minimum extension is {MIN_EXTEND} minutes'}), 400
+    if minutes > MAX_EXTEND:
+        return jsonify({'error': f'Maximum extension is {MAX_EXTEND} minutes (4 hours)'}), 400
+    
+    # Check total session time won't exceed limit
+    session = session_manager.get_session(session_id)
+    if session:
+        from datetime import datetime, timedelta
+        total_duration = (session.expires_at + timedelta(minutes=minutes) - session.created_at).total_seconds() / 3600
+        if total_duration > MAX_TOTAL_HOURS:
+            remaining_allowed = int((MAX_TOTAL_HOURS * 3600 - (session.expires_at - session.created_at).total_seconds()) / 60)
+            return jsonify({'error': f'Maximum session time is {MAX_TOTAL_HOURS} hours. You can extend by up to {remaining_allowed} more minutes.'}), 400
+    
     session = session_manager.extend_session(session_id, minutes)
     if session:
         return jsonify(session.to_dict())
