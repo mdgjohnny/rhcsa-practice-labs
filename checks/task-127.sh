@@ -11,11 +11,11 @@ check '[[ -d /var/mariadb ]]' \
 
 check 'systemctl is-active mariadb &>/dev/null' \
     "System service mariadb is running" \
-    "System service mariadb is not running (use: sudo systemctl start mariadb)"
+    "System service mariadb is not running"
 
 check 'systemctl is-enabled mariadb &>/dev/null' \
     "System service mariadb is enabled" \
-    "System service mariadb is not enabled (use: sudo systemctl enable mariadb)"
+    "System service mariadb is not enabled"
 
 check 'podman ps 2>/dev/null | grep -qi mariadb' \
     "MariaDB container is running (root)" \

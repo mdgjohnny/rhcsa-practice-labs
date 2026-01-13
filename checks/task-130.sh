@@ -13,17 +13,17 @@ check 'su - opc -c "[[ -d ~/dbdata ]]"' \
 # Check user service is running
 check 'su - opc -c "systemctl --user is-active mariadb" &>/dev/null' \
     "User service mariadb is running" \
-    "User service mariadb is not running (use: systemctl --user start mariadb)"
+    "User service mariadb is not running"
 
 # Check user service is enabled
 check 'su - opc -c "systemctl --user is-enabled mariadb" &>/dev/null' \
     "User service mariadb is enabled" \
-    "User service mariadb is not enabled (use: systemctl --user enable mariadb)"
+    "User service mariadb is not enabled"
 
 # Check lingering is enabled (required for user services to start at boot)
 check 'loginctl show-user opc -p Linger 2>/dev/null | grep -q "yes"' \
-    "Lingering enabled for opc (services start at boot)" \
-    "Lingering not enabled (use: sudo loginctl enable-linger opc)"
+    "Lingering enabled for opc" \
+    "Lingering not enabled for opc"
 
 # Check container is running as opc
 check 'su - opc -c "podman ps 2>/dev/null" | grep -qi mariadb' \
