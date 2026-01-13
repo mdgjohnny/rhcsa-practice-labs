@@ -1,33 +1,18 @@
 #!/usr/bin/env bash
-# Task: Create a script /root/usercheck.sh that accepts a username as an argument. The script should print "User exists" if the user exists on the system, or "User not found" otherwise.
-# Title: Shell Script - Check User Exists
-# Category: shell-scripts
+# Task: Create /home/shared directory. Configure SELinux context so NFS can export this directory to clients.
+# Title: SELinux Context for NFS Export
+# Category: security
 # Target: node1
 
-check '[[ -f /root/usercheck.sh ]]' \
-    "Script /root/usercheck.sh exists" \
-    "Script /root/usercheck.sh not found"
 
-check '[[ -x /root/usercheck.sh ]]' \
-    "Script is executable" \
-    "Script is not executable"
+check '[[ -d /home/shared ]]' \
+    "Directory /home/shared exists" \
+    "Directory /home/shared does not exist"
 
-check 'head -1 /root/usercheck.sh | grep -qE "^#!"' \
-    "Script has shebang line" \
-    "Script missing shebang line"
+check 'ls -Zd /home/shared 2>/dev/null | grep -qE "nfs_t|public_content_t"' \
+    "/home/shared has correct SELinux context" \
+    "/home/shared does not have correct context"
 
-check 'grep -qE "(if |test |\[\[|\[)" /root/usercheck.sh' \
-    "Script uses conditional construct (if/test/[])" \
-    "Script missing conditional construct"
-
-check 'grep -qE "\\\$1|\\\${1}" /root/usercheck.sh' \
-    "Script uses positional parameter \$1" \
-    "Script doesn't use positional parameter"
-
-check '/root/usercheck.sh root 2>/dev/null | grep -qi "exists"' \
-    "Script correctly identifies existing user (root)" \
-    "Script fails to identify existing user"
-
-check '/root/usercheck.sh nonexistent_user_xyz99 2>/dev/null | grep -qi "not found"' \
-    "Script correctly reports non-existent user" \
-    "Script fails for non-existent user"
+check 'semanage fcontext -l | grep -q "/home/shared"' \
+    "SELinux context rule is persistent" \
+    "SELinux context rule not persistent"

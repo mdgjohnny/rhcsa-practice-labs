@@ -1,41 +1,18 @@
 #!/usr/bin/env bash
-# Task: Write a script to create users user555, user666, user777 with nologin shell and passwords matching usernames.
-# Title: Create User Script
-# Category: users-groups
+# Task: A script /opt/scripts/backup.sh needs to write to /backup directory. The script runs via cron. Configure SELinux context on /backup to allow this.
+# Title: SELinux Context for Backup Directory
+# Category: security
 # Target: node1
 
-# Check users exist
-check 'id user555 &>/dev/null' \
-    "User user555 exists" \
-    "User user555 does not exist"
 
-check 'id user666 &>/dev/null' \
-    "User user666 exists" \
-    "User user666 does not exist"
+check '[[ -d /backup ]]' \
+    "Directory /backup exists" \
+    "Directory /backup does not exist"
 
-check 'id user777 &>/dev/null' \
-    "User user777 exists" \
-    "User user777 does not exist"
+check 'ls -Zd /backup 2>/dev/null | grep -qE "backup_store_t|var_t|usr_t"' \
+    "/backup has appropriate SELinux context" \
+    "/backup does not have appropriate context"
 
-# Check users have nologin shell
-check 'getent passwd user555 | grep -q "nologin\|/bin/false"' \
-    "user555 has no login shell" \
-    "user555 has a login shell"
-
-check 'getent passwd user666 | grep -q "nologin\|/bin/false"' \
-    "user666 has no login shell" \
-    "user666 has a login shell"
-
-check 'getent passwd user777 | grep -q "nologin\|/bin/false"' \
-    "user777 has no login shell" \
-    "user777 has a login shell"
-
-# Check output file exists
-check '[[ -f /var/tmp/newusers ]]' \
-    "File /var/tmp/newusers exists" \
-    "File /var/tmp/newusers does not exist"
-
-# Check output file contains the usernames
-check 'grep -q "user555" /var/tmp/newusers && grep -q "user666" /var/tmp/newusers && grep -q "user777" /var/tmp/newusers' \
-    "/var/tmp/newusers contains all three usernames" \
-    "/var/tmp/newusers missing some usernames"
+check 'semanage fcontext -l | grep -q "/backup"' \
+    "SELinux context rule is persistent" \
+    "SELinux context rule not persistent"

@@ -4,17 +4,19 @@
 # Category: security
 # Target: node1
 
-# Check directory hierarchy exists
+
 check '[[ -d /dir1/dir2/dir3/dir4 ]]' \
-    "Directory hierarchy /dir1/dir2/dir3/dir4 exists" \
+    "Directory hierarchy exists" \
     "Directory hierarchy does not exist"
 
-# Check SELinux context matches /etc (etc_t type)
 check 'ls -Zd /dir1 2>/dev/null | grep -q "etc_t"' \
-    "/dir1 has etc_t SELinux context" \
-    "/dir1 does not have etc_t context"
+    "/dir1 has correct SELinux context" \
+    "/dir1 does not have correct context"
 
-# Check context is set persistently
+check 'ls -Zd /dir1/dir2/dir3/dir4 2>/dev/null | grep -q "etc_t"' \
+    "/dir1/dir2/dir3/dir4 has correct SELinux context" \
+    "/dir1/dir2/dir3/dir4 does not have correct context"
+
 check 'semanage fcontext -l | grep -q "/dir1"' \
-    "SELinux context is set persistently for /dir1" \
-    "SELinux context not persistent"
+    "SELinux context rule is persistent" \
+    "SELinux context rule not persistent"

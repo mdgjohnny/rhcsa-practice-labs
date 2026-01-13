@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
-# Task: As user20: Configure a ubi8 container to auto-start at boot without requiring user login. Use systemd user services and enable linger.
-# Title: Container Auto-start (user20)
-# Category: operate-systems
+# Task: Copy /etc/hosts to /root/hosts.bak. The copied file should retain a context appropriate for /root, not /etc.
+# Title: SELinux Context After Copy
+# Category: security
 # Target: node1
 
 
-check 'podman ps 2>/dev/null | grep -q . || docker ps 2>/dev/null | grep -q .' \
-    "Container is running" \
-    "No container is running"
+check '[[ -f /root/hosts.bak ]]' \
+    "File /root/hosts.bak exists" \
+    "File /root/hosts.bak does not exist"
+
+check 'ls -Z /root/hosts.bak 2>/dev/null | grep -q "admin_home_t"' \
+    "/root/hosts.bak has correct context for /root" \
+    "/root/hosts.bak has wrong context"

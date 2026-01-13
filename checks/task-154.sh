@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
-# Task: Log message "This is RHCSA sample exam on <date> by <user>" to /var/log/messages.
-# Title: Log Custom Message
-# Category: operate-systems
+# Task: Create directory /samba-share. Configure SELinux context so Samba can share files from this directory persistently.
+# Title: SELinux Context for Samba Share
+# Category: security
 # Target: node1
 
-check 'grep -q "RHCSA sample exam" /var/log/messages 2>/dev/null' \
-    "RHCSA sample exam message found in /var/log/messages" \
-    "RHCSA sample exam message not found"
+
+check '[[ -d /samba-share ]]' \
+    "Directory /samba-share exists" \
+    "Directory /samba-share does not exist"
+
+check 'ls -Zd /samba-share 2>/dev/null | grep -q "samba_share_t"' \
+    "/samba-share has correct SELinux context" \
+    "/samba-share does not have correct context"
+
+check 'semanage fcontext -l | grep -q "/samba-share"' \
+    "SELinux context rule is persistent" \
+    "SELinux context rule not persistent"
