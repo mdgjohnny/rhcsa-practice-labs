@@ -218,7 +218,7 @@ sysctl -p 2>/dev/null
 # Key insight from previous session: create swap FIRST, then dnf works!
 # NOTE: Must use dd or fallocate, NOT truncate (sparse files don't work for swap)
 mkdir -p /var/practice-disks
-dd if=/dev/zero of=/var/practice-disks/swap.img bs=1M count=2048 status=none
+dd if=/dev/zero of=/var/practice-disks/swap.img bs=1M count=1024 status=none
 chmod 600 /var/practice-disks/swap.img
 mkswap /var/practice-disks/swap.img
 swapon /var/practice-disks/swap.img
@@ -338,7 +338,7 @@ sysctl -p 2>/dev/null
 
 # PHASE 6: SETUP EXTRA SWAP AND INSTALL PACKAGES (node2)
 mkdir -p /var/practice-disks
-dd if=/dev/zero of=/var/practice-disks/swap.img bs=1M count=2048 status=none
+dd if=/dev/zero of=/var/practice-disks/swap.img bs=1M count=1024 status=none
 chmod 600 /var/practice-disks/swap.img
 mkswap /var/practice-disks/swap.img
 swapon /var/practice-disks/swap.img
@@ -429,6 +429,18 @@ resource "oci_core_instance" "node1" {
     hostname_label   = "rhcsa1"
   }
 
+  # Preemptible instances: ~50% cheaper, can be reclaimed with 30s notice
+  # Perfect for practice labs where interruption is acceptable
+  dynamic "preemptible_instance_config" {
+    for_each = var.use_preemptible ? [1] : []
+    content {
+      preemption_action {
+        type                 = "TERMINATE"
+        preserve_boot_volume = false
+      }
+    }
+  }
+
   metadata = {
     ssh_authorized_keys = local.ssh_public_key
     user_data           = base64encode(local.cloud_init_node1)
@@ -465,6 +477,17 @@ resource "oci_core_instance" "node2" {
     assign_public_ip = true
     private_ip       = cidrhost(var.subnet_cidr, 12) # 10.0.1.12
     hostname_label   = "rhcsa2"
+  }
+
+  # Preemptible instances: ~50% cheaper, can be reclaimed with 30s notice
+  dynamic "preemptible_instance_config" {
+    for_each = var.use_preemptible ? [1] : []
+    content {
+      preemption_action {
+        type                 = "TERMINATE"
+        preserve_boot_volume = false
+      }
+    }
   }
 
   metadata = {

@@ -56,19 +56,25 @@ variable "subnet_cidr" {
 variable "instance_shape" {
   description = "Shape of the compute instance"
   type        = string
-  default     = "VM.Standard.A1.Flex"  # ARM - Always Free: 4 OCPUs / 24GB total
+  default     = "VM.Standard.A1.Flex"  # ARM - cheapest (~$0.01/OCPU/hr)
 }
 
 variable "instance_ocpus" {
   description = "Number of OCPUs (for flex shapes)"
   type        = number
-  default     = 2  # 2 per VM = 4 total (free tier max)
+  default     = 1  # 1 OCPU is plenty for RHCSA tasks
 }
 
 variable "instance_memory_gb" {
   description = "Memory in GB (for flex shapes)"
   type        = number
-  default     = 12  # 12 per VM = 24 total (free tier max)
+  default     = 4  # 4GB needed for container tasks
+}
+
+variable "use_preemptible" {
+  description = "Use preemptible (spot) instances for ~50% cost savings. May be reclaimed with 30s notice."
+  type        = bool
+  default     = true
 }
 
 variable "os_image_id" {
