@@ -178,10 +178,16 @@ rm -f /etc/cron.d/ksplice /etc/cron.d/oracle* /etc/cron.daily/oracle*
 
 # PHASE 2b: DISABLE BLOATED REPOS (saves 400MB+ downloads)
 # Keep ONLY BaseOS and AppStream - that's all RHCSA needs
-# Disable everything else to make dnf usable on 1GB RAM
-dnf config-manager --disable ol8_ksplice ol8_MySQL80 ol8_MySQL84 ol8_MySQL84_tools \
-    ol8_MySQL_connectors_community ol8_oci_included ol8_developer ol8_developer_EPEL \
-    ol8_addons ol8_UEKR6 ol8_UEKR7 2>/dev/null || true
+# dnf config-manager --disable doesn't work reliably, use sed instead
+for f in /etc/yum.repos.d/ksplice-ol8.repo \
+         /etc/yum.repos.d/mysql-ol8.repo \
+         /etc/yum.repos.d/oci-included-ol8.repo \
+         /etc/yum.repos.d/uek-ol8.repo \
+         /etc/yum.repos.d/oraclelinux-developer-ol8.repo; do
+    [ -f "$f" ] && sed -i 's/^enabled=1/enabled=0/' "$f"
+done
+# Disable addons in main oracle-linux repo
+sed -i '/^\[ol8_addons\]/,/^\[/{s/^enabled=1/enabled=0/}' /etc/yum.repos.d/oracle-linux-ol8.repo 2>/dev/null || true
 
 # PHASE 3: HOSTNAME AND HOSTS
 hostnamectl set-hostname rhcsa1
@@ -301,9 +307,14 @@ rm -f /etc/cron.d/ksplice /etc/cron.d/oracle* /etc/cron.daily/oracle*
 
 # PHASE 2b: DISABLE BLOATED REPOS (saves 400MB+ downloads)
 # Keep ONLY BaseOS and AppStream - that's all RHCSA needs
-dnf config-manager --disable ol8_ksplice ol8_MySQL80 ol8_MySQL84 ol8_MySQL84_tools \
-    ol8_MySQL_connectors_community ol8_oci_included ol8_developer ol8_developer_EPEL \
-    ol8_addons ol8_UEKR6 ol8_UEKR7 2>/dev/null || true
+for f in /etc/yum.repos.d/ksplice-ol8.repo \
+         /etc/yum.repos.d/mysql-ol8.repo \
+         /etc/yum.repos.d/oci-included-ol8.repo \
+         /etc/yum.repos.d/uek-ol8.repo \
+         /etc/yum.repos.d/oraclelinux-developer-ol8.repo; do
+    [ -f "$f" ] && sed -i 's/^enabled=1/enabled=0/' "$f"
+done
+sed -i '/^\[ol8_addons\]/,/^\[/{s/^enabled=1/enabled=0/}' /etc/yum.repos.d/oracle-linux-ol8.repo 2>/dev/null || true
 
 # PHASE 3: HOSTNAME AND HOSTS
 hostnamectl set-hostname rhcsa2
