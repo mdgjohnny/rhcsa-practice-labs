@@ -62,3 +62,18 @@ restorecon -v /path
 # List all custom rules
 semanage fcontext -l -C
 ```
+
+## Packages You May Need to Install
+
+These aren't pre-installed - knowing when/how to install them is part of the exam:
+
+```bash
+# SELinux man pages (man ftpd_selinux, man httpd_selinux, etc.)
+dnf install selinux-policy-doc
+
+# seinfo command for querying policy
+dnf install setools-console
+
+# semanage command (usually pre-installed, but just in case)
+dnf install policycoreutils-python-utils
+```
