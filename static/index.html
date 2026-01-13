@@ -1033,8 +1033,12 @@
                         Cancel provisioning
                     </button>
                 `;
-                // Poll for updates more frequently
-                setTimeout(refreshCloudSessionUI, 3000);
+                // Poll for updates - use renderCloudSessionUI to preserve provisioningStartTime
+                setTimeout(() => {
+                    if (cloudSession && cloudSession.state === 'provisioning') {
+                        renderCloudSessionUI(cloudSession);
+                    }
+                }, 1000);
             } else if (session.state === 'ready' || session.state === 'active') {
                 const timeRemaining = Math.max(0, Math.floor(session.time_remaining_seconds / 60));
                 infoEl.innerHTML = `
