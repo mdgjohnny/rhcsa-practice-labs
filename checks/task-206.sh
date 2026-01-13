@@ -2,7 +2,7 @@
 # Task: Set SELinux to permissive mode temporarily (until next reboot). Do not modify the config file.
 # Title: Set SELinux Permissive Temporarily
 # Category: security
-# Target: node1
+# Target: node2
 
 check 'getenforce | grep -qi permissive' \
     "SELinux is in permissive mode" \

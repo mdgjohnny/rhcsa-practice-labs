@@ -2,7 +2,7 @@
 # Task: Set SELinux to permissive mode persistently. System must boot in permissive mode.
 # Title: Set SELinux Mode
 # Category: security
-# Target: node1
+# Target: node2
 
 
 check 'getenforce | grep -qi permissive' \

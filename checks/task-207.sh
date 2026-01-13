@@ -2,7 +2,7 @@
 # Task: Configure SELinux to be in permissive mode permanently. The change should persist across reboots.
 # Title: Set SELinux Permissive Permanently
 # Category: security
-# Target: node1
+# Target: node2
 
 check 'grep -qE "^SELINUX=permissive" /etc/selinux/config' \
     "SELinux config set to permissive" \
