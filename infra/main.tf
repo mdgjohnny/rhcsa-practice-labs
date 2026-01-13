@@ -234,21 +234,6 @@ sync && echo 3 > /proc/sys/vm/drop_caches
 SCRIPT
 chmod +x /usr/local/bin/safe-install
 
-# Background install of autofs (don't block cloud-init completion)
-# This runs AFTER the cloud-init-complete marker is created
-cat > /usr/local/bin/post-setup.sh << 'POSTSCRIPT'
-#!/bin/bash
-# Post cloud-init setup - runs in background
-sleep 10  # Wait for system to settle
-rm -rf /var/cache/dnf/* /var/cache/yum/* 2>/dev/null
-sync && echo 3 > /proc/sys/vm/drop_caches
-dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 autofs 2>/dev/null || true
-rm -rf /var/cache/dnf/*
-sync && echo 3 > /proc/sys/vm/drop_caches
-touch /root/.post-setup-complete
-POSTSCRIPT
-chmod +x /usr/local/bin/post-setup.sh
-
 # PHASE 7: CREATE PRACTICE DISKS (LOOPBACK) - sparse files for LVM/partition practice
 truncate -s 10G /var/practice-disks/disk0.img  # loop0 - main practice disk
 truncate -s 5G /var/practice-disks/disk1.img   # loop1 - ext4/vfat tasks  
@@ -284,11 +269,8 @@ dnf clean all 2>/dev/null || true
 rm -rf /var/cache/dnf/*
 sync && echo 3 > /proc/sys/vm/drop_caches
 
-# Signal that basic setup is complete (VM is usable)
+# Signal that setup is complete (VM is usable)
 touch /root/.cloud-init-complete
-
-# Start background post-setup (install autofs, etc.) - don't wait
-nohup /usr/local/bin/post-setup.sh > /var/log/post-setup.log 2>&1 &
   EOF
 
   cloud_init_node2 = <<-EOF
@@ -364,19 +346,6 @@ sync && echo 3 > /proc/sys/vm/drop_caches
 SCRIPT
 chmod +x /usr/local/bin/safe-install
 
-# Background install of autofs (don't block cloud-init completion)
-cat > /usr/local/bin/post-setup.sh << 'POSTSCRIPT'
-#!/bin/bash
-sleep 10
-rm -rf /var/cache/dnf/* /var/cache/yum/* 2>/dev/null
-sync && echo 3 > /proc/sys/vm/drop_caches
-dnf install -y --setopt=install_weak_deps=False --setopt=keepcache=0 autofs 2>/dev/null || true
-rm -rf /var/cache/dnf/*
-sync && echo 3 > /proc/sys/vm/drop_caches
-touch /root/.post-setup-complete
-POSTSCRIPT
-chmod +x /usr/local/bin/post-setup.sh
-
 # PHASE 7: CREATE PRACTICE DISKS (LOOPBACK)
 truncate -s 10G /var/practice-disks/disk0.img
 truncate -s 5G /var/practice-disks/disk1.img
@@ -411,11 +380,8 @@ dnf clean all 2>/dev/null || true
 rm -rf /var/cache/dnf/*
 sync && echo 3 > /proc/sys/vm/drop_caches
 
-# Signal that basic setup is complete (VM is usable)
+# Signal that setup is complete (VM is usable)
 touch /root/.cloud-init-complete
-
-# Start background post-setup (install autofs, etc.) - don't wait
-nohup /usr/local/bin/post-setup.sh > /var/log/post-setup.log 2>&1 &
   EOF
 }
 
