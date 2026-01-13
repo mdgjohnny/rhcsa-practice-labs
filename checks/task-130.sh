@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: As user opc (rootless), create ~/dbdata directory. Run a MariaDB container with ~/dbdata:/var/lib/mysql bind mount on port 3307. Create a user service named "mariadb" using podman generate systemd. Enable lingering and start the service.
+# Task: As user opc, create /home/opc/dbdata directory. Run a MariaDB container with /home/opc/dbdata:/var/lib/mysql bind mount on port 3307. Create and enable a systemd user service named "mariadb". Ensure the service starts at boot.
 # Title: Rootless Container with User Service
 # Category: containers
 # Target: node1
@@ -7,8 +7,8 @@
 
 # Check directory exists in opc home
 check 'su - opc -c "[[ -d ~/dbdata ]]"' \
-    "Directory ~/dbdata exists for opc" \
-    "Directory ~/dbdata does not exist (create as opc user)"
+    "Directory /home/opc/dbdata exists" \
+    "Directory /home/opc/dbdata does not exist"
 
 # Check user service is running
 check 'su - opc -c "systemctl --user is-active mariadb" &>/dev/null' \

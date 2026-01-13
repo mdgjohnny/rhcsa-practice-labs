@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: As user student, create ~/mysql-data directory. Run a MariaDB container with ~/mysql-data:/var/lib/mysql bind mount on port 3308. Create and enable a systemd user service named "mariadb". Ensure the service starts at boot (hint: lingering).
+# Task: As user student, create /home/student/mysql-data directory. Run a MariaDB container with /home/student/mysql-data:/var/lib/mysql bind mount on port 3308. Create and enable a systemd user service named "mariadb". Ensure the service starts at boot.
 # Title: Rootless Container as Student User
 # Category: containers
 # Target: node1
@@ -10,8 +10,8 @@ check 'id student &>/dev/null' \
     "User student does not exist"
 
 check 'su - student -c "[[ -d ~/mysql-data ]]"' \
-    "Directory ~/mysql-data exists for student" \
-    "Directory ~/mysql-data does not exist"
+    "Directory /home/student/mysql-data exists" \
+    "Directory /home/student/mysql-data does not exist"
 
 check 'su - student -c "systemctl --user is-active mariadb" &>/dev/null' \
     "User service mariadb is running" \
