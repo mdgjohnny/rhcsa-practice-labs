@@ -176,11 +176,12 @@ for svc in $KILL_SERVICES; do
 done
 rm -f /etc/cron.d/ksplice /etc/cron.d/oracle* /etc/cron.daily/oracle*
 
-# PHASE 2b: DISABLE BLOATED REPOS (saves 300MB+ downloads)
-# Keep only BaseOS and AppStream - that's all RHCSA needs
-for repo in ol8_ksplice ol8_MySQL80 ol8_MySQL84 ol8_MySQL84_tools ol8_MySQL_connectors_community ol8_oci_included ol8_developer ol8_developer_EPEL; do
-    dnf config-manager --disable "$repo" 2>/dev/null || true
-done
+# PHASE 2b: DISABLE BLOATED REPOS (saves 400MB+ downloads)
+# Keep ONLY BaseOS and AppStream - that's all RHCSA needs
+# Disable everything else to make dnf usable on 1GB RAM
+dnf config-manager --disable ol8_ksplice ol8_MySQL80 ol8_MySQL84 ol8_MySQL84_tools \
+    ol8_MySQL_connectors_community ol8_oci_included ol8_developer ol8_developer_EPEL \
+    ol8_addons ol8_UEKR6 ol8_UEKR7 2>/dev/null || true
 
 # PHASE 3: HOSTNAME AND HOSTS
 hostnamectl set-hostname rhcsa1
@@ -298,10 +299,11 @@ for svc in $KILL_SERVICES; do
 done
 rm -f /etc/cron.d/ksplice /etc/cron.d/oracle* /etc/cron.daily/oracle*
 
-# PHASE 2b: DISABLE BLOATED REPOS (saves 300MB+ downloads)
-for repo in ol8_ksplice ol8_MySQL80 ol8_MySQL84 ol8_MySQL84_tools ol8_MySQL_connectors_community ol8_oci_included ol8_developer ol8_developer_EPEL; do
-    dnf config-manager --disable "$repo" 2>/dev/null || true
-done
+# PHASE 2b: DISABLE BLOATED REPOS (saves 400MB+ downloads)
+# Keep ONLY BaseOS and AppStream - that's all RHCSA needs
+dnf config-manager --disable ol8_ksplice ol8_MySQL80 ol8_MySQL84 ol8_MySQL84_tools \
+    ol8_MySQL_connectors_community ol8_oci_included ol8_developer ol8_developer_EPEL \
+    ol8_addons ol8_UEKR6 ol8_UEKR7 2>/dev/null || true
 
 # PHASE 3: HOSTNAME AND HOSTS
 hostnamectl set-hostname rhcsa2
