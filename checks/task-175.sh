@@ -4,9 +4,10 @@
 # Category: containers
 # Target: node1
 
-check 'podman image exists registry.access.redhat.com/ubi8/ubi 2>/dev/null || podman image exists ubi8 2>/dev/null' \
+# Accept various ubi8 image names/registries
+check 'podman images --format "{{.Repository}}" 2>/dev/null | grep -qiE "ubi8|ubi:8"' \
     "UBI8 image is present" \
-    "UBI8 image not found (pull it first)"
+    "UBI8 image not found"
 
 check '[[ -f /root/container-cmd.txt ]]' \
     "File /root/container-cmd.txt exists" \
