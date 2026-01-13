@@ -9,13 +9,14 @@ check '[[ -d /var/mariadb ]]' \
     "Directory /var/mariadb exists" \
     "Directory /var/mariadb does not exist"
 
-check 'systemctl is-active mariadb &>/dev/null' \
+# Check for system service OR user service (rootless containers)
+check 'systemctl is-active mariadb &>/dev/null || su - opc -c "systemctl --user is-active mariadb" &>/dev/null' \
     "Service mariadb is running" \
-    "Service mariadb is not running"
+    "Service mariadb is not running (check both system and user services)"
 
-check 'systemctl is-enabled mariadb &>/dev/null' \
+check 'systemctl is-enabled mariadb &>/dev/null || su - opc -c "systemctl --user is-enabled mariadb" &>/dev/null' \
     "Service mariadb is enabled" \
-    "Service mariadb is not enabled"
+    "Service mariadb is not enabled (check both system and user services)"
 
 # Check for MariaDB container running (root or rootless)
 check 'podman ps 2>/dev/null | grep -qi mariadb || su - opc -c "podman ps 2>/dev/null" | grep -qi mariadb' \
