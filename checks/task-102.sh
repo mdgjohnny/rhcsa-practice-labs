@@ -6,11 +6,13 @@
 
 
 check '[[ -d /httproot ]]' \
-    "Directory /httproot exists" \
-    "Directory /httproot does not exist"
-check '[[ -d /var/www/html ]]' \
-    "Directory /var/www/html exists" \
-    "Directory /var/www/html does not exist"
-check 'podman ps 2>/dev/null | grep -q . || docker ps 2>/dev/null | grep -q .' \
-    "Container is running" \
-    "No container is running"
+    "Directory /httproot exists on host" \
+    "Directory /httproot does not exist - create it first"
+
+check 'podman ps --format "{{.Mounts}}" 2>/dev/null | grep -q "/httproot" || podman inspect --format "{{range .Mounts}}{{.Source}}{{end}}" $(podman ps -q 2>/dev/null) 2>/dev/null | grep -q "/httproot"' \
+    "Container has /httproot mounted" \
+    "No container with /httproot bind mount found"
+
+check 'podman ps 2>/dev/null | grep -q httpd || podman ps 2>/dev/null | grep -q http' \
+    "HTTP container is running" \
+    "No HTTP container is running"
