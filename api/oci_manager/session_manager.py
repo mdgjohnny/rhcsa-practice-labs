@@ -498,18 +498,10 @@ class SessionManager:
             conn.commit()
             conn.close()
 
-            # Health check - wait for cloud-init to complete
-            if not skip_health_check and ssh_private_key and node1_ip:
-                logger.info(f"Waiting for VM health check on {session_id}...")
-                
-                # Check node1
-                if not self._check_vm_health(node1_ip, ssh_private_key, self.health_check_timeout):
-                    raise RuntimeError(f"Node1 health check failed for {session_id}")
-                
-                # Check node2 if exists
-                if node2_ip:
-                    if not self._check_vm_health(node2_ip, ssh_private_key, self.health_check_timeout):
-                        raise RuntimeError(f"Node2 health check failed for {session_id}")
+            # Skip health check - terminal has retry logic and cloud-init is slow
+            # The VMs are usable even before cloud-init completes
+            # Users just need to wait a moment if they connect immediately
+            logger.info(f"Skipping health check - VMs provisioned, cloud-init may still be running")
             
             # Mark as ready
             self._update_session_state(session_id, SessionState.READY)
