@@ -8,10 +8,19 @@ RHCSA Practice Labs API with WebSocket support.
 
 This is a wrapper around the main Flask app that adds Socket.IO support
 for the web terminal functionality.
+
+Cloud Management Best Practices:
+- Graceful shutdown handler for SIGTERM/SIGINT
+- Startup reconciliation for orphaned resources
+- VM health checks before marking sessions ready
+- Terraform state locking
+- SSH key encryption at rest
 """
 
+import atexit
 import logging
 import os
+import signal
 import sys
 from pathlib import Path
 
@@ -205,6 +214,43 @@ def session_cleanup_worker():
 
 
 # =============================================================================
+# Graceful Shutdown Handler
+# =============================================================================
+
+def graceful_shutdown(signum, frame):
+    """Handle shutdown signals gracefully."""
+    sig_name = signal.Signals(signum).name
+    logger.info(f"Received {sig_name}, initiating graceful shutdown...")
+    
+    if session_manager:
+        try:
+            session_manager.request_shutdown()
+        except Exception as e:
+            logger.error(f"Error during shutdown cleanup: {e}")
+    
+    logger.info("Graceful shutdown complete, exiting.")
+    sys.exit(0)
+
+
+def register_shutdown_handlers():
+    """Register signal handlers for graceful shutdown."""
+    # Note: eventlet may interfere with signal handling, so we use atexit as backup
+    signal.signal(signal.SIGTERM, graceful_shutdown)
+    signal.signal(signal.SIGINT, graceful_shutdown)
+    
+    # Also register atexit handler as backup
+    def cleanup_on_exit():
+        if session_manager:
+            logger.info("atexit cleanup triggered")
+            try:
+                session_manager.request_shutdown()
+            except Exception as e:
+                logger.error(f"atexit cleanup error: {e}")
+    
+    atexit.register(cleanup_on_exit)
+
+
+# =============================================================================
 # Main Entry Point
 # =============================================================================
 
@@ -212,6 +258,10 @@ if __name__ == '__main__':
     logger.info(f"Starting RHCSA Practice Labs API with WebSocket support")
     logger.info(f"Debug: {DEBUG}, Log Level: {LOG_LEVEL}")
     logger.info(f"Session manager: {'enabled' if session_manager else 'disabled'}")
+    
+    # Register graceful shutdown handlers
+    register_shutdown_handlers()
+    logger.info("Graceful shutdown handlers registered")
     
     # Start background session cleanup worker
     if session_manager:
