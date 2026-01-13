@@ -176,6 +176,12 @@ for svc in $KILL_SERVICES; do
 done
 rm -f /etc/cron.d/ksplice /etc/cron.d/oracle* /etc/cron.daily/oracle*
 
+# PHASE 2b: DISABLE BLOATED REPOS (saves 300MB+ downloads)
+# Keep only BaseOS and AppStream - that's all RHCSA needs
+for repo in ol8_ksplice ol8_MySQL80 ol8_MySQL84 ol8_MySQL84_tools ol8_MySQL_connectors_community ol8_oci_included ol8_developer ol8_developer_EPEL; do
+    dnf config-manager --disable "$repo" 2>/dev/null || true
+done
+
 # PHASE 3: HOSTNAME AND HOSTS
 hostnamectl set-hostname rhcsa1
 echo "${cidrhost(var.subnet_cidr, 11)} rhcsa1" >> /etc/hosts
@@ -291,6 +297,11 @@ for svc in $KILL_SERVICES; do
     systemctl mask "$svc" 2>/dev/null
 done
 rm -f /etc/cron.d/ksplice /etc/cron.d/oracle* /etc/cron.daily/oracle*
+
+# PHASE 2b: DISABLE BLOATED REPOS (saves 300MB+ downloads)
+for repo in ol8_ksplice ol8_MySQL80 ol8_MySQL84 ol8_MySQL84_tools ol8_MySQL_connectors_community ol8_oci_included ol8_developer ol8_developer_EPEL; do
+    dnf config-manager --disable "$repo" 2>/dev/null || true
+done
 
 # PHASE 3: HOSTNAME AND HOSTS
 hostnamectl set-hostname rhcsa2
