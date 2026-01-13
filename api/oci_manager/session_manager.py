@@ -194,6 +194,17 @@ class SessionManager:
             result = terraform.apply(session_id)
 
             if not result.success:
+                # CRITICAL: Clean up partial resources before marking as failed
+                logger.warning(f"Terraform apply failed for {session_id}, cleaning up partial resources...")
+                try:
+                    terraform.destroy(session_id)
+                    logger.info(f"Cleanup completed for failed session {session_id}")
+                except Exception as cleanup_err:
+                    logger.error(f"Cleanup also failed for {session_id}: {cleanup_err}")
+                
+                # Now clean up the workspace
+                self.workspace_manager.delete_workspace(session_id)
+                
                 self._update_session_state(
                     session_id,
                     SessionState.FAILED,
@@ -258,8 +269,12 @@ class SessionManager:
             logger.warning(f"Session {session_id} not found")
             return False
 
-        if session.state in (SessionState.TERMINATED, SessionState.TERMINATING):
-            logger.info(f"Session {session_id} already terminated/terminating")
+        if session.state == SessionState.TERMINATED:
+            logger.info(f"Session {session_id} already terminated")
+            return True
+        
+        if session.state == SessionState.TERMINATING:
+            logger.info(f"Session {session_id} already terminating")
             return True
 
         self._update_session_state(session_id, SessionState.TERMINATING)
@@ -354,16 +369,30 @@ class SessionManager:
         Returns:
             Number of sessions cleaned up
         """
-        sessions = self.list_sessions()
+        sessions = self.list_sessions(include_terminated=True)
         cleaned = 0
 
         for session in sessions:
+            # Clean up expired sessions
             if session.is_expired() and session.state not in (
                 SessionState.TERMINATED,
                 SessionState.TERMINATING,
             ):
                 logger.info(f"Cleaning up expired session {session.session_id}")
                 if self.terminate_session(session.session_id):
+                    cleaned += 1
+            
+            # Also try to clean up FAILED sessions that might have orphaned resources
+            elif session.state == SessionState.FAILED:
+                workspace_dir = self.workspace_manager.get_workspace(session.session_id)
+                if workspace_dir:
+                    logger.info(f"Cleaning up failed session workspace {session.session_id}")
+                    try:
+                        terraform = TerraformWrapper(workspace_dir)
+                        terraform.destroy(session.session_id)
+                    except Exception as e:
+                        logger.warning(f"Failed to destroy resources for {session.session_id}: {e}")
+                    self.workspace_manager.delete_workspace(session.session_id)
                     cleaned += 1
 
         return cleaned
