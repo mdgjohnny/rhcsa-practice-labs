@@ -72,9 +72,9 @@ variable "instance_memory_gb" {
 }
 
 variable "use_preemptible" {
-  description = "Use preemptible (spot) instances for ~50% cost savings. May be reclaimed with 30s notice."
+  description = "Use preemptible (spot) instances for ~50% cost savings. May be reclaimed with 30s notice. ALWAYS USE THIS."
   type        = bool
-  default     = true
+  default     = true  # NEVER change this to false
 }
 
 variable "os_image_id" {
