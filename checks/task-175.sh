@@ -4,8 +4,8 @@
 # Category: containers
 # Target: node1
 
-# Accept various ubi8 image names/registries
-check 'podman images --format "{{.Repository}}" 2>/dev/null | grep -qiE "ubi8|ubi:8"' \
+# Accept various ubi8 image names/registries (check root and opc user)
+check 'podman images --format "{{.Repository}}" 2>/dev/null | grep -qiE "ubi8|ubi:8" || su - opc -c "podman images --format \"{{.Repository}}\"" 2>/dev/null | grep -qiE "ubi8|ubi:8"' \
     "UBI8 image is present" \
     "UBI8 image not found"
 
