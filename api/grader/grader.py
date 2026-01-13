@@ -7,10 +7,14 @@ the bundler (creates scripts) and executor (runs them) to evaluate tasks.
 import json
 import logging
 import sqlite3
+import sys
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any
+
+# Add parent directory for oci_manager import
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from .bundler import TaskBundler, TaskMetadata
 from .executor import Executor, LocalExecutor, RemoteExecutor, ExecutionResult
@@ -351,12 +355,24 @@ def create_grader_from_session(
         
         # Create remote executors
         if row['ssh_private_key']:
+            # Decrypt SSH key if encrypted
+            ssh_key = row['ssh_private_key']
+            if ssh_key.startswith('gAAAAA'):  # Fernet encrypted
+                try:
+                    from oci_manager.session_manager import KeyEncryption
+                    key_encryption = KeyEncryption()
+                    ssh_key = key_encryption.decrypt(ssh_key)
+                    logger.debug("Decrypted SSH key")
+                except Exception as e:
+                    logger.error(f"Failed to decrypt SSH key: {e}")
+                    return None
+            
             node1_executor = RemoteExecutor(
                 host=row['node1_ip'],
                 user='opc',
                 use_sudo=True
             )
-            node1_executor.set_key_content(row['ssh_private_key'])
+            node1_executor.set_key_content(ssh_key)
             grader.add_executor('node1', node1_executor)
             grader.add_executor('default', node1_executor)
             
@@ -366,7 +382,7 @@ def create_grader_from_session(
                     user='opc',
                     use_sudo=True
                 )
-                node2_executor.set_key_content(row['ssh_private_key'])
+                node2_executor.set_key_content(ssh_key)
                 grader.add_executor('node2', node2_executor)
         
         logger.info(f"Created grader from session {row['session_id']}")
