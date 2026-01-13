@@ -998,7 +998,7 @@
                 `;
             } else if (session.state === 'provisioning') {
                 // Calculate elapsed time from when provisioning started
-                const startTime = session.provisioningStartTime || Date.now();
+                const startTime = provisioningStartTime || Date.now();
                 const elapsed = Math.floor((Date.now() - startTime) / 1000);
                 const elapsedMin = Math.floor(elapsed / 60);
                 const elapsedSec = elapsed % 60;
@@ -1033,12 +1033,6 @@
                         Cancel provisioning
                     </button>
                 `;
-                // Poll for updates - use renderCloudSessionUI to preserve provisioningStartTime
-                setTimeout(() => {
-                    if (cloudSession && cloudSession.state === 'provisioning') {
-                        renderCloudSessionUI(cloudSession);
-                    }
-                }, 1000);
             } else if (session.state === 'ready' || session.state === 'active') {
                 const timeRemaining = Math.max(0, Math.floor(session.time_remaining_seconds / 60));
                 infoEl.innerHTML = `
@@ -1110,13 +1104,28 @@
             
             // Optimistically show provisioning state immediately
             cloudSession.state = 'provisioning';
-            cloudSession.provisioningStartTime = Date.now(); // Track when provisioning started
-            renderCloudSessionUI(cloudSession);  // Render directly, don't re-fetch
+            provisioningStartTime = Date.now(); // Global timer start
+            renderCloudSessionUI(cloudSession);
+            
+            // Start timer to update UI every second
+            if (provisioningTimer) clearInterval(provisioningTimer);
+            provisioningTimer = setInterval(() => {
+                if (cloudSession && cloudSession.state === 'provisioning') {
+                    renderCloudSessionUI(cloudSession);
+                } else {
+                    clearInterval(provisioningTimer);
+                    provisioningTimer = null;
+                }
+            }, 1000);
             
             // Start provisioning (don't await - let it run in background)
             fetch(`/api/sessions/${sessionId}/provision`, { method: 'POST' })
                 .then(resp => resp.json())
                 .then(data => {
+                    // Stop the timer
+                    if (provisioningTimer) { clearInterval(provisioningTimer); provisioningTimer = null; }
+                    provisioningStartTime = null;
+                    
                     if (data.error) {
                         showToast('error', 'Provisioning Failed', data.error);
                         cloudSession.state = 'failed';
@@ -1128,6 +1137,7 @@
                     updateTerminalUI();
                 })
                 .catch(e => {
+                    if (provisioningTimer) { clearInterval(provisioningTimer); provisioningTimer = null; }
                     showToast('error', 'Error', e.message);
                     refreshCloudSessionUI();
                 });
@@ -2225,6 +2235,8 @@
         let termCurrentNode = 'node1';
         let termRetryCount = 0;
         let cloudSession = null;
+        let provisioningTimer = null;
+        let provisioningStartTime = null;
 
         function initTerminal() {
             if (terminal) return;
