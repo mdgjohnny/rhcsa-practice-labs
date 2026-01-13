@@ -996,7 +996,7 @@
                         Cancel
                     </button>
                 `;
-            } else if (session.state === 'provisioning') {
+            } else if (session.state === 'provisioning' || session.state === 'waiting_health') {
                 // Calculate elapsed time from when provisioning started
                 const startTime = provisioningStartTime || Date.now();
                 const elapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -1004,10 +1004,13 @@
                 const elapsedSec = elapsed % 60;
                 const elapsedStr = `${elapsedMin}:${String(elapsedSec).padStart(2, '0')}`;
                 
-                // Progress stages
+                // Progress stages (waiting_health comes after VMs are up)
                 let stage = 'Initializing';
                 let progress = 10;
-                if (elapsed > 15) { stage = 'Creating network'; progress = 25; }
+                if (session.state === 'waiting_health') {
+                    stage = 'Waiting for VMs to be ready';
+                    progress = 85;
+                } else if (elapsed > 15) { stage = 'Creating network'; progress = 25; }
                 if (elapsed > 30) { stage = 'Launching VMs'; progress = 45; }
                 if (elapsed > 60) { stage = 'Configuring instances'; progress = 65; }
                 if (elapsed > 90) { stage = 'Installing packages'; progress = 80; }
@@ -1110,7 +1113,8 @@
             // Start timer to update UI every second
             if (provisioningTimer) clearInterval(provisioningTimer);
             provisioningTimer = setInterval(() => {
-                if (cloudSession && cloudSession.state === 'provisioning') {
+                // Continue timer for provisioning and waiting_health states
+                if (cloudSession && (cloudSession.state === 'provisioning' || cloudSession.state === 'waiting_health')) {
                     renderCloudSessionUI(cloudSession);
                 } else {
                     clearInterval(provisioningTimer);
