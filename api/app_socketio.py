@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
-"""IMPORTANT: eventlet monkey-patching must happen FIRST."""
-import eventlet
-eventlet.monkey_patch()
-
 """
 RHCSA Practice Labs API with WebSocket support.
 
-This is a wrapper around the main Flask app that adds Socket.IO support
-for the web terminal functionality.
+Uses asyncio (via gevent-websocket or threading) instead of eventlet.
+Eventlet is deprecated and has compatibility issues with newer Python.
 
 Cloud Management Best Practices:
 - Graceful shutdown handler for SIGTERM/SIGINT
@@ -17,11 +13,13 @@ Cloud Management Best Practices:
 - SSH key encryption at rest
 """
 
+import asyncio
 import atexit
 import logging
 import os
 import signal
 import sys
+import threading
 from pathlib import Path
 
 # Add parent directory to path for imports
@@ -43,11 +41,11 @@ limiter = Limiter(
     storage_uri="memory://",
 )
 
-# Initialize Socket.IO with eventlet async mode
+# Initialize Socket.IO with threading async mode (no eventlet needed)
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
-    async_mode="eventlet",
+    async_mode="threading",
     logger=DEBUG,
     engineio_logger=DEBUG,
     ping_timeout=60,
@@ -216,11 +214,14 @@ def terminal_test():
 # =============================================================================
 
 SESSION_CLEANUP_INTERVAL = 300  # 5 minutes
+shutdown_event = threading.Event()
 
 def session_cleanup_worker():
     """Background worker that periodically cleans up expired sessions."""
-    while True:
-        eventlet.sleep(SESSION_CLEANUP_INTERVAL)
+    while not shutdown_event.is_set():
+        shutdown_event.wait(SESSION_CLEANUP_INTERVAL)
+        if shutdown_event.is_set():
+            break
         if session_manager:
             try:
                 cleaned = session_manager.cleanup_expired_sessions()
@@ -239,6 +240,9 @@ def graceful_shutdown(signum, frame):
     sig_name = signal.Signals(signum).name
     logger.info(f"Received {sig_name}, initiating graceful shutdown...")
     
+    # Signal cleanup worker to stop
+    shutdown_event.set()
+    
     if session_manager:
         try:
             session_manager.request_shutdown()
@@ -251,12 +255,12 @@ def graceful_shutdown(signum, frame):
 
 def register_shutdown_handlers():
     """Register signal handlers for graceful shutdown."""
-    # Note: eventlet may interfere with signal handling, so we use atexit as backup
     signal.signal(signal.SIGTERM, graceful_shutdown)
     signal.signal(signal.SIGINT, graceful_shutdown)
     
     # Also register atexit handler as backup
     def cleanup_on_exit():
+        shutdown_event.set()
         if session_manager:
             logger.info("atexit cleanup triggered")
             try:
@@ -275,6 +279,7 @@ if __name__ == '__main__':
     logger.info(f"Starting RHCSA Practice Labs API with WebSocket support")
     logger.info(f"Debug: {DEBUG}, Log Level: {LOG_LEVEL}")
     logger.info(f"Session manager: {'enabled' if session_manager else 'disabled'}")
+    logger.info(f"Async mode: threading (no eventlet)")
     
     # Register graceful shutdown handlers
     register_shutdown_handlers()
@@ -282,7 +287,8 @@ if __name__ == '__main__':
     
     # Start background session cleanup worker
     if session_manager:
-        eventlet.spawn(session_cleanup_worker)
+        cleanup_thread = threading.Thread(target=session_cleanup_worker, daemon=True)
+        cleanup_thread.start()
         logger.info(f"Session cleanup worker started (interval: {SESSION_CLEANUP_INTERVAL}s)")
     
     socketio.run(
@@ -290,5 +296,6 @@ if __name__ == '__main__':
         host='0.0.0.0',
         port=8080,
         debug=DEBUG,
-        use_reloader=False
+        use_reloader=False,
+        allow_unsafe_werkzeug=True
     )
