@@ -247,18 +247,6 @@ sync && echo 3 > /proc/sys/vm/drop_caches
 SCRIPT
 chmod +x /usr/local/bin/safe-install
 
-# PHASE 6b: INSTALL ESSENTIAL RHCSA PACKAGES
-# These are needed for various exam tasks and won't be available otherwise
-dnf install -y --setopt=install_weak_deps=False \
-    selinux-policy-doc \
-    setools-console \
-    policycoreutils-python-utils \
-    man-pages \
-    bash-completion \
-    vim-enhanced \
-    tar \
-    &>/dev/null || true
-
 # PHASE 7: CREATE PRACTICE DISKS (LOOPBACK) - sparse files for LVM/partition practice
 truncate -s 10G /var/practice-disks/disk0.img  # loop0 - main practice disk
 truncate -s 5G /var/practice-disks/disk1.img   # loop1 - ext4/vfat tasks  
@@ -381,17 +369,6 @@ rm -rf /var/cache/dnf/*
 sync && echo 3 > /proc/sys/vm/drop_caches
 SCRIPT
 chmod +x /usr/local/bin/safe-install
-
-# PHASE 6b: INSTALL ESSENTIAL RHCSA PACKAGES
-dnf install -y --setopt=install_weak_deps=False \
-    selinux-policy-doc \
-    setools-console \
-    policycoreutils-python-utils \
-    man-pages \
-    bash-completion \
-    vim-enhanced \
-    tar \
-    &>/dev/null || true
 
 # PHASE 7: CREATE PRACTICE DISKS (LOOPBACK)
 truncate -s 10G /var/practice-disks/disk0.img
