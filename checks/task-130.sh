@@ -9,11 +9,12 @@ check '[[ -d /home/opc/mysql-opc ]]' \
     "Directory /home/opc/mysql-opc exists" \
     "Directory /home/opc/mysql-opc does not exist"
 
-check 'su - opc -c "systemctl --user is-active mariadb-opc" &>/dev/null' \
+# Accept either mariadb-opc or container-mariadb-opc (podman default name)
+check 'su - opc -c "systemctl --user is-active mariadb-opc || systemctl --user is-active container-mariadb-opc" &>/dev/null' \
     "User service mariadb-opc is running" \
     "User service mariadb-opc is not running"
 
-check 'su - opc -c "systemctl --user is-enabled mariadb-opc" &>/dev/null' \
+check 'su - opc -c "systemctl --user is-enabled mariadb-opc || systemctl --user is-enabled container-mariadb-opc" &>/dev/null' \
     "User service mariadb-opc is enabled" \
     "User service mariadb-opc is not enabled"
 

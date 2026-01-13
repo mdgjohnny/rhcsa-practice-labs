@@ -13,11 +13,12 @@ check '[[ -d /home/student/mysql-student ]]' \
     "Directory /home/student/mysql-student exists" \
     "Directory /home/student/mysql-student does not exist"
 
-check 'sudo runuser -l student -c "export XDG_RUNTIME_DIR=/run/user/\$(id -u); systemctl --user is-active mariadb-student" &>/dev/null' \
+# Accept either mariadb-student or container-mariadb-student (podman default name)
+check 'sudo runuser -l student -c "export XDG_RUNTIME_DIR=/run/user/\$(id -u); systemctl --user is-active mariadb-student || systemctl --user is-active container-mariadb-student" &>/dev/null' \
     "User service mariadb-student is running" \
     "User service mariadb-student is not running"
 
-check 'sudo runuser -l student -c "export XDG_RUNTIME_DIR=/run/user/\$(id -u); systemctl --user is-enabled mariadb-student" &>/dev/null' \
+check 'sudo runuser -l student -c "export XDG_RUNTIME_DIR=/run/user/\$(id -u); systemctl --user is-enabled mariadb-student || systemctl --user is-enabled container-mariadb-student" &>/dev/null' \
     "User service mariadb-student is enabled" \
     "User service mariadb-student is not enabled"
 

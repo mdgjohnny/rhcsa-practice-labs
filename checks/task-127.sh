@@ -9,11 +9,12 @@ check '[[ -d /var/mariadb-root ]]' \
     "Directory /var/mariadb-root exists" \
     "Directory /var/mariadb-root does not exist"
 
-check 'systemctl is-active mariadb-root &>/dev/null' \
+# Accept either mariadb-root or container-mariadb-root (podman default name)
+check 'systemctl is-active mariadb-root &>/dev/null || systemctl is-active container-mariadb-root &>/dev/null' \
     "System service mariadb-root is running" \
     "System service mariadb-root is not running"
 
-check 'systemctl is-enabled mariadb-root &>/dev/null' \
+check 'systemctl is-enabled mariadb-root &>/dev/null || systemctl is-enabled container-mariadb-root &>/dev/null' \
     "System service mariadb-root is enabled" \
     "System service mariadb-root is not enabled"
 
