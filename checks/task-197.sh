@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Enable the SELinux boolean "httpd_can_network_connect" persistently. This allows Apache to make network connections.
-# Title: Enable SELinux Network Boolean
+# Task: Apache is unable to connect to a remote database server due to SELinux restrictions. Find and enable the appropriate SELinux boolean to allow Apache (httpd) to make outbound network connections. The change must persist across reboots.
+# Title: Fix Apache Network Connectivity (SELinux)
 # Category: security
 # Target: node1
 

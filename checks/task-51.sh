@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Enable the SELinux boolean that allows NFS to export read-write. The change must persist across reboots.
-# Title: Toggle SELinux Boolean
+# Task: NFS clients can mount exports as read-only but write operations fail due to SELinux. Find and enable the SELinux boolean that allows NFS to export filesystems with read-write access. The change must persist across reboots.
+# Title: Fix NFS Read-Write Exports (SELinux)
 # Category: security
 # Target: node1
 

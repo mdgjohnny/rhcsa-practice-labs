@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Enable the SELinux boolean "httpd_enable_homedirs" persistently to allow Apache to serve content from user home directories.
-# Title: Enable Apache Home Dirs Boolean
+# Task: Users are reporting that Apache cannot serve files from their ~/public_html directories despite correct file permissions. This is an SELinux issue. Find and enable the appropriate boolean to allow Apache to access user home directories. Make it persistent.
+# Title: Fix Apache User Home Directory Access (SELinux)
 # Category: security
 # Target: node1
 

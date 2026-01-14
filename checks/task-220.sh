@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Enable the SELinux boolean "ftpd_full_access" to allow FTP to read/write all files. Make it persistent.
-# Title: Enable FTP Full Access Boolean
+# Task: The FTP server is unable to read/write files outside its default directories due to SELinux. Find and enable the boolean that grants FTP full filesystem access. The setting must survive reboots.
+# Title: Fix FTP Filesystem Access (SELinux)
 # Category: security
 # Target: node1
 
