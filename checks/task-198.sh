@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Task: Add port 8888/TCP to the SELinux http_port_t type. This allows HTTP services to bind to port 8888.
-# Title: Add Custom SELinux HTTP Port
+# Task: Your development team needs to run a web server on port 8888 for testing. Currently, the security policy blocks HTTP services from binding to this port. Update the policy to allow it. The change must survive reboots. (Click "Check Task" to verify)
+# Title: Allow HTTP Service on Port 8888
 # Category: security
 # Target: node1
 
-check 'semanage port -l 2>/dev/null | grep http_port_t | grep -q 8888' \
-    "Port 8888 is assigned to http_port_t" \
-    "Port 8888 not found in http_port_t"
+check 'semanage port -l 2>/dev/null | grep -w "8888" | grep -q "http_port_t"' \
+    "Port 8888/TCP is allowed for HTTP services" \
+    "Port 8888/TCP is not configured for HTTP (hint: check semanage port)"
