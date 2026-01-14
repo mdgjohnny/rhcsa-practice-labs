@@ -1,13 +1,23 @@
 #!/usr/bin/env bash
-# Task: The security team requires SELinux to run in permissive mode on this system for application compatibility testing. Configure SELinux to boot in permissive mode. The change must persist across reboots.
-# Title: Configure SELinux Permissive Mode
+# Task: A process is being blocked by SELinux but you're not sure why. Use the audit log to identify the most recent SELinux denial and save the denial message (the line containing "denied") to /root/selinux-denial.txt. Then use audit2why to analyze it and append the explanation to the same file.
+# Title: Analyze SELinux Denials
 # Category: security
-# Target: node2
+# Target: node1
 
-check 'grep -qE "^SELINUX=permissive" /etc/selinux/config 2>/dev/null' \
-    "SELinux configured for permissive mode at boot" \
-    "SELinux not configured for permissive in /etc/selinux/config"
+# Setup: Generate an SELinux denial to analyze
+if ! grep -q "denied" /var/log/audit/audit.log 2>/dev/null; then
+    # Try to trigger a denial by accessing something httpd shouldn't
+    timeout 2 runcon -t httpd_t -- cat /etc/shadow &>/dev/null || true
+fi
 
-check 'getenforce 2>/dev/null | grep -qi permissive' \
-    "SELinux is currently in permissive mode" \
-    "SELinux is not currently permissive (may need reboot or setenforce 0)"
+check '[[ -f /root/selinux-denial.txt ]]' \
+    "File /root/selinux-denial.txt exists" \
+    "File /root/selinux-denial.txt not found"
+
+check 'grep -qi "denied" /root/selinux-denial.txt 2>/dev/null' \
+    "File contains SELinux denial message" \
+    "File doesn't contain a denial message (hint: grep denied /var/log/audit/audit.log)"
+
+check 'grep -qiE "was caused by|requires|boolean|allow" /root/selinux-denial.txt 2>/dev/null' \
+    "File contains audit2why analysis" \
+    "File missing audit2why explanation (hint: pipe denial to audit2why)"
