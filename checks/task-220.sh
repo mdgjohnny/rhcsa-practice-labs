@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: The FTP server is unable to read/write files outside its default directories due to SELinux. Find and enable the boolean that grants FTP full filesystem access. The setting must survive reboots.
+# Task: You need to configure vsftpd to allow users to upload files anywhere on the system (not just their home directories). SELinux restricts this by default. Find and enable the boolean that grants the FTP daemon full read/write access to the filesystem. The setting must survive reboots.
 # Title: Fix FTP Filesystem Access (SELinux)
 # Category: security
 # Target: node1

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Apache is unable to connect to a remote database server due to SELinux restrictions. Find and enable the appropriate SELinux boolean to allow Apache (httpd) to make outbound network connections. The change must persist across reboots.
+# Task: Your organization requires Apache to proxy requests to backend application servers. By default, SELinux prevents httpd from initiating network connections. Find and enable the boolean that allows httpd to connect to network services. The change must persist across reboots.
 # Title: Fix Apache Network Connectivity (SELinux)
 # Category: security
 # Target: node1

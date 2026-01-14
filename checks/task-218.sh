@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Users are reporting that Apache cannot serve files from their ~/public_html directories despite correct file permissions. This is an SELinux issue. Find and enable the appropriate boolean to allow Apache to access user home directories. Make it persistent.
+# Task: You need to configure Apache to serve user web content from ~/public_html directories. SELinux blocks this by default. Find and enable the boolean that allows httpd to access content in user home directories. Make it persistent.
 # Title: Fix Apache User Home Directory Access (SELinux)
 # Category: security
 # Target: node1
