@@ -5,5 +5,5 @@
 # Target: node1
 
 check 'getsebool ftpd_full_access 2>/dev/null | grep -q "on"' \
-    "ftpd_full_access is enabled" \
-    "ftpd_full_access is not enabled"
+    "Correct SELinux boolean is enabled" \
+    "Required boolean is not enabled (hint: search ftp booleans)"

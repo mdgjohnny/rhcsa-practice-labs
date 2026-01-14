@@ -5,5 +5,5 @@
 # Target: node1
 
 check 'getsebool httpd_enable_homedirs 2>/dev/null | grep -q "on"' \
-    "httpd_enable_homedirs is enabled" \
-    "httpd_enable_homedirs is not enabled"
+    "Correct SELinux boolean is enabled" \
+    "Required boolean is not enabled (hint: search httpd booleans related to home)"

@@ -5,5 +5,5 @@
 # Target: node1
 
 check 'getsebool nfs_export_all_rw 2>/dev/null | grep -q "on"' \
-    "nfs_export_all_rw boolean is enabled" \
-    "nfs_export_all_rw boolean is not enabled"
+    "Correct SELinux boolean is enabled" \
+    "Required boolean is not enabled (hint: search nfs booleans)"
