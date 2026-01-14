@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-# Task: Configure /etc/skel so that all new users automatically get a file named "CONGRATS" in their home directory.
-# Title: Configure Skeleton Directory
+# Task: Ensure that when new user accounts are created, they automatically receive a welcome file named "CONGRATS" in their home directory.
+# Title: Configure New User Defaults
 # Category: users-groups
 # Target: node1
-# after user creation
 
-check ' [[ -f /etc/skel/CONGRATS ]] ' \
-    "File named CONGRATS will be in home folder after user is created" \
-    "File named CONGRATS will not be in home folder after user is created"
+check '[[ -f /etc/skel/CONGRATS ]]' \
+    "New users will receive CONGRATS file" \
+    "CONGRATS file not configured for new users"

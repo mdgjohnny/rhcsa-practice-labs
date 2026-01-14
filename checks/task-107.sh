@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
-# Task: Configure /etc/skel to include a file named "NEWFILE" for all new user accounts.
-# Title: Configure Skeleton Directory
+# Task: Configure the system so that when new users are created, they automatically get an empty file named "NEWFILE" in their home directory.
+# Title: Configure New User Template
 # Category: users-groups
 # Target: node1
 
-# Check if NEWFILE exists in /etc/skel
 check '[[ -f /etc/skel/NEWFILE ]]' \
-    "NEWFILE exists in /etc/skel" \
-    "NEWFILE does not exist in /etc/skel"
+    "NEWFILE will be created for new users" \
+    "NEWFILE not configured for new users"
 
-# Check the file is empty (0 bytes)
 check '[[ ! -s /etc/skel/NEWFILE ]]' \
-    "NEWFILE is empty" \
-    "NEWFILE is not empty"
+    "NEWFILE is empty as required" \
+    "NEWFILE should be empty"
