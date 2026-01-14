@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create /root/system-info.txt by appending: 1) hostname, 2) current date, 3) kernel version (uname -r). Each on a new line, using >> to append.
-# Title: Append Output to File
+# Task: Create /root/system-info.txt containing three pieces of information, each on a separate line: 1) the system hostname, 2) current date, 3) kernel version. Build the file by appending each item.
+# Title: Append System Info to File
 # Category: essential-tools
 # Target: node1
 
@@ -13,7 +13,7 @@ check 'grep -q "$(hostname)" /root/system-info.txt' \
     "Hostname not found in file"
 
 check 'grep -qE "[0-9]{4}" /root/system-info.txt' \
-    "File contains date" \
+    "File contains date with year" \
     "Date not found in file"
 
 check 'grep -q "$(uname -r)" /root/system-info.txt' \

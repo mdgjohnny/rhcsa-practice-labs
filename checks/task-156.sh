@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
-# Task: A script /opt/scripts/backup.sh needs to write to /backup directory. The script runs via cron. Configure SELinux context on /backup to allow this.
-# Title: SELinux Context for Backup Directory
+# Task: Create directory /backup and set its SELinux context to backup_store_t. Ensure the context is persistent across relabeling.
+# Title: Set SELinux Context for Backup Directory
 # Category: security
 # Target: node1
-
 
 check '[[ -d /backup ]]' \
     "Directory /backup exists" \
     "Directory /backup does not exist"
 
-check 'ls -Zd /backup 2>/dev/null | grep -qE "backup_store_t|var_t|usr_t"' \
-    "/backup has appropriate SELinux context" \
-    "/backup does not have appropriate context"
+check 'ls -Zd /backup 2>/dev/null | grep -q "backup_store_t"' \
+    "/backup has SELinux context backup_store_t" \
+    "/backup does not have backup_store_t context"
 
-check 'semanage fcontext -l | grep -q "/backup"' \
+check 'semanage fcontext -l | grep -qE "/backup.*backup_store_t"' \
     "SELinux context rule is persistent" \
-    "SELinux context rule not persistent"
+    "SELinux context rule not persistent in semanage"

@@ -1,13 +1,21 @@
 #!/usr/bin/env bash
-# Task: Mount /share1 from rhcsa1 to /share2 on this host. Mount must be persistent across reboots.
-# Title: Mount NFS Share
+# Task: Configure a direct automount for rhcsa1:/share1 to mount automatically at /share2 when accessed. The mount should be configured using autofs.
+# Title: Configure Direct Automount for NFS Share
 # Category: file-systems
 # Target: node2
 
-check 'mount | grep -q /share2' \
-    "/share2 is mounted" \
-    "/share2 is not mounted"
+check 'rpm -q autofs &>/dev/null' \
+    "autofs package is installed" \
+    "autofs package not installed"
 
-check 'grep -q share2 /etc/fstab' \
-    "/share2 is configured in /etc/fstab (persistent)" \
-    "/share2 is not in /etc/fstab (not persistent)"
+check 'systemctl is-active autofs &>/dev/null' \
+    "autofs service is running" \
+    "autofs service not running"
+
+check 'grep -rq "share2" /etc/auto.* 2>/dev/null' \
+    "share2 configured in autofs maps" \
+    "share2 not found in autofs configuration"
+
+check 'grep -rqE "rhcsa1.*share1|share1.*rhcsa1" /etc/auto.* 2>/dev/null' \
+    "rhcsa1:/share1 source configured" \
+    "rhcsa1:/share1 not found in autofs maps"

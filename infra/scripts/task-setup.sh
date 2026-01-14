@@ -23,10 +23,20 @@ echo "Setting up tasks for $NODE"
 # Ensure policycoreutils-python-utils for semanage
 dnf install -y policycoreutils-python-utils &>/dev/null || true
 
+# Task-13: Create user edwin with some files to find
+useradd -m edwin 2>/dev/null || true
+touch /tmp/edwin-temp.txt && chown edwin:edwin /tmp/edwin-temp.txt
+touch /var/tmp/edwin-data.log && chown edwin:edwin /var/tmp/edwin-data.log
+mkdir -p /opt/edwinwork && touch /opt/edwinwork/config.txt && chown -R edwin:edwin /opt/edwinwork
+
 ###############################################################################
 # NODE1 (rhcsa1) SPECIFIC SETUP
 ###############################################################################
 if [[ "$NODE" == "rhcsa1" ]]; then
+
+    echo "=== Setting up process management task ==="
+    # Task-165: Background sleep process for kill practice
+    nohup sleep 99999 &>/dev/null &
 
     echo "=== Setting up Apache/SELinux tasks ==="
     

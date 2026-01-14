@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Use audit2why or sealert to analyze recent SELinux denials. Save the analysis to /root/selinux-audit.txt.
-# Title: Analyze SELinux Audit Log
+# Task: Find SELinux denials in the audit log and analyze them. Save your analysis showing what's being denied and recommended solutions to /root/selinux-audit.txt.
+# Title: Analyze SELinux Audit Denials
 # Category: security
 # Target: node1
 
@@ -8,7 +8,10 @@ check '[[ -f /root/selinux-audit.txt ]]' \
     "File /root/selinux-audit.txt exists" \
     "File not found"
 
-# Check for either denials found or no denials message
-check 'grep -qiE "denied|allow|scontext|no matches|nothing to do" /root/selinux-audit.txt' \
-    "File contains audit analysis" \
-    "No audit analysis found"
+check '[[ -s /root/selinux-audit.txt ]]' \
+    "File has content" \
+    "File is empty"
+
+check 'grep -qiE "denied|avc|scontext|tcontext|boolean|allow" /root/selinux-audit.txt' \
+    "File contains SELinux-related analysis" \
+    "File doesn't appear to contain SELinux analysis"

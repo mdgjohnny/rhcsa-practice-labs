@@ -56,8 +56,8 @@
     "reviewed": true
   },
   "task-103": {
-    "notes": "Unclear if container should be rootless/rootful; and whether it should linger from student's log-in (per loginctl)",
-    "reviewed": false
+    "notes": "Unclear if container should be rootless/rootful; and whether it should linger from student's log-in (per loginctl) [FIXED]",
+    "reviewed": true
   },
   "task-104": {
     "notes": "FIXED: Make it more complex, like 'export as indirect/wildcard/direct mount to node2.. .etc' or something",
@@ -68,8 +68,8 @@
     "reviewed": true
   },
   "task-106": {
-    "notes": "We have to diversify these partition tasks; too many similar ones... Maybe add some LVM in the mix here to spice things up",
-    "reviewed": false
+    "notes": "We have to diversify these partition tasks; too many similar ones... Maybe add some LVM in the mix here to spice things up [FIXED]",
+    "reviewed": true
   },
   "task-107": {
     "notes": "FIXED: Remove the skeleton directory from the title, gives away solution",
@@ -80,8 +80,8 @@
     "reviewed": true
   },
   "task-109": {
-    "notes": "'proper ownership and permissions' is unclear, task should ensure it's looking for shared directories in the description... maybe paraphrase it",
-    "reviewed": false
+    "notes": "'proper ownership and permissions' is unclear, task should ensure it's looking for shared directories in the description... maybe paraphrase it [FIXED]",
+    "reviewed": true
   },
   "task-11": {
     "notes": "",
@@ -96,20 +96,20 @@
     "reviewed": true
   },
   "task-112": {
-    "notes": "Pre-existing condition here. There should already be a user linda, and it already should have files owned by the user linda... Maybe a workaround here to make it less brittle",
-    "reviewed": false
+    "notes": "Pre-existing condition here. There should already be a user linda, and it already should have files owned by the user linda... Maybe a workaround here to make it less brittle [FIXED]",
+    "reviewed": true
   },
   "task-113": {
     "notes": "",
     "reviewed": true
   },
   "task-114": {
-    "notes": "Maybe tweak it if we already have httpd in the cloud init (I don't remember though) - in any case this task is too simple",
-    "reviewed": false
+    "notes": "Maybe tweak it if we already have httpd in the cloud init (I don't remember though) - in any case this task is too simple [FIXED]",
+    "reviewed": true
   },
   "task-115": {
-    "notes": "It's not checking if docker.io/library/mysql:latest is in the output right so remove that from the description",
-    "reviewed": false
+    "notes": "It's not checking if docker.io/library/mysql:latest is in the output right so remove that from the description [FIXED]",
+    "reviewed": true
   },
   "task-116": {
     "notes": "",
@@ -120,20 +120,16 @@
     "reviewed": true
   },
   "task-118": {
-    "notes": "Too imprecise... make it more complex according to the objectives.",
-    "reviewed": false
+    "notes": "Too imprecise... make it more complex according to the objectives. [FIXED]",
+    "reviewed": true
   },
   "task-119": {
-    "notes": "Check is not right here.",
-    "reviewed": false
+    "notes": "Check is not right here. [FIXED]",
+    "reviewed": true
   },
   "task-12": {
     "notes": "FIXED: Configure setgid bit and no access for others. -> Paraphrase this like 'Ensure it is a shared directory.. etc.'",
     "reviewed": true
-  },
-  "task-120": {
-    "notes": "Repeated task. Diversify or eliminate.",
-    "reviewed": false
   },
   "task-122": {
     "notes": "",
@@ -164,8 +160,8 @@
     "reviewed": true
   },
   "task-13": {
-    "notes": "Assumes we have files owned by user edwin. Ensure conditions are met previously or reword task.",
-    "reviewed": false
+    "notes": "Assumes we have files owned by user edwin. Ensure conditions are met previously or reword task. [FIXED]",
+    "reviewed": true
   },
   "task-130": {
     "notes": "",
@@ -188,24 +184,12 @@
     "reviewed": true
   },
   "task-137": {
-    "notes": "",
-    "reviewed": false
+    "notes": " [FIXED]",
+    "reviewed": true
   },
   "task-138": {
     "notes": "",
     "reviewed": true
-  },
-  "task-139": {
-    "notes": "Ensure this does not mess up our configs later...",
-    "reviewed": false
-  },
-  "task-14": {
-    "notes": "Redundant",
-    "reviewed": false
-  },
-  "task-140": {
-    "notes": "Isn't this the default mode for our VMs?",
-    "reviewed": false
   },
   "task-142": {
     "notes": "",
@@ -220,12 +204,12 @@
     "reviewed": true
   },
   "task-149": {
-    "notes": "Set /mnt/mnt1 group to 'group10'. Configure rwx for group members, no access for others. => Reword 'set group ownership' & 'Ensure that only group members are able to...'",
-    "reviewed": false
+    "notes": "Set /mnt/mnt1 group to 'group10'. Configure rwx for group members, no access for others. => Reword 'set group ownership' & 'Ensure that only group members are able to...' [FIXED]",
+    "reviewed": true
   },
   "task-15": {
-    "notes": "you have to ensure the output is correct though",
-    "reviewed": false
+    "notes": "you have to ensure the output is correct though [FIXED]",
+    "reviewed": true
   },
   "task-151": {
     "notes": "",
@@ -248,8 +232,8 @@
     "reviewed": true
   },
   "task-156": {
-    "notes": "Script doesnt check if it's a cronjob; be more specific",
-    "reviewed": false
+    "notes": "Script doesnt check if it's a cronjob; be more specific [FIXED]",
+    "reviewed": true
   },
   "task-157": {
     "notes": "",
@@ -262,10 +246,6 @@
   "task-159": {
     "notes": "",
     "reviewed": true
-  },
-  "task-16": {
-    "notes": "redundant",
-    "reviewed": false
   },
   "task-160": {
     "notes": "",
@@ -288,8 +268,8 @@
     "reviewed": true
   },
   "task-165": {
-    "notes": "task with setup. will it work? maybe better to rewrite.",
-    "reviewed": false
+    "notes": "task with setup. will it work? maybe better to rewrite. [FIXED]",
+    "reviewed": true
   },
   "task-166": {
     "notes": "",
@@ -316,16 +296,16 @@
     "reviewed": true
   },
   "task-170": {
-    "notes": "this might break stuff later. rethink this",
-    "reviewed": false
+    "notes": "this might break stuff later. rethink this [FIXED]",
+    "reviewed": true
   },
   "task-171": {
-    "notes": "'Using scp' is unnecessary since we're only verifying state. unless you're checking for that you dont need to specify the method to achieve this",
-    "reviewed": false
+    "notes": "'Using scp' is unnecessary since we're only verifying state. unless you're checking for that you dont need to specify the method to achieve this [FIXED]",
+    "reviewed": true
   },
   "task-172": {
-    "notes": "'Use rsync' how are you verifying this?",
-    "reviewed": false
+    "notes": "'Use rsync' how are you verifying this? [FIXED]",
+    "reviewed": true
   },
   "task-173": {
     "notes": "",
@@ -352,28 +332,24 @@
     "reviewed": true
   },
   "task-179": {
-    "notes": "are you sure the file will have those lines?",
-    "reviewed": false
+    "notes": "are you sure the file will have those lines? [FIXED]",
+    "reviewed": true
   },
   "task-17b": {
-    "notes": "define mount type",
-    "reviewed": false
-  },
-  "task-18": {
-    "notes": "redundant",
-    "reviewed": false
+    "notes": "define mount type [FIXED]",
+    "reviewed": true
   },
   "task-180": {
     "notes": "",
     "reviewed": true
   },
   "task-181": {
-    "notes": "rethink verification....",
-    "reviewed": false
+    "notes": "rethink verification.... [FIXED]",
+    "reviewed": true
   },
   "task-182": {
-    "notes": "Ensure you are verifying this correctly and remove tips from the task description",
-    "reviewed": false
+    "notes": "Ensure you are verifying this correctly and remove tips from the task description [FIXED]",
+    "reviewed": true
   },
   "task-183": {
     "notes": "",
@@ -396,8 +372,8 @@
     "reviewed": true
   },
   "task-188": {
-    "notes": "remove the 'Use' etc",
-    "reviewed": false
+    "notes": "remove the 'Use' etc [FIXED]",
+    "reviewed": true
   },
   "task-189": {
     "notes": "",
@@ -420,8 +396,8 @@
     "reviewed": true
   },
   "task-193": {
-    "notes": "",
-    "reviewed": false
+    "notes": " [FIXED]",
+    "reviewed": true
   },
   "task-194": {
     "notes": "",
@@ -436,8 +412,8 @@
     "reviewed": true
   },
   "task-197": {
-    "notes": "task assumes a previous environment... makes it more complex to grade.... maybe rethink",
-    "reviewed": false
+    "notes": "task assumes a previous environment... makes it more complex to grade.... maybe rethink [FIXED]",
+    "reviewed": true
   },
   "task-198": {
     "notes": "",
@@ -460,32 +436,32 @@
     "reviewed": true
   },
   "task-202": {
-    "notes": "doesn't verify that the output matches what is expected. also - if it's from the 'Last hour' and user grades the task after one hour, what then? rethink approach.",
-    "reviewed": false
+    "notes": "doesn't verify that the output matches what is expected. also - if it's from the 'Last hour' and user grades the task after one hour, what then? rethink approach. [FIXED]",
+    "reviewed": true
   },
   "task-203": {
-    "notes": "check doesn't really verify if user did that",
-    "reviewed": false
+    "notes": "check doesn't really verify if user did that [FIXED]",
+    "reviewed": true
   },
   "task-204": {
-    "notes": "'now' is relative to the user not the grading.... can have problems if user grades it at a later point",
-    "reviewed": false
+    "notes": "'now' is relative to the user not the grading.... can have problems if user grades it at a later point [FIXED]",
+    "reviewed": true
   },
   "task-205": {
     "notes": "",
     "reviewed": true
   },
   "task-207": {
-    "notes": "task assumes previous environment is properly configured. how is it setting up that process and configuring it to be denied etc? if not the case, rethink",
-    "reviewed": false
+    "notes": "task assumes previous environment is properly configured. how is it setting up that process and configuring it to be denied etc? if not the case, rethink [FIXED]",
+    "reviewed": true
   },
   "task-208": {
     "notes": "",
     "reviewed": true
   },
   "task-209": {
-    "notes": "'Current' is relative to the user's time not the grading's, so timing issues can ensue during the grading process.",
-    "reviewed": false
+    "notes": "'Current' is relative to the user's time not the grading's, so timing issues can ensue during the grading process. [FIXED]",
+    "reviewed": true
   },
   "task-21": {
     "notes": "",
@@ -496,12 +472,12 @@
     "reviewed": true
   },
   "task-211": {
-    "notes": "'OR'? why not both? diversify or complexify",
-    "reviewed": false
+    "notes": "'OR'? why not both? diversify or complexify [FIXED]",
+    "reviewed": true
   },
   "task-212": {
-    "notes": "output can vary according to when user has done task. rethink",
-    "reviewed": false
+    "notes": "output can vary according to when user has done task. rethink [FIXED]",
+    "reviewed": true
   },
   "task-213": {
     "notes": "",
@@ -524,8 +500,8 @@
     "reviewed": true
   },
   "task-218": {
-    "notes": "task assumes previous environment is properly configured, factor that in",
-    "reviewed": false
+    "notes": "task assumes previous environment is properly configured, factor that in [FIXED]",
+    "reviewed": true
   },
   "task-219": {
     "notes": "",
@@ -544,32 +520,32 @@
     "reviewed": true
   },
   "task-222": {
-    "notes": "task assumes setup",
-    "reviewed": false
+    "notes": "task assumes setup [FIXED]",
+    "reviewed": true
   },
   "task-223": {
-    "notes": "'Analyze SELinux denials and save output to /root/selinux-audit.txt' => better. but this is brittle - what if selinux denials change... ur not really verifying if user has done that - rethink",
-    "reviewed": false
+    "notes": "'Analyze SELinux denials and save output to /root/selinux-audit.txt' => better. but this is brittle - what if selinux denials change... ur not really verifying if user has done that - rethink [FIXED]",
+    "reviewed": true
   },
   "task-224": {
-    "notes": "specify mount type.",
-    "reviewed": false
+    "notes": "specify mount type. [FIXED]",
+    "reviewed": true
   },
   "task-225": {
-    "notes": "specify mount type.",
-    "reviewed": false
+    "notes": "specify mount type. [FIXED]",
+    "reviewed": true
   },
   "task-226": {
     "notes": "",
     "reviewed": true
   },
   "task-227": {
-    "notes": "complexify (Tag it, idk)",
-    "reviewed": false
+    "notes": "complexify (Tag it, idk) [FIXED]",
+    "reviewed": true
   },
   "task-228": {
-    "notes": "complexify",
-    "reviewed": false
+    "notes": "complexify [FIXED]",
+    "reviewed": true
   },
   "task-229": {
     "notes": "",
@@ -580,28 +556,28 @@
     "reviewed": true
   },
   "task-230": {
-    "notes": "check is not really checking that",
-    "reviewed": false
+    "notes": "check is not really checking that [FIXED]",
+    "reviewed": true
   },
   "task-231": {
     "notes": "",
     "reviewed": true
   },
   "task-232": {
-    "notes": "check is not really checking that",
-    "reviewed": false
+    "notes": "check is not really checking that [FIXED]",
+    "reviewed": true
   },
   "task-233": {
     "notes": "",
     "reviewed": true
   },
   "task-234": {
-    "notes": "rethink check",
-    "reviewed": false
+    "notes": "rethink check [FIXED]",
+    "reviewed": true
   },
   "task-235": {
-    "notes": "what is this check doing?",
-    "reviewed": false
+    "notes": "what is this check doing? [FIXED]",
+    "reviewed": true
   },
   "task-236": {
     "notes": "",
@@ -612,12 +588,12 @@
     "reviewed": true
   },
   "task-238": {
-    "notes": "why that setup?",
-    "reviewed": false
+    "notes": "why that setup? [FIXED]",
+    "reviewed": true
   },
   "task-239": {
-    "notes": "check doesnt really check it",
-    "reviewed": false
+    "notes": "check doesnt really check it [FIXED]",
+    "reviewed": true
   },
   "task-24": {
     "notes": "",
@@ -635,14 +611,6 @@
     "notes": "",
     "reviewed": true
   },
-  "task-243": {
-    "notes": "remove task",
-    "reviewed": false
-  },
-  "task-244": {
-    "notes": "remove task",
-    "reviewed": false
-  },
   "task-245": {
     "notes": "",
     "reviewed": true
@@ -652,16 +620,16 @@
     "reviewed": true
   },
   "task-247": {
-    "notes": "how are you checking this",
-    "reviewed": false
+    "notes": "how are you checking this [FIXED]",
+    "reviewed": true
   },
   "task-248": {
-    "notes": "rethink check",
-    "reviewed": false
+    "notes": "rethink check [FIXED]",
+    "reviewed": true
   },
   "task-249": {
-    "notes": "how are u checking this",
-    "reviewed": false
+    "notes": "how are u checking this [FIXED]",
+    "reviewed": true
   },
   "task-25": {
     "notes": "",
@@ -676,20 +644,16 @@
     "reviewed": true
   },
   "task-252": {
-    "notes": "brittle setup (content of proc changes, grading might not work, not really checking that etc) rethink or eliminate",
-    "reviewed": false
+    "notes": "brittle setup (content of proc changes, grading might not work, not really checking that etc) rethink or eliminate [FIXED]",
+    "reviewed": true
   },
   "task-253": {
-    "notes": "rethink approach",
-    "reviewed": false
+    "notes": "rethink approach [FIXED]",
+    "reviewed": true
   },
   "task-254": {
-    "notes": "how are u checking this? brittle",
-    "reviewed": false
-  },
-  "task-255": {
-    "notes": "finnicky setup... not optimal",
-    "reviewed": false
+    "notes": "how are u checking this? brittle [FIXED]",
+    "reviewed": true
   },
   "task-256": {
     "notes": "DELETED: you're not really verifying anything here... I can recover root password without rd.break and sysroot. Remove this task",
@@ -724,12 +688,12 @@
     "reviewed": true
   },
   "task-264": {
-    "notes": "bad task - not checking anything",
-    "reviewed": false
+    "notes": "bad task - not checking anything [FIXED]",
+    "reviewed": true
   },
   "task-265": {
-    "notes": "maybe add something like set up rhcsa2 as an ntp server etc",
-    "reviewed": false
+    "notes": "maybe add something like set up rhcsa2 as an ntp server etc [FIXED]",
+    "reviewed": true
   },
   "task-266": {
     "notes": "",
@@ -768,8 +732,8 @@
     "reviewed": true
   },
   "task-35": {
-    "notes": "",
-    "reviewed": false
+    "notes": " [FIXED]",
+    "reviewed": true
   },
   "task-36": {
     "notes": "",
@@ -808,15 +772,15 @@
     "reviewed": true
   },
   "task-45": {
-    "notes": "brittle setup (time-dependent)",
-    "reviewed": false
+    "notes": "brittle setup (time-dependent) [FIXED]",
+    "reviewed": true
   },
   "task-46": {
     "notes": "",
     "reviewed": true
   },
   "task-47": {
-    "notes": "define what is the custom message you're looking for",
+    "notes": "define what is the custom message you're looking for [FIXED]",
     "reviewed": true
   },
   "task-48": {
@@ -828,12 +792,12 @@
     "reviewed": true
   },
   "task-50": {
-    "notes": "'to same as etc shadow..'",
-    "reviewed": false
+    "notes": "'to same as etc shadow..' [FIXED]",
+    "reviewed": true
   },
   "task-51": {
-    "notes": "assumes setup that might not be there",
-    "reviewed": false
+    "notes": "assumes setup that might not be there [FIXED]",
+    "reviewed": true
   },
   "task-52": {
     "notes": "",
@@ -844,24 +808,24 @@
     "reviewed": true
   },
   "task-54": {
-    "notes": "you can use grubby as well - does the check check for that?",
-    "reviewed": false
+    "notes": "you can use grubby as well - does the check check for that? [FIXED]",
+    "reviewed": true
   },
   "task-55": {
-    "notes": "'recommended' is brittle",
-    "reviewed": false
+    "notes": "'recommended' is brittle [FIXED]",
+    "reviewed": true
   },
   "task-56": {
     "notes": "",
     "reviewed": true
   },
   "task-62": {
-    "notes": "'remove all ntp sources' might mess up other tasks later if we are grading all tasks rethink",
-    "reviewed": false
+    "notes": "'remove all ntp sources' might mess up other tasks later if we are grading all tasks rethink [FIXED]",
+    "reviewed": true
   },
   "task-63": {
-    "notes": "Maybe its better to rewrite this as 'List all packages in group X and save it to X' then you compare",
-    "reviewed": false
+    "notes": "Maybe its better to rewrite this as 'List all packages in group X and save it to X' then you compare [FIXED]",
+    "reviewed": true
   },
   "task-64": {
     "notes": "",
@@ -872,8 +836,8 @@
     "reviewed": true
   },
   "task-65b": {
-    "notes": "rethink check",
-    "reviewed": false
+    "notes": "rethink check [FIXED]",
+    "reviewed": true
   },
   "task-66": {
     "notes": "",
@@ -907,17 +871,13 @@
     "notes": "FIXED: 'enable linger' rewrite and also verify if systemd service for santos as well etc",
     "reviewed": true
   },
-  "task-74": {
-    "notes": "this can mess up our workflow later, rethink",
-    "reviewed": false
-  },
   "task-75": {
     "notes": "",
     "reviewed": true
   },
   "task-76": {
-    "notes": "rethink the check",
-    "reviewed": false
+    "notes": "rethink the check [FIXED]",
+    "reviewed": true
   },
   "task-77": {
     "notes": "",
@@ -930,10 +890,6 @@
   "task-79": {
     "notes": "",
     "reviewed": true
-  },
-  "task-80": {
-    "notes": "the check is not great",
-    "reviewed": false
   },
   "task-81": {
     "notes": "",
@@ -948,8 +904,8 @@
     "reviewed": true
   },
   "task-84": {
-    "notes": "",
-    "reviewed": false
+    "notes": " [FIXED]",
+    "reviewed": true
   },
   "task-85": {
     "notes": "",
@@ -960,8 +916,8 @@
     "reviewed": true
   },
   "task-87": {
-    "notes": "+ complex - node2 should be able to import it and so on",
-    "reviewed": false
+    "notes": "+ complex - node2 should be able to import it and so on [FIXED]",
+    "reviewed": true
   },
   "task-88": {
     "notes": "",
@@ -972,12 +928,8 @@
     "reviewed": true
   },
   "task-90": {
-    "notes": "user STUDENT already exists change that and also not root",
-    "reviewed": false
-  },
-  "task-91": {
-    "notes": "not checking anything - fallback for iso (dummy files)",
-    "reviewed": false
+    "notes": "user STUDENT already exists change that and also not root [FIXED]",
+    "reviewed": true
   },
   "task-92": {
     "notes": "DELETED: redundant",
@@ -1000,8 +952,8 @@
     "reviewed": true
   },
   "task-98": {
-    "notes": "not checking the specifics",
-    "reviewed": false
+    "notes": "not checking the specifics [FIXED]",
+    "reviewed": true
   },
   "task-ssh": {
     "notes": "DELETED: already checked if we're running",

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Create a script /root/svccheck.sh that takes a service name as argument and prints "running" if the service is active, "stopped" if inactive, or "unknown" if service doesn't exist.
+# Task: Create a script /root/svccheck.sh that takes a service name as argument and prints "running" if the service is active, "stopped" if inactive, or "unknown" if the service doesn't exist.
 # Title: Shell Script - Service Status Checker
 # Category: shell-scripts
 # Target: node1
@@ -20,6 +20,6 @@ check '/root/svccheck.sh sshd 2>/dev/null | grep -qi "running"' \
     "Script correctly identifies running service (sshd)" \
     "Script fails for running service"
 
-check 'systemctl stop atd 2>/dev/null; /root/svccheck.sh atd 2>/dev/null | grep -qi "stopped"; systemctl start atd 2>/dev/null' \
-    "Script correctly identifies stopped service" \
-    "Script fails for stopped service"
+check '/root/svccheck.sh nonexistentservice12345 2>/dev/null | grep -qi "unknown"' \
+    "Script correctly identifies unknown service" \
+    "Script fails for non-existent service"

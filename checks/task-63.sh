@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
-# Task: Install development packages (gcc, make). Save package info to /var/tmp/systemtools.out
-# Title: Install Development Packages
+# Task: List all packages in the "Development Tools" group and save the list to /var/tmp/devtools.txt.
+# Title: List Package Group Contents
 # Category: deploy-maintain
 # Target: node1
 
-# Check for key development tools (gcc and make are essential)
-check 'rpm -q gcc &>/dev/null' \
-    "gcc is installed" \
-    "gcc is not installed"
+check '[[ -f /var/tmp/devtools.txt ]]' \
+    "File /var/tmp/devtools.txt exists" \
+    "File /var/tmp/devtools.txt does not exist"
 
-check 'rpm -q make &>/dev/null' \
-    "make is installed" \
-    "make is not installed"
+check '[[ -s /var/tmp/devtools.txt ]]' \
+    "File has content" \
+    "File is empty"
 
-check '[[ -f /var/tmp/systemtools.out ]]' \
-    "File /var/tmp/systemtools.out exists" \
-    "File /var/tmp/systemtools.out does not exist"
+check 'grep -qiE "gcc|make|binutils|autoconf" /var/tmp/devtools.txt' \
+    "File contains development packages" \
+    "Expected packages not found in file"

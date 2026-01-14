@@ -1,20 +1,18 @@
 #!/usr/bin/env bash
-# Task: Configure user "bill" to manage users via sudo, but cannot change root password.
-# Title: Configure Limited Sudo
+# Task: Create user "bill". Configure sudo so bill can run /usr/sbin/useradd, /usr/sbin/usermod, and /usr/bin/passwd but NOT /usr/bin/passwd root (cannot change root password).
+# Title: Configure Limited Sudo Access
 # Category: users-groups
 # Target: node1
 
-# Check if user bill exists
 check 'id bill &>/dev/null' \
     "User bill exists" \
     "User bill does not exist"
 
-# Check if sudo config exists for bill
-check 'grep -rq "bill" /etc/sudoers /etc/sudoers.d/ 2>/dev/null' \
-    "Sudo configuration for bill exists" \
-    "No sudo configuration found for bill"
+check 'grep -rqE "bill.*(useradd|usermod|passwd)" /etc/sudoers /etc/sudoers.d/ 2>/dev/null' \
+    "Bill has user management sudo rules" \
+    "Bill missing user management permissions"
 
-# Check bill has some passwd/user management permissions
-check 'grep -rE "bill.*(passwd|user)" /etc/sudoers /etc/sudoers.d/ 2>/dev/null | grep -q bill' \
-    "Bill has user management permissions" \
-    "Bill does not have user management permissions"
+# Check that passwd root is explicitly denied or not granted
+check 'grep -rqE "bill.*!/usr/bin/passwd.*root|bill.*NOPASSWD.*passwd,.*!.*passwd root" /etc/sudoers /etc/sudoers.d/ 2>/dev/null' \
+    "Bill cannot change root password" \
+    "Need to deny bill from running 'passwd root'"

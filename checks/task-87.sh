@@ -1,20 +1,21 @@
 #!/usr/bin/env bash
-# Task: Configure autofs to automatically mount any subdirectory from the NFS server's /home exports.
-# Title: Configure Autofs Wildcard Mount
+# Task: Configure autofs for automounting home directories from rhcsa2. When a user accesses /nethome/<username>, it should mount rhcsa2:/home/<username> automatically using a wildcard map.
+# Title: Configure Autofs for Network Home Directories
 # Category: networking
 # Target: node1
 
-# Check if autofs is installed and running
+check 'rpm -q autofs &>/dev/null' \
+    "autofs package installed" \
+    "autofs not installed"
+
 check 'systemctl is-active autofs &>/dev/null' \
     "autofs service is running" \
     "autofs service is not running"
 
-# Check if auto.master has an entry for home directories
-check 'grep -q "/home" /etc/auto.master || grep -qr "/home" /etc/auto.master.d/' \
-    "Automount entry for /home exists in auto.master" \
-    "No automount entry for /home found"
+check 'grep -rqE "/nethome" /etc/auto.master /etc/auto.master.d/ 2>/dev/null' \
+    "/nethome configured in auto.master" \
+    "/nethome not in auto.master"
 
-# Check for wildcard configuration
-check 'grep -rq "\*" /etc/auto.home /etc/auto.master.d/ 2>/dev/null || grep -q "\*.*nfs" /etc/auto.* 2>/dev/null' \
-    "Wildcard automount is configured" \
-    "Wildcard automount not found"
+check 'grep -rqE "^\s*\*\s+" /etc/auto.* 2>/dev/null' \
+    "Wildcard entry found in autofs map" \
+    "No wildcard (*) entry found"
