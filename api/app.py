@@ -888,9 +888,44 @@ def list_tasks_v2():
     try:
         service = get_grader_service(BASE_DIR)
         tasks = service.list_tasks()
+        
+        # Add check_script for each task (for admin review)
+        include_scripts = request.args.get('include_scripts', 'false').lower() == 'true'
+        if include_scripts:
+            checks_dir = BASE_DIR / 'checks'
+            for task in tasks:
+                script_path = checks_dir / f"{task['id']}.sh"
+                if script_path.exists():
+                    task['check_script'] = script_path.read_text()
+        
         return jsonify(tasks)
     except Exception as e:
         logger.error(f"list_tasks_v2 failed: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/v2/tasks/<task_id>', methods=['GET'])
+def get_task_v2(task_id):
+    """Get a single task with full details including check script."""
+    if not NEW_GRADER_AVAILABLE:
+        return jsonify({'error': 'New grader not available'}), 501
+    
+    try:
+        service = get_grader_service(BASE_DIR)
+        tasks = service.list_tasks()
+        task = next((t for t in tasks if t['id'] == task_id), None)
+        
+        if not task:
+            return jsonify({'error': f'Task {task_id} not found'}), 404
+        
+        # Add full check script
+        script_path = BASE_DIR / 'checks' / f"{task_id}.sh"
+        if script_path.exists():
+            task['check_script'] = script_path.read_text()
+        
+        return jsonify(task)
+    except Exception as e:
+        logger.error(f"get_task_v2 failed: {e}")
         return jsonify({'error': str(e)}), 500
 
 

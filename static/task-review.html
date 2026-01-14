@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Review - RHCSA Labs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0a0a0a; color: #e5e5e5; }
+        .task-card { background: #1a1a1a; border: 1px solid #333; }
+        .task-card:hover { border-color: #555; }
+        .task-card.has-notes { border-left: 3px solid #f59e0b; }
+        .task-card.reviewed { border-left: 3px solid #22c55e; }
+        .note-input { background: #0d0d0d; border: 1px solid #333; }
+        .note-input:focus { border-color: #dc2626; outline: none; }
+        .badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; }
+        .script-preview { background: #0d0d0d; font-family: monospace; font-size: 0.8rem; }
+        .filter-btn.active { background: #dc2626; color: white; }
+        pre { white-space: pre-wrap; word-break: break-word; }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-white">Task Review</h1>
+                <p class="text-gray-400 text-sm">Review and add notes to tasks</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="exportNotes()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm">
+                    Export Notes
+                </button>
+                <button onclick="importNotes()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm">
+                    Import Notes
+                </button>
+                <a href="/" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm">
+                    Back to App
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+            <div class="bg-gray-800 rounded-lg p-4">
+                <div class="text-2xl font-bold text-white" id="stat-total">0</div>
+                <div class="text-gray-400 text-sm">Total Tasks</div>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-4">
+                <div class="text-2xl font-bold text-green-500" id="stat-reviewed">0</div>
+                <div class="text-gray-400 text-sm">Reviewed (OK)</div>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-4">
+                <div class="text-2xl font-bold text-amber-500" id="stat-notes">0</div>
+                <div class="text-gray-400 text-sm">Has Notes</div>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-4">
+                <div class="text-2xl font-bold text-gray-400" id="stat-pending">0</div>
+                <div class="text-gray-400 text-sm">Pending Review</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex flex-wrap gap-2 mb-6">
+            <button onclick="setFilter('all')" class="filter-btn px-3 py-1 rounded text-sm bg-gray-700" data-filter="all">All</button>
+            <button onclick="setFilter('pending')" class="filter-btn px-3 py-1 rounded text-sm bg-gray-700" data-filter="pending">Pending</button>
+            <button onclick="setFilter('notes')" class="filter-btn px-3 py-1 rounded text-sm bg-gray-700" data-filter="notes">Has Notes</button>
+            <button onclick="setFilter('reviewed')" class="filter-btn px-3 py-1 rounded text-sm bg-gray-700" data-filter="reviewed">Reviewed OK</button>
+            <span class="border-l border-gray-600 mx-2"></span>
+            <select id="category-filter" onchange="renderTasks()" class="px-3 py-1 rounded text-sm bg-gray-700 border-none">
+                <option value="">All Categories</option>
+            </select>
+            <span class="border-l border-gray-600 mx-2"></span>
+            <input type="text" id="search" placeholder="Search tasks..." oninput="renderTasks()" 
+                   class="px-3 py-1 rounded text-sm bg-gray-700 border-none w-64">
+        </div>
+
+        <!-- Task List -->
+        <div id="task-list" class="space-y-3">
+            <div class="text-gray-400">Loading tasks...</div>
+        </div>
+    </div>
+
+    <!-- Task Detail Modal -->
+    <div id="modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-6" onclick="closeModal(event)">
+        <div class="bg-gray-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-start">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="badge bg-gray-700" id="modal-id">task-00</span>
+                        <span class="badge" id="modal-category">Category</span>
+                        <span class="badge bg-blue-600" id="modal-node">node1</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-white" id="modal-title">Task Title</h2>
+                </div>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 200px)">
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">DESCRIPTION</h3>
+                    <p class="text-gray-200" id="modal-description">Description here</p>
+                </div>
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">CHECK SCRIPT</h3>
+                    <pre class="script-preview p-4 rounded-lg overflow-x-auto text-green-400" id="modal-script">#!/bin/bash</pre>
+                </div>
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">REVIEW NOTES</h3>
+                    <textarea id="modal-notes" rows="4" 
+                              class="w-full note-input rounded-lg p-3 text-gray-200"
+                              placeholder="Add your review notes here..."></textarea>
+                </div>
+                <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="modal-reviewed" class="w-4 h-4 accent-green-500">
+                        <span class="text-gray-300">Mark as Reviewed (OK)</span>
+                    </label>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-700 flex justify-between">
+                <button onclick="prevTask()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">&larr; Previous</button>
+                <button onclick="saveAndClose()" class="px-6 py-2 bg-red-600 hover:bg-red-700 rounded font-medium">Save & Close</button>
+                <button onclick="nextTask()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">Next &rarr;</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allTasks = [];
+        let taskNotes = {}; // { taskId: { notes: '', reviewed: false } }
+        let currentFilter = 'all';
+        let currentTaskId = null;
+        let filteredTasks = [];
+
+        // Load tasks and notes
+        async function init() {
+            // Load saved notes from localStorage
+            const saved = localStorage.getItem('taskReviewNotes');
+            if (saved) {
+                taskNotes = JSON.parse(saved);
+            }
+
+            // Fetch tasks
+            try {
+                const res = await fetch('/api/v2/tasks');
+                allTasks = await res.json();
+                
+                // Populate category filter
+                const categories = [...new Set(allTasks.map(t => t.category))];
+                const select = document.getElementById('category-filter');
+                categories.sort().forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = cat;
+                    opt.textContent = cat;
+                    select.appendChild(opt);
+                });
+
+                updateStats();
+                renderTasks();
+            } catch (e) {
+                document.getElementById('task-list').innerHTML = 
+                    `<div class="text-red-500">Error loading tasks: ${e.message}</div>`;
+            }
+        }
+
+        function updateStats() {
+            const total = allTasks.length;
+            const reviewed = allTasks.filter(t => taskNotes[t.id]?.reviewed).length;
+            const withNotes = allTasks.filter(t => taskNotes[t.id]?.notes?.trim()).length;
+            const pending = total - reviewed;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-reviewed').textContent = reviewed;
+            document.getElementById('stat-notes').textContent = withNotes;
+            document.getElementById('stat-pending').textContent = pending;
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const search = document.getElementById('search').value.toLowerCase();
+            const category = document.getElementById('category-filter').value;
+
+            filteredTasks = allTasks.filter(task => {
+                // Category filter
+                if (category && task.category !== category) return false;
+
+                // Search filter
+                if (search) {
+                    const searchStr = `${task.id} ${task.title} ${task.description}`.toLowerCase();
+                    if (!searchStr.includes(search)) return false;
+                }
+
+                // Status filter
+                const note = taskNotes[task.id];
+                if (currentFilter === 'pending' && note?.reviewed) return false;
+                if (currentFilter === 'notes' && !note?.notes?.trim()) return false;
+                if (currentFilter === 'reviewed' && !note?.reviewed) return false;
+
+                return true;
+            });
+
+            const container = document.getElementById('task-list');
+            
+            if (filteredTasks.length === 0) {
+                container.innerHTML = '<div class="text-gray-400">No tasks match filters</div>';
+                return;
+            }
+
+            container.innerHTML = filteredTasks.map(task => {
+                const note = taskNotes[task.id] || {};
+                const hasNotes = note.notes?.trim();
+                const isReviewed = note.reviewed;
+                
+                let cardClass = 'task-card';
+                if (isReviewed) cardClass += ' reviewed';
+                else if (hasNotes) cardClass += ' has-notes';
+
+                return `
+                    <div class="${cardClass} rounded-lg p-4 cursor-pointer hover:bg-gray-800/50 transition-colors"
+                         onclick="openTask('${task.id}')">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-gray-500 text-sm font-mono">${task.id}</span>
+                                    <span class="badge bg-gray-700">${task.category}</span>
+                                    <span class="badge bg-blue-600/50">${task.target || 'node1'}</span>
+                                    ${isReviewed ? '<span class="badge bg-green-600">✓ OK</span>' : ''}
+                                    ${hasNotes && !isReviewed ? '<span class="badge bg-amber-600">📝</span>' : ''}
+                                </div>
+                                <h3 class="text-white font-medium">${task.title}</h3>
+                                <p class="text-gray-400 text-sm mt-1 line-clamp-2">${task.description}</p>
+                                ${hasNotes ? `<p class="text-amber-400 text-sm mt-2 italic">"${note.notes.slice(0, 100)}${note.notes.length > 100 ? '...' : ''}"</p>` : ''}
+                            </div>
+                            <div class="text-gray-500 text-sm ml-4">
+                                ${task.points || 20} pts
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function openTask(taskId) {
+            currentTaskId = taskId;
+            const task = allTasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            const note = taskNotes[taskId] || {};
+
+            document.getElementById('modal-id').textContent = task.id;
+            document.getElementById('modal-category').textContent = task.category;
+            document.getElementById('modal-category').className = 'badge bg-purple-600';
+            document.getElementById('modal-node').textContent = task.target || 'node1';
+            document.getElementById('modal-title').textContent = task.title;
+            document.getElementById('modal-description').textContent = task.description;
+            document.getElementById('modal-script').textContent = 'Loading script...';
+            document.getElementById('modal-notes').value = note.notes || '';
+            document.getElementById('modal-reviewed').checked = note.reviewed || false;
+
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('modal').classList.add('flex');
+
+            // Fetch full task details including script
+            try {
+                const res = await fetch(`/api/v2/tasks/${taskId}`);
+                const fullTask = await res.json();
+                document.getElementById('modal-script').textContent = fullTask.check_script || 'No script available';
+            } catch (e) {
+                document.getElementById('modal-script').textContent = `Error loading script: ${e.message}`;
+            }
+
+            document.getElementById('modal-notes').focus();
+        }
+
+        function closeModal(event) {
+            if (event && event.target !== document.getElementById('modal')) return;
+            saveCurrentTask();
+            document.getElementById('modal').classList.add('hidden');
+            document.getElementById('modal').classList.remove('flex');
+            currentTaskId = null;
+        }
+
+        function saveCurrentTask() {
+            if (!currentTaskId) return;
+
+            const notes = document.getElementById('modal-notes').value;
+            const reviewed = document.getElementById('modal-reviewed').checked;
+
+            taskNotes[currentTaskId] = { notes, reviewed };
+            localStorage.setItem('taskReviewNotes', JSON.stringify(taskNotes));
+            updateStats();
+            renderTasks();
+        }
+
+        function saveAndClose() {
+            saveCurrentTask();
+            closeModal();
+        }
+
+        function prevTask() {
+            saveCurrentTask();
+            const idx = filteredTasks.findIndex(t => t.id === currentTaskId);
+            if (idx > 0) {
+                openTask(filteredTasks[idx - 1].id);
+            }
+        }
+
+        function nextTask() {
+            saveCurrentTask();
+            const idx = filteredTasks.findIndex(t => t.id === currentTaskId);
+            if (idx < filteredTasks.length - 1) {
+                openTask(filteredTasks[idx + 1].id);
+            }
+        }
+
+        function exportNotes() {
+            const data = JSON.stringify(taskNotes, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `task-review-notes-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importNotes() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    const text = await file.text();
+                    const imported = JSON.parse(text);
+                    taskNotes = { ...taskNotes, ...imported };
+                    localStorage.setItem('taskReviewNotes', JSON.stringify(taskNotes));
+                    updateStats();
+                    renderTasks();
+                    alert(`Imported notes for ${Object.keys(imported).length} tasks`);
+                } catch (e) {
+                    alert('Error importing: ' + e.message);
+                }
+            };
+            input.click();
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (!currentTaskId) return;
+            
+            if (e.key === 'Escape') {
+                closeModal();
+            } else if (e.key === 'ArrowLeft' && e.altKey) {
+                prevTask();
+            } else if (e.key === 'ArrowRight' && e.altKey) {
+                nextTask();
+            } else if (e.key === 'Enter' && e.ctrlKey) {
+                document.getElementById('modal-reviewed').checked = true;
+                nextTask();
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>
