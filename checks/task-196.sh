@@ -9,6 +9,6 @@ check 'vgs datavg &>/dev/null' \
     "Volume group datavg exists" \
     "Volume group datavg not found"
 
-check 'vgdisplay datavg 2>/dev/null | grep -q "/dev/loop5"' \
+check 'pvs --noheadings -o pv_name,vg_name 2>/dev/null | grep -q "/dev/loop5.*datavg"' \
     "VG datavg includes /dev/loop5" \
     "VG doesn't include expected PV"
