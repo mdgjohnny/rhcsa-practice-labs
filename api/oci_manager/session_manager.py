@@ -60,6 +60,8 @@ class SessionInfo:
     node1_private_ip: Optional[str] = None
     node2_private_ip: Optional[str] = None
     ssh_private_key: Optional[str] = None
+    ssh_password: Optional[str] = None  # For password-based auth (local VMs)
+    ssh_user: Optional[str] = None  # SSH username (default: opc for OCI, root for local)
     error: Optional[str] = None
 
     def to_dict(self) -> dict:
@@ -199,10 +201,21 @@ class SessionManager:
                 node1_private_ip TEXT,
                 node2_private_ip TEXT,
                 ssh_private_key TEXT,
+                ssh_password TEXT,
+                ssh_user TEXT,
                 error TEXT,
                 terraform_outputs TEXT
             )
         """)
+        # Migration: add ssh_password and ssh_user columns if missing
+        try:
+            c.execute("ALTER TABLE sessions ADD COLUMN ssh_password TEXT")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        try:
+            c.execute("ALTER TABLE sessions ADD COLUMN ssh_user TEXT")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
         conn.commit()
         conn.close()
 
@@ -445,6 +458,11 @@ class SessionManager:
         self._update_session_state(session_id, SessionState.PROVISIONING)
 
         try:
+            # Variables to track auth method
+            ssh_private_key = None
+            ssh_password = None
+            ssh_user = 'opc'  # Default for OCI
+            
             # Check if using static VMs (reuse existing infrastructure)
             if self.static_vms:
                 logger.info(f"Using static VMs for session {session_id}")
@@ -452,14 +470,19 @@ class SessionManager:
                 node2_ip = self.static_vms.get('node2_ip')
                 node1_private_ip = self.static_vms.get('node1_private_ip', '10.0.1.11')
                 node2_private_ip = self.static_vms.get('node2_private_ip', '10.0.1.12')
+                ssh_user = self.static_vms.get('ssh_user', 'root')  # Default root for local VMs
                 
-                # Load SSH key from file
+                # Support both key-based and password-based auth
                 ssh_key_path = self.static_vms.get('ssh_private_key_path')
+                ssh_password = self.static_vms.get('ssh_password')
+                
                 if ssh_key_path:
                     with open(ssh_key_path, 'r') as f:
                         ssh_private_key = f.read()
+                elif ssh_password:
+                    logger.info(f"Using password-based auth for static VMs")
                 else:
-                    raise RuntimeError("Static VMs configured but no ssh_private_key_path specified")
+                    raise RuntimeError("Static VMs configured but no ssh_private_key_path or ssh_password specified")
                 
                 outputs = {
                     'node1_public_ip': node1_ip,
@@ -510,7 +533,7 @@ class SessionManager:
                     else:
                         raise RuntimeError("No SSH key available - terraform didn't generate one and no persistent key found")
             
-            # Encrypt SSH key before storing
+            # Encrypt SSH key before storing (password stored as-is for now)
             encrypted_key = self.key_encryption.encrypt(ssh_private_key) if ssh_private_key else None
 
             # Update state to waiting for health check
@@ -526,11 +549,13 @@ class SessionManager:
                     node1_private_ip = ?,
                     node2_private_ip = ?,
                     ssh_private_key = ?,
+                    ssh_password = ?,
+                    ssh_user = ?,
                     terraform_outputs = ?
                 WHERE session_id = ?
             """, (
                 node1_ip, node2_ip, node1_private_ip, node2_private_ip,
-                encrypted_key, json.dumps(outputs), session_id
+                encrypted_key, ssh_password, ssh_user, json.dumps(outputs), session_id
             ))
             conn.commit()
             conn.close()
@@ -621,6 +646,8 @@ class SessionManager:
             node1_private_ip=row["node1_private_ip"],
             node2_private_ip=row["node2_private_ip"],
             ssh_private_key=ssh_key,
+            ssh_password=row["ssh_password"] if "ssh_password" in row.keys() else None,
+            ssh_user=row["ssh_user"] if "ssh_user" in row.keys() else None,
             error=row["error"],
         )
 
@@ -661,6 +688,8 @@ class SessionManager:
                 node1_private_ip=row["node1_private_ip"],
                 node2_private_ip=row["node2_private_ip"],
                 ssh_private_key=ssh_key,
+                ssh_password=row["ssh_password"] if "ssh_password" in row.keys() else None,
+                ssh_user=row["ssh_user"] if "ssh_user" in row.keys() else None,
                 error=row["error"],
             ))
         

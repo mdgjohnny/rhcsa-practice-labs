@@ -34,7 +34,8 @@ class TerminalSession:
     """Manages an SSH terminal session."""
 
     def __init__(self, sid: str, host: str, username: str = "opc",
-                 private_key: Optional[str] = None, port: int = 22):
+                 private_key: Optional[str] = None, password: Optional[str] = None,
+                 port: int = 22):
         """
         Initialize terminal session.
 
@@ -43,12 +44,14 @@ class TerminalSession:
             host: SSH host
             username: SSH username (default: opc for OCI instances)
             private_key: SSH private key content (PEM format)
+            password: SSH password (alternative to private_key)
             port: SSH port
         """
         self.sid = sid
         self.host = host
         self.username = username
         self.private_key = private_key
+        self.password = password
         self.port = port
 
         self.ssh_client: Optional[paramiko.SSHClient] = None
@@ -69,24 +72,39 @@ class TerminalSession:
             self.ssh_client = paramiko.SSHClient()
             self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            # Load private key from string
-            key_file = StringIO(self.private_key)
-            try:
-                pkey = paramiko.RSAKey.from_private_key(key_file)
-            except:
-                key_file.seek(0)
-                pkey = paramiko.Ed25519Key.from_private_key(key_file)
-
             logger.info(f"Connecting to {self.username}@{self.host}:{self.port}")
-            self.ssh_client.connect(
-                hostname=self.host,
-                port=self.port,
-                username=self.username,
-                pkey=pkey,
-                timeout=30,
-                allow_agent=False,
-                look_for_keys=False,
-            )
+            
+            if self.private_key:
+                # Key-based authentication
+                key_file = StringIO(self.private_key)
+                try:
+                    pkey = paramiko.RSAKey.from_private_key(key_file)
+                except:
+                    key_file.seek(0)
+                    pkey = paramiko.Ed25519Key.from_private_key(key_file)
+                
+                self.ssh_client.connect(
+                    hostname=self.host,
+                    port=self.port,
+                    username=self.username,
+                    pkey=pkey,
+                    timeout=30,
+                    allow_agent=False,
+                    look_for_keys=False,
+                )
+            elif self.password:
+                # Password-based authentication
+                self.ssh_client.connect(
+                    hostname=self.host,
+                    port=self.port,
+                    username=self.username,
+                    password=self.password,
+                    timeout=30,
+                    allow_agent=False,
+                    look_for_keys=False,
+                )
+            else:
+                raise ValueError("Either private_key or password must be provided")
 
             # Request PTY
             self.channel = self.ssh_client.invoke_shell(
@@ -260,8 +278,11 @@ def init_terminal_handlers(socketio: SocketIO, session_manager: Optional["Sessio
             return
 
         private_key = session.ssh_private_key
-        if not private_key:
-            emit("terminal_error", {"error": "No SSH key available for session"})
+        ssh_password = getattr(session, 'ssh_password', None)
+        ssh_user = getattr(session, 'ssh_user', None) or 'opc'
+        
+        if not private_key and not ssh_password:
+            emit("terminal_error", {"error": "No SSH credentials available for session"})
             return
 
         # Close existing terminal if any
@@ -273,8 +294,9 @@ def init_terminal_handlers(socketio: SocketIO, session_manager: Optional["Sessio
         terminal = TerminalSession(
             sid=sid,
             host=host,
-            username="opc",
-            private_key=private_key
+            username=ssh_user,
+            private_key=private_key,
+            password=ssh_password
         )
 
         if terminal.connect(socketio):

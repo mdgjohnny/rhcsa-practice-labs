@@ -317,12 +317,14 @@ def create_grader_from_session(
         # Get session
         if session_id:
             cursor.execute("""
-                SELECT session_id, node1_ip, node2_ip, node1_private_ip, node2_private_ip, ssh_private_key 
+                SELECT session_id, node1_ip, node2_ip, node1_private_ip, node2_private_ip, 
+                       ssh_private_key, ssh_password, ssh_user
                 FROM sessions WHERE session_id = ?
             """, (session_id,))
         else:
             cursor.execute("""
-                SELECT session_id, node1_ip, node2_ip, node1_private_ip, node2_private_ip, ssh_private_key 
+                SELECT session_id, node1_ip, node2_ip, node1_private_ip, node2_private_ip,
+                       ssh_private_key, ssh_password, ssh_user
                 FROM sessions 
                 WHERE state IN ('ready', 'active')
                 ORDER BY created_at DESC
@@ -354,6 +356,14 @@ def create_grader_from_session(
             grader.set_env('NODE2_PRIVATE_IP', row['node2_private_ip'])
         
         # Create remote executors
+        ssh_key = None
+        ssh_password = row['ssh_password'] if 'ssh_password' in row.keys() else None
+        ssh_user = row['ssh_user'] if 'ssh_user' in row.keys() else None
+        
+        # Default user based on auth method
+        if not ssh_user:
+            ssh_user = 'root' if ssh_password else 'opc'
+        
         if row['ssh_private_key']:
             # Decrypt SSH key (all keys must be encrypted)
             ssh_key = row['ssh_private_key']
@@ -368,23 +378,30 @@ def create_grader_from_session(
             except Exception as e:
                 logger.error(f"Failed to decrypt SSH key: {e}")
                 return None
+        
+        if ssh_key or ssh_password:
+            use_sudo = ssh_user != 'root'
             
             node1_executor = RemoteExecutor(
                 host=row['node1_ip'],
-                user='opc',
-                use_sudo=True
+                user=ssh_user,
+                password=ssh_password,
+                use_sudo=use_sudo
             )
-            node1_executor.set_key_content(ssh_key)
+            if ssh_key:
+                node1_executor.set_key_content(ssh_key)
             grader.add_executor('node1', node1_executor)
             grader.add_executor('default', node1_executor)
             
             if row['node2_ip']:
                 node2_executor = RemoteExecutor(
                     host=row['node2_ip'],
-                    user='opc',
-                    use_sudo=True
+                    user=ssh_user,
+                    password=ssh_password,
+                    use_sudo=use_sudo
                 )
-                node2_executor.set_key_content(ssh_key)
+                if ssh_key:
+                    node2_executor.set_key_content(ssh_key)
                 grader.add_executor('node2', node2_executor)
         
         logger.info(f"Created grader from session {row['session_id']}")
