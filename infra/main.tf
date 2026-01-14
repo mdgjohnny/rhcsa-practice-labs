@@ -277,7 +277,101 @@ SERVICE
 systemctl daemon-reload
 systemctl enable practice-disks.service
 
-# PHASE 8: CLEANUP
+# PHASE 8: TASK SCENARIO SETUP
+# Create broken scenarios for troubleshooting tasks
+echo "Setting up practice task scenarios..."
+
+# Install packages needed for tasks (in background to not block)
+(
+  dnf install -y httpd mod_ssl vsftpd nfs-utils policycoreutils-python-utils &>/dev/null
+  
+  # Task-197: Apache reverse proxy setup
+  cat > /etc/httpd/conf.d/backend-proxy.conf << 'PROXY'
+<Location "/backend">
+    ProxyPass "http://127.0.0.1:8888/"
+    ProxyPassReverse "http://127.0.0.1:8888/"
+</Location>
+PROXY
+
+  # Backend server for proxy task
+  cat > /usr/local/bin/backend-server.py << 'PYBACK'
+#!/usr/bin/python3
+from http.server import HTTPServer, BaseHTTPRequestHandler
+class H(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b'BACKEND_OK')
+    def log_message(self, *a): pass
+HTTPServer(('127.0.0.1', 8888), H).serve_forever()
+PYBACK
+  chmod +x /usr/local/bin/backend-server.py
+  
+  cat > /etc/systemd/system/backend-server.service << 'SVC'
+[Unit]
+Description=Backend Server
+After=network.target
+[Service]
+ExecStart=/usr/local/bin/backend-server.py
+Restart=always
+[Install]
+WantedBy=multi-user.target
+SVC
+  systemctl daemon-reload
+  systemctl enable --now backend-server
+
+  # Task-208: Web file with wrong SELinux context
+  mkdir -p /var/www/html
+  echo '<html><body>SELINUX_CONTEXT_OK</body></html>' > /var/www/html/index.html
+  chcon -t user_home_t /var/www/html/index.html
+  chmod 644 /var/www/html/index.html
+
+  # Task-218: UserDir setup
+  useradd -m webdev 2>/dev/null || true
+  mkdir -p /home/webdev/public_html
+  echo '<html><body>USERDIR_WORKS</body></html>' > /home/webdev/public_html/index.html
+  chmod 711 /home/webdev
+  chmod 755 /home/webdev/public_html
+  sed -i 's/UserDir disabled$/UserDir public_html/' /etc/httpd/conf.d/userdir.conf
+  sed -i 's/Require method GET POST OPTIONS/Require all granted/' /etc/httpd/conf.d/userdir.conf
+
+  # Task-220: FTP setup
+  mkdir -p /var/ftp/uploads
+  chmod 777 /var/ftp/uploads
+  cat > /etc/vsftpd/vsftpd.conf << 'VSFTPD'
+anonymous_enable=YES
+local_enable=YES
+write_enable=YES
+anon_upload_enable=YES
+anon_mkdir_write_enable=YES
+anon_root=/var/ftp
+listen=YES
+listen_ipv6=NO
+pam_service_name=vsftpd
+VSFTPD
+  systemctl enable --now vsftpd
+
+  # Task-51: NFS setup
+  mkdir -p /srv/nfsdata
+  chmod 755 /srv/nfsdata
+  grep -q '/srv/nfsdata' /etc/exports || echo '/srv/nfsdata *(rw,sync,no_root_squash)' >> /etc/exports
+  systemctl enable --now nfs-server
+  exportfs -ra
+
+  # Start httpd and ensure SELinux booleans are OFF for practice
+  systemctl enable --now httpd
+  setsebool httpd_can_network_connect off
+  setsebool httpd_enable_homedirs off
+  setsebool ftpd_full_access off
+  setsebool nfs_export_all_rw off
+
+  # Task-222: SSH on alternate port
+  grep -q '^Port 2222' /etc/ssh/sshd_config || sed -i '/^#Port 22/a Port 2222' /etc/ssh/sshd_config
+
+  touch /root/.task-setup-complete
+) &
+
+# PHASE 9: CLEANUP
 dnf clean all 2>/dev/null || true
 rm -rf /var/cache/dnf/*
 sync && echo 3 > /proc/sys/vm/drop_caches

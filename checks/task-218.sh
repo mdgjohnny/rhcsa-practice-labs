@@ -4,34 +4,6 @@
 # Category: security
 # Target: node1
 
-# Self-contained setup
-if ! rpm -q httpd &>/dev/null; then
-    dnf install -y httpd &>/dev/null
-fi
-
-# Create webdev user if not exists
-if ! id webdev &>/dev/null; then
-    useradd webdev
-fi
-
-# Create public_html with content
-mkdir -p /home/webdev/public_html
-echo "<html><body>USERDIR_WORKS</body></html>" > /home/webdev/public_html/index.html
-chmod 711 /home/webdev
-chmod 755 /home/webdev/public_html
-chmod 644 /home/webdev/public_html/index.html
-
-# Enable UserDir in Apache - modify the main userdir.conf
-if grep -q "UserDir disabled$" /etc/httpd/conf.d/userdir.conf 2>/dev/null; then
-    sed -i 's/UserDir disabled$/UserDir public_html/' /etc/httpd/conf.d/userdir.conf
-    sed -i 's/Require method GET POST OPTIONS/Require all granted/' /etc/httpd/conf.d/userdir.conf
-    systemctl reload httpd 2>/dev/null
-fi
-
-# Ensure httpd is running
-systemctl is-active httpd &>/dev/null || systemctl start httpd &>/dev/null
-
-# THE CHECKS
 check 'curl -sf --max-time 3 http://127.0.0.1/~webdev/ 2>/dev/null | grep -q "USERDIR_WORKS"' \
     "Apache successfully serves user home directory content" \
     "UserDir access failing - 403 Forbidden (hint: check audit.log for AVC denials)"
