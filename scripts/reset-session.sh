@@ -36,12 +36,31 @@ ssh -i "$SSH_KEY_FILE" -o ConnectTimeout=5 -o StrictHostKeyChecking=no opc@$NODE
 echo "SSH OK"
 
 echo ""
-echo "=== Updating session database ==="
+echo "=== Updating static_vms.json ==="
 cd ..
+cat > static_vms.json << VMSJSON
+{
+    "enabled": true,
+    "node1_ip": "$NODE1_IP",
+    "node2_ip": "$NODE2_IP",
+    "node1_private_ip": "$NODE1_PRIVATE",
+    "node2_private_ip": "$NODE2_PRIVATE",
+    "ssh_private_key_path": "$SSH_KEY_FILE"
+}
+VMSJSON
+echo "Updated static_vms.json"
+cat static_vms.json
+
+echo ""
+echo "=== Updating session database ==="
 
 python3 << PYEOF
 import sqlite3
+import sys
 from datetime import datetime, timedelta
+
+# Add api to path for imports
+sys.path.insert(0, 'api')
 
 session_id = "$SESSION_ID"
 node1_ip = "$NODE1_IP"
@@ -53,10 +72,23 @@ node2_private = "$NODE2_PRIVATE"
 with open("$SSH_KEY_FILE", 'r') as f:
     ssh_key = f.read()
 
+# Encrypt the key for consistency with normal sessions
+try:
+    from oci_manager.session_manager import KeyEncryption
+    key_encryption = KeyEncryption()
+    encrypted_key = key_encryption.encrypt(ssh_key)
+    print("SSH key encrypted successfully")
+except Exception as e:
+    print(f"Warning: Could not encrypt key ({e}), storing unencrypted")
+    encrypted_key = ssh_key
+
 conn = sqlite3.connect('sessions.db')
 
 # Delete any existing session with this ID
 conn.execute("DELETE FROM sessions WHERE session_id = ?", (session_id,))
+
+# Also terminate any other active sessions (since VMs changed)
+conn.execute("UPDATE sessions SET state = 'terminated' WHERE state IN ('ready', 'pending', 'provisioning')")
 
 # Create new session
 now = datetime.now()
@@ -68,7 +100,7 @@ conn.execute("""
                          ssh_private_key)
     VALUES (?, 'ready', ?, ?, ?, ?, ?, ?, ?)
 """, (session_id, now.isoformat(), expires.isoformat(), 
-      node1_ip, node2_ip, node1_private, node2_private, ssh_key))
+      node1_ip, node2_ip, node1_private, node2_private, encrypted_key))
 
 conn.commit()
 conn.close()
@@ -79,4 +111,7 @@ PYEOF
 
 echo ""
 echo "=== Done! ==="
-echo "Restart the app if needed: pkill -f 'python api/app_socketio.py' && python api/app_socketio.py &"
+echo ""
+echo "IMPORTANT: Restart the app to pick up new static_vms.json:"
+echo "  pkill -f 'python api/app_socketio.py'"
+echo "  cd ~/rhcsa-practice-labs && python api/app_socketio.py > /tmp/app.log 2>&1 &"
