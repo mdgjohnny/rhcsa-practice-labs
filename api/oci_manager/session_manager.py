@@ -602,10 +602,14 @@ class SessionManager:
         if not row:
             return None
 
-        # Decrypt SSH key
+        # Decrypt SSH key (all keys must be encrypted)
         ssh_key = row["ssh_private_key"]
         if ssh_key:
-            ssh_key = self.key_encryption.decrypt(ssh_key)
+            if not ssh_key.startswith('gAAAAA'):
+                logger.error(f"Session {row['session_id']} has unencrypted SSH key - this is a security issue")
+                ssh_key = None
+            else:
+                ssh_key = self.key_encryption.decrypt(ssh_key)
 
         return SessionInfo(
             session_id=row["session_id"],
@@ -641,7 +645,11 @@ class SessionManager:
         for row in rows:
             ssh_key = row["ssh_private_key"]
             if ssh_key:
-                ssh_key = self.key_encryption.decrypt(ssh_key)
+                if not ssh_key.startswith('gAAAAA'):
+                    logger.error(f"Session {row['session_id']} has unencrypted SSH key - this is a security issue")
+                    ssh_key = None
+                else:
+                    ssh_key = self.key_encryption.decrypt(ssh_key)
             
             sessions.append(SessionInfo(
                 session_id=row["session_id"],

@@ -355,17 +355,19 @@ def create_grader_from_session(
         
         # Create remote executors
         if row['ssh_private_key']:
-            # Decrypt SSH key if encrypted
+            # Decrypt SSH key (all keys must be encrypted)
             ssh_key = row['ssh_private_key']
-            if ssh_key.startswith('gAAAAA'):  # Fernet encrypted
-                try:
-                    from oci_manager.session_manager import KeyEncryption
-                    key_encryption = KeyEncryption()
-                    ssh_key = key_encryption.decrypt(ssh_key)
-                    logger.debug("Decrypted SSH key")
-                except Exception as e:
-                    logger.error(f"Failed to decrypt SSH key: {e}")
-                    return None
+            if not ssh_key.startswith('gAAAAA'):
+                logger.error("SSH key is not encrypted - all keys must be Fernet encrypted")
+                return None
+            try:
+                from oci_manager.session_manager import KeyEncryption
+                key_encryption = KeyEncryption()
+                ssh_key = key_encryption.decrypt(ssh_key)
+                logger.debug("Decrypted SSH key")
+            except Exception as e:
+                logger.error(f"Failed to decrypt SSH key: {e}")
+                return None
             
             node1_executor = RemoteExecutor(
                 host=row['node1_ip'],

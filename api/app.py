@@ -139,14 +139,24 @@ def get_grading_env():
             if row['node2_ip']:
                 env['NODE2_IP'] = row['node2_ip']
                 env['NODE2'] = 'rhcsa2'
-            # Get SSH key for passwordless auth
+            # Get SSH key for passwordless auth (must be encrypted)
             if row['ssh_private_key']:
-                key_file = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.pem')
-                key_file.write(row['ssh_private_key'])
-                key_file.close()
-                os.chmod(key_file.name, 0o600)
-                env['SSH_KEY_FILE'] = key_file.name
-                env['SSH_USER'] = 'opc'  # OCI default user
+                ssh_key = row['ssh_private_key']
+                if ssh_key.startswith('gAAAAA'):
+                    try:
+                        from oci_manager.session_manager import KeyEncryption
+                        key_encryption = KeyEncryption()
+                        ssh_key = key_encryption.decrypt(ssh_key)
+                        key_file = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.pem')
+                        key_file.write(ssh_key)
+                        key_file.close()
+                        os.chmod(key_file.name, 0o600)
+                        env['SSH_KEY_FILE'] = key_file.name
+                        env['SSH_USER'] = 'opc'  # OCI default user
+                    except Exception as e:
+                        logger.error(f"Failed to decrypt SSH key: {e}")
+                else:
+                    logger.error("SSH key is not encrypted - refusing to use")
             logger.info(f"Using cloud session IPs: node1={row['node1_ip']}, node2={row['node2_ip']}")
     except Exception as e:
         logger.warning(f"Failed to get cloud session IPs: {e}")
