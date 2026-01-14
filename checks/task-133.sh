@@ -1,15 +1,23 @@
 #!/usr/bin/env bash
-# Task: Find all files with the SetUID bit set on the system. Save the list to /root/suidfiles.
+# Task: Find all files with the SetUID permission bit set on the system. Save the complete list of file paths to /root/suidfiles.
 # Title: Find SetUID Files
 # Category: users-groups
 # Target: node1
 
-# Check if the output file exists
 check '[[ -f /root/suidfiles ]]' \
     "File /root/suidfiles exists" \
     "File /root/suidfiles does not exist"
 
-# Check if file contains SUID files (should have entries like /usr/bin/passwd)
-check 'grep -q "/usr/bin/passwd\|/usr/bin/sudo\|/bin/su" /root/suidfiles 2>/dev/null' \
-    "/root/suidfiles contains common SUID files" \
-    "/root/suidfiles appears empty or incomplete"
+# Must contain common SUID files
+check 'grep -q "/usr/bin/passwd" /root/suidfiles 2>/dev/null' \
+    "List includes /usr/bin/passwd" \
+    "/usr/bin/passwd not in list (common SUID file)"
+
+check 'grep -q "/usr/bin/sudo" /root/suidfiles 2>/dev/null || grep -q "/bin/su" /root/suidfiles 2>/dev/null' \
+    "List includes sudo or su" \
+    "sudo/su not in list"
+
+# Verify it's actually a list of SUID files, not random content
+check '[[ $(wc -l < /root/suidfiles) -ge 5 ]]' \
+    "List contains multiple entries" \
+    "List seems incomplete (should have many SUID files)"
