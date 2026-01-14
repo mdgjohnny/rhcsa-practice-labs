@@ -1,0 +1,412 @@
+{
+  "meta": {
+    "source": "Sander van Vugt - RHCSA 9 Cert Guide (Memory Tables)",
+    "type": "flashcards",
+    "total_cards": 247
+  },
+  "chapters": [
+    {
+      "chapter": 2,
+      "title": "Using Essential Tools",
+      "cards": [
+        {"q": "Name for file descriptor 0 (keyboard input)", "a": "STDIN"},
+        {"q": "Name for file descriptor 1 (monitor output)", "a": "STDOUT"},
+        {"q": "Name for file descriptor 2 (error output)", "a": "STDERR"},
+        {"q": "Redirector: Redirect STDOUT, overwrite file", "a": "> (same as 1>)"},
+        {"q": "Redirector: Redirect STDOUT in append mode", "a": ">> (same as 1>>)"},
+        {"q": "Redirector: Redirect STDERR", "a": "2>"},
+        {"q": "Redirector: Redirect STDERR to same destination as STDOUT", "a": "2>&1"},
+        {"q": "Redirector: Redirect STDIN", "a": "< (same as 0<)"},
+        {"q": "vim: Switch from input to command mode", "a": "Esc"},
+        {"q": "vim: Switch to input mode at (i) or after (a) cursor", "a": "i, a"},
+        {"q": "vim: Open new line below cursor, enter input mode", "a": "o"},
+        {"q": "vim: Write file and quit", "a": ":wq"},
+        {"q": "vim: Quit without saving (force)", "a": ":q!"},
+        {"q": "vim: Write file with new filename", "a": ":w filename"},
+        {"q": "vim: Delete current line", "a": "dd"},
+        {"q": "vim: Copy (yank) current line", "a": "yy"},
+        {"q": "vim: Paste from buffer", "a": "p"},
+        {"q": "vim: Enter visual mode for text selection", "a": "v"},
+        {"q": "vim: Undo last command", "a": "u"},
+        {"q": "vim: Redo last undo", "a": "Ctrl-r"},
+        {"q": "vim: Go to first line in document", "a": "gg"},
+        {"q": "vim: Go to last line in document", "a": "G"},
+        {"q": "vim: Search forward for text", "a": "/text"},
+        {"q": "vim: Search backward for text", "a": "?text"},
+        {"q": "vim: Go to first position in current line", "a": "^"},
+        {"q": "vim: Go to last position in current line", "a": "$"},
+        {"q": "vim: Insert output of command in file", "a": "!ls (or !command)"},
+        {"q": "vim: Replace all occurrences of old with new", "a": ":%s/old/new/g"}
+      ]
+    },
+    {
+      "chapter": 3,
+      "title": "Essential File Management Tools",
+      "cards": [
+        {"q": "FHS: Root directory, file system tree starts here", "a": "/"},
+        {"q": "FHS: Files needed to boot Linux kernel", "a": "/boot"},
+        {"q": "FHS: Device files for physical devices", "a": "/dev"},
+        {"q": "FHS: Configuration files for programs/services", "a": "/etc"},
+        {"q": "FHS: Local user home directories", "a": "/home"},
+        {"q": "FHS: Directories for mounting devices", "a": "/media, /mnt"},
+        {"q": "FHS: Optional packages", "a": "/opt"},
+        {"q": "FHS: Kernel information (proc filesystem)", "a": "/proc"},
+        {"q": "FHS: Root user's home directory", "a": "/root"},
+        {"q": "FHS: Process/user info created since last boot", "a": "/run"},
+        {"q": "FHS: Data for services like NFS, FTP, HTTP", "a": "/srv"},
+        {"q": "FHS: Interface to hardware devices", "a": "/sys"},
+        {"q": "FHS: Temporary files (may be deleted on boot)", "a": "/tmp"},
+        {"q": "FHS: Program files, libraries, documentation", "a": "/usr"},
+        {"q": "FHS: Variable files (logs, mail, spool)", "a": "/var"}
+      ]
+    },
+    {
+      "chapter": 4,
+      "title": "Working with Text Files",
+      "cards": [
+        {"q": "Command: Open text file in pager for easy reading", "a": "less"},
+        {"q": "Command: Dump file contents to screen", "a": "cat"},
+        {"q": "Command: Show first 10 lines of file", "a": "head"},
+        {"q": "Command: Show last 10 lines of file", "a": "tail"},
+        {"q": "Command: Filter specific columns/characters", "a": "cut"},
+        {"q": "Command: Sort contents of text file", "a": "sort"},
+        {"q": "Command: Count lines, words, characters", "a": "wc"},
+        {"q": "Regex: Match line starting with text", "a": "^text"},
+        {"q": "Regex: Match line ending with text", "a": "text$"},
+        {"q": "Regex: Wildcard, match any single character", "a": "."},
+        {"q": "Regex: Match a, b, or c", "a": "[abc]"},
+        {"q": "Regex (extended): Match zero or one of preceding char", "a": "?"},
+        {"q": "Regex (extended): Match one or more of preceding char", "a": "+"},
+        {"q": "Regex: Match zero to infinite of previous char", "a": "*"},
+        {"q": "Regex: Match exactly two of previous char", "a": "\\{2\\}"},
+        {"q": "Regex: Match 1-3 of previous char", "a": "\\{1,3\\}"},
+        {"q": "Regex: Match 'color' and 'colour'", "a": "colou?r"},
+        {"q": "Regex: Group multiple characters", "a": "(...)"},
+        {"q": "grep -i", "a": "Case insensitive search"},
+        {"q": "grep -v", "a": "Show lines NOT matching pattern"},
+        {"q": "grep -r", "a": "Search recursively in subdirectories"},
+        {"q": "grep -e", "a": "Search multiple patterns"},
+        {"q": "grep -E", "a": "Extended regular expression"},
+        {"q": "grep -A <n>", "a": "Show n lines after match"},
+        {"q": "grep -B <n>", "a": "Show n lines before match"}
+      ]
+    },
+    {
+      "chapter": 5,
+      "title": "Connecting to RHEL",
+      "cards": [
+        {"q": "ssh -v", "a": "Verbose, show connection details"},
+        {"q": "ssh -Y", "a": "Enable X11 forwarding (graphical apps)"},
+        {"q": "ssh -p <PORT>", "a": "Connect to non-default port"},
+        {"q": "rsync -r", "a": "Synchronize entire directory tree"},
+        {"q": "rsync -l", "a": "Copy symlinks as symlinks"},
+        {"q": "rsync -p", "a": "Preserve permissions"},
+        {"q": "rsync -n", "a": "Dry run, don't actually sync"},
+        {"q": "rsync -a", "a": "Archive mode (full sync)"},
+        {"q": "rsync -A", "a": "Archive mode + sync ACLs"},
+        {"q": "rsync -X", "a": "Synchronize SELinux context"}
+      ]
+    },
+    {
+      "chapter": 6,
+      "title": "User and Group Management",
+      "cards": [
+        {"q": "Method: Open subshell as different user", "a": "su"},
+        {"q": "Method: Run commands with admin privileges", "a": "sudo"},
+        {"q": "Method: Run graphical utilities as admin", "a": "PolicyKit"}
+      ]
+    },
+    {
+      "chapter": 7,
+      "title": "Permissions Management",
+      "cards": [
+        {"q": "Read permission on files", "a": "View file content"},
+        {"q": "Read permission on directories", "a": "List contents of directory"},
+        {"q": "Write permission on files", "a": "Change contents of file"},
+        {"q": "Write permission on directories", "a": "Create and delete files"},
+        {"q": "Execute permission on files", "a": "Run a program file"},
+        {"q": "Execute permission on directories", "a": "Change to the directory"},
+        {"q": "Numeric value for Read", "a": "4"},
+        {"q": "Numeric value for Write", "a": "2"},
+        {"q": "Numeric value for Execute", "a": "1"},
+        {"q": "SUID numeric value and relative value", "a": "4, u+s"},
+        {"q": "SUID effect on files", "a": "Execute with file owner's permissions"},
+        {"q": "SGID numeric value and relative value", "a": "2, g+s"},
+        {"q": "SGID effect on directories", "a": "Files get same group owner"},
+        {"q": "Sticky bit numeric and relative value", "a": "1, +t"},
+        {"q": "Sticky bit effect on directories", "a": "Prevent deleting others' files"},
+        {"q": "umask 0: files get", "a": "Read and write"},
+        {"q": "umask 0: directories get", "a": "Everything (rwx)"},
+        {"q": "umask 7: files get", "a": "Nothing"},
+        {"q": "umask 7: directories get", "a": "Nothing"}
+      ]
+    },
+    {
+      "chapter": 8,
+      "title": "Configuring Networking",
+      "cards": [
+        {"q": "Binary 00000000 = decimal", "a": "0"},
+        {"q": "Binary 00100000 = decimal", "a": "32"},
+        {"q": "Binary 01000000 = decimal", "a": "64"},
+        {"q": "Binary 01100000 = decimal", "a": "96"},
+        {"q": "Binary 10000000 = decimal", "a": "128"},
+        {"q": "Binary 10100000 = decimal", "a": "160"},
+        {"q": "Binary 11000000 = decimal", "a": "192"},
+        {"q": "Binary 11100000 = decimal", "a": "224"}
+      ]
+    },
+    {
+      "chapter": 9,
+      "title": "Managing Software",
+      "cards": [
+        {"q": "Repo file: Label/identifier for repository", "a": "[label]"},
+        {"q": "Repo file: Name of repository (mandatory)", "a": "name="},
+        {"q": "Repo file: URL for mirror server info", "a": "mirrorlist="},
+        {"q": "Repo file: Base URL for RPM packages (mandatory)", "a": "baseurl="},
+        {"q": "Repo file: Enable GPG integrity check (0 or 1)", "a": "gpgcheck="},
+        {"q": "Repo file: Location of GPG key", "a": "gpgkey="},
+        {"q": "dnf: Search package name/summary", "a": "search"},
+        {"q": "dnf: Search name, summary, description", "a": "search all"},
+        {"q": "dnf: Find package containing a file", "a": "[what]provides */name"},
+        {"q": "dnf: Show package info", "a": "info"},
+        {"q": "dnf: Install package", "a": "install"},
+        {"q": "dnf: Remove package", "a": "remove"},
+        {"q": "dnf: List packages", "a": "list [all | installed]"},
+        {"q": "dnf: List package groups", "a": "group list"},
+        {"q": "dnf: Install package group", "a": "group install"},
+        {"q": "dnf: Update packages", "a": "update"},
+        {"q": "dnf: Remove all cached metadata", "a": "clean all"},
+        {"q": "rpm -qf", "a": "Find which package owns a file"},
+        {"q": "rpm -ql", "a": "List files in package"},
+        {"q": "rpm -qi", "a": "Show package info"},
+        {"q": "rpm -qd", "a": "Show package documentation"},
+        {"q": "rpm -qc", "a": "Show package config files"},
+        {"q": "rpm -q --scripts", "a": "Show package scripts"},
+        {"q": "rpm -qp <pkg>", "a": "Query package file (not installed)"},
+        {"q": "rpm -qR", "a": "Show package dependencies"},
+        {"q": "rpm -V", "a": "Verify package (show changes)"},
+        {"q": "rpm -Va", "a": "Verify all installed packages"},
+        {"q": "rpm -qa", "a": "List all installed packages"}
+      ]
+    },
+    {
+      "chapter": 10,
+      "title": "Managing Processes",
+      "cards": [
+        {"q": "Job control: Start command in background", "a": "& (at end of command)"},
+        {"q": "Job control: Stop job temporarily", "a": "Ctrl-Z"},
+        {"q": "Job control: Send EOF to current job", "a": "Ctrl-D"},
+        {"q": "Job control: Cancel current interactive job", "a": "Ctrl-C"},
+        {"q": "Job control: Continue stopped job in background", "a": "bg"},
+        {"q": "Job control: Bring job to foreground", "a": "fg"},
+        {"q": "Job control: Show running jobs", "a": "jobs"},
+        {"q": "Process state R", "a": "Running (active, using CPU)"},
+        {"q": "Process state S", "a": "Sleeping (waiting for event)"},
+        {"q": "Process state D", "a": "Uninterruptible sleep (waiting for I/O)"},
+        {"q": "Process state T", "a": "Stopped (e.g., Ctrl-Z)"},
+        {"q": "Process state Z", "a": "Zombie (stopped, can't be removed)"},
+        {"q": "tuned profile: Balance power/performance", "a": "balanced"},
+        {"q": "tuned profile: Better interactive response", "a": "desktop"},
+        {"q": "tuned profile: Maximum throughput", "a": "latency-performance"},
+        {"q": "tuned profile: Reduce network latency", "a": "network-latency"},
+        {"q": "tuned profile: Streaming content optimization", "a": "network-throughput"},
+        {"q": "tuned profile: Maximum power saving", "a": "powersave"},
+        {"q": "tuned profile: Maximum throughput", "a": "throughput-performance"},
+        {"q": "tuned profile: Running as VM", "a": "virtual-guest"},
+        {"q": "tuned profile: KVM host", "a": "virtual-host"}
+      ]
+    },
+    {
+      "chapter": 11,
+      "title": "Working with Systemd",
+      "cards": [
+        {"q": "systemd status: Unit file processed, unit active", "a": "Loaded"},
+        {"q": "systemd status: Running with active processes", "a": "Active(running)"},
+        {"q": "systemd status: One-time run completed", "a": "Active(exited)"},
+        {"q": "systemd status: Running, waiting for event", "a": "Active(waiting)"},
+        {"q": "systemd status: Not running", "a": "Inactive(dead)"},
+        {"q": "systemd status: Will start at boot", "a": "Enabled"},
+        {"q": "systemd status: Won't start at boot", "a": "Disabled"},
+        {"q": "systemd status: Can't enable, may auto-start", "a": "Static"},
+        {"q": "systemctl: Show only service units", "a": "systemctl -t service"},
+        {"q": "systemctl: Show all service units", "a": "systemctl list-units -t service"},
+        {"q": "systemctl: Show inactive services too", "a": "systemctl list-units -t service --all"},
+        {"q": "systemctl: Show failed services", "a": "systemctl --failed -t service"},
+        {"q": "systemctl: Show detailed service status", "a": "systemctl status -l your.service"}
+      ]
+    },
+    {
+      "chapter": 13,
+      "title": "Configuring Logging",
+      "cards": [
+        {"q": "Log file: Generic, most messages", "a": "/var/log/messages"},
+        {"q": "Log file: Kernel messages", "a": "/var/log/dmesg"},
+        {"q": "Log file: Authentication messages", "a": "/var/log/secure"},
+        {"q": "Log file: System startup messages", "a": "/var/log/boot.log"},
+        {"q": "Log file: Audit/SELinux messages", "a": "/var/log/audit/audit.log"},
+        {"q": "Log file: Email messages", "a": "/var/log/maillog"},
+        {"q": "Log file: Apache logs", "a": "/var/log/httpd/"},
+        {"q": "rsyslog facility: Authentication", "a": "auth / authpriv"},
+        {"q": "rsyslog facility: Cron service", "a": "cron"},
+        {"q": "rsyslog facility: Generic daemon", "a": "daemon"},
+        {"q": "rsyslog facility: Kernel", "a": "kern"},
+        {"q": "rsyslog facility: Email", "a": "mail"},
+        {"q": "rsyslog facility: Syslog system", "a": "syslog"},
+        {"q": "rsyslog facility: User space", "a": "user"},
+        {"q": "rsyslog facility: Custom services", "a": "local0-7"},
+        {"q": "rsyslog priority: Most verbose", "a": "debug"},
+        {"q": "rsyslog priority: Normal operation info", "a": "info"},
+        {"q": "rsyslog priority: Might become issue", "a": "notice"},
+        {"q": "rsyslog priority: Suboptimal, no error yet", "a": "warning (warn)"},
+        {"q": "rsyslog priority: Non-critical error", "a": "err (error)"},
+        {"q": "rsyslog priority: Critical error", "a": "crit"},
+        {"q": "rsyslog priority: Service about to stop", "a": "alert"},
+        {"q": "rsyslog priority: Service discontinued", "a": "emerg (panic)"}
+      ]
+    },
+    {
+      "chapter": 14,
+      "title": "Managing Storage",
+      "cards": [
+        {"q": "Device /dev/sda", "a": "SCSI/SATA disk (physical/VMware)"},
+        {"q": "Device /dev/nvme0n1", "a": "NVMe SSD (first disk)"},
+        {"q": "Device /dev/hda", "a": "Legacy IDE disk"},
+        {"q": "Device /dev/vda", "a": "KVM virtio disk"},
+        {"q": "Device /dev/xvda", "a": "Xen virtual disk"},
+        {"q": "Filesystem: RHEL 9 default", "a": "XFS"},
+        {"q": "Filesystem: Previous RHEL default", "a": "Ext4"},
+        {"q": "Filesystem: Windows/macOS compatible (USB)", "a": "VFAT"},
+        {"q": "/etc/fstab field 1", "a": "Device (name, UUID, or label)"},
+        {"q": "/etc/fstab field 2", "a": "Mount Point"},
+        {"q": "/etc/fstab field 3", "a": "File System type"},
+        {"q": "/etc/fstab field 4", "a": "Mount Options"},
+        {"q": "/etc/fstab field 5", "a": "Dump Support (0 or 1)"},
+        {"q": "/etc/fstab field 6", "a": "Automatic Check (0, 1, or 2)"},
+        {"q": "Mount option: Auto mount at boot", "a": "auto / noauto"},
+        {"q": "Mount option: Enable ACLs", "a": "acl"},
+        {"q": "Mount option: Read-only", "a": "ro"},
+        {"q": "Mount option: Disable access time updates", "a": "noatime"},
+        {"q": "Mount option: Prevent execution", "a": "noexec"}
+      ]
+    },
+    {
+      "chapter": 15,
+      "title": "Managing Advanced Storage",
+      "cards": [
+        {"q": "LVM: Create physical volume", "a": "pvcreate"},
+        {"q": "LVM: Show PV summary", "a": "pvs"},
+        {"q": "LVM: Show PV details", "a": "pvdisplay"},
+        {"q": "LVM: Remove PV signature", "a": "pvremove"},
+        {"q": "LVM: Create volume group", "a": "vgcreate"},
+        {"q": "LVM: Show VG summary", "a": "vgs"},
+        {"q": "LVM: Show VG details", "a": "vgdisplay"},
+        {"q": "LVM: Remove volume group", "a": "vgremove"},
+        {"q": "LVM: Create logical volume", "a": "lvcreate"},
+        {"q": "LVM: Show LV summary", "a": "lvs"},
+        {"q": "LVM: Show LV details", "a": "lvdisplay"},
+        {"q": "LVM: Remove logical volume", "a": "lvremove"}
+      ]
+    },
+    {
+      "chapter": 16,
+      "title": "Basic Kernel Management",
+      "cards": [
+        {"q": "Kernel module: List loaded modules", "a": "lsmod"},
+        {"q": "Kernel module: Show module info", "a": "modinfo"},
+        {"q": "Kernel module: Load module with dependencies", "a": "modprobe"},
+        {"q": "Kernel module: Unload module", "a": "modprobe -r"}
+      ]
+    },
+    {
+      "chapter": 18,
+      "title": "Essential Troubleshooting Skills",
+      "cards": [
+        {"q": "Boot phase: Hardware check", "a": "POST"},
+        {"q": "Boot phase: Select boot device", "a": "BIOS/UEFI config"},
+        {"q": "Boot: Fix boot loader issues", "a": "grub2-install, grub2-mkconfig"},
+        {"q": "Boot: Start root shell before init", "a": "rd.break kernel argument"},
+        {"q": "Boot: Specify alternative init", "a": "init= kernel argument"},
+        {"q": "Boot: Rebuild initramfs", "a": "dracut"},
+        {"q": "Boot: Set default target", "a": "systemctl set-default"},
+        {"q": "Boot: Start rescue mode", "a": "rescue.target kernel argument"}
+      ]
+    },
+    {
+      "chapter": 20,
+      "title": "Managing SSH",
+      "cards": [
+        {"q": "sshd config: TCP listening port", "a": "Port"},
+        {"q": "sshd config: Allow/disallow root login", "a": "PermitRootLogin"},
+        {"q": "sshd config: Max authentication attempts", "a": "MaxAuthTries"},
+        {"q": "sshd config: Max sessions per IP", "a": "MaxSessions"},
+        {"q": "sshd config: Allowed users list", "a": "AllowUsers"},
+        {"q": "sshd config: Enable password auth", "a": "PasswordAuthentication"},
+        {"q": "sshd config: Clean up inactive connections", "a": "TCPKeepAlive"},
+        {"q": "sshd config: Interval for alive packets", "a": "ClientAliveInterval"},
+        {"q": "sshd config: Number of alive packets", "a": "ClientAliveCountMax"},
+        {"q": "sshd config: DNS lookup for IPs", "a": "UseDNS"}
+      ]
+    },
+    {
+      "chapter": 22,
+      "title": "Managing SELinux",
+      "cards": [
+        {"q": "SELinux: Collection of access rules", "a": "Policy"},
+        {"q": "SELinux: Object trying to access target", "a": "Source domain"},
+        {"q": "SELinux: What is being accessed", "a": "Target domain"},
+        {"q": "SELinux: Security label for categorization", "a": "Context"},
+        {"q": "SELinux: Specific access permission rule", "a": "Rule"},
+        {"q": "SELinux: Also called context label", "a": "Label"}
+      ]
+    },
+    {
+      "chapter": 23,
+      "title": "Managing Network Security",
+      "cards": [
+        {"q": "firewalld zone: Reject with icmp-host-prohibited", "a": "block"},
+        {"q": "firewalld zone: DMZ, limited internal access", "a": "dmz"},
+        {"q": "firewalld zone: Drop all, no reply", "a": "drop"},
+        {"q": "firewalld zone: NAT/masquerading enabled", "a": "external"},
+        {"q": "firewalld zone: Home network, trust most", "a": "home"},
+        {"q": "firewalld zone: Internal network", "a": "internal"},
+        {"q": "firewalld zone: Default for new interfaces", "a": "public"},
+        {"q": "firewalld zone: Accept all connections", "a": "trusted"},
+        {"q": "firewalld zone: Work area", "a": "work"},
+        {"q": "firewall-cmd: List all zones", "a": "--get-zones"},
+        {"q": "firewall-cmd: Show default zone", "a": "--get-default-zone"},
+        {"q": "firewall-cmd: Change default zone", "a": "--set-default-zone=<ZONE>"},
+        {"q": "firewall-cmd: List available services", "a": "--get-services"},
+        {"q": "firewall-cmd: List active services", "a": "--list-services"},
+        {"q": "firewall-cmd: Add service", "a": "--add-service=<name>"},
+        {"q": "firewall-cmd: Remove service", "a": "--remove-service=<name>"},
+        {"q": "firewall-cmd: Show all zone configs", "a": "--list-all-zones"},
+        {"q": "firewall-cmd: Add port", "a": "--add-port=<port/protocol>"},
+        {"q": "firewall-cmd: Add interface to zone", "a": "--add-interface=<IFACE>"},
+        {"q": "firewall-cmd: Add source IP", "a": "--add-source=<ip/mask>"},
+        {"q": "firewall-cmd: Write to permanent config", "a": "--permanent"},
+        {"q": "firewall-cmd: Save runtime to permanent", "a": "--runtime-to-permanent"},
+        {"q": "firewall-cmd: Reload config from disk", "a": "--reload"}
+      ]
+    },
+    {
+      "chapter": 25,
+      "title": "Configuring Time Services",
+      "cards": [
+        {"q": "Time: Hardware clock on motherboard", "a": "Hardware clock / Real-time clock"},
+        {"q": "Time: OS-maintained time", "a": "System time / Software clock"},
+        {"q": "Time: Worldwide standard", "a": "UTC (Coordinated Universal Time)"},
+        {"q": "Time: Auto-adjust for DST", "a": "Daylight saving time"},
+        {"q": "Time: Time in current zone", "a": "Local time"},
+        {"q": "Command: Manage local time", "a": "date"},
+        {"q": "Command: Manage hardware clock", "a": "hwclock"},
+        {"q": "Command: Manage all time aspects", "a": "timedatectl"},
+        {"q": "timedatectl: Show current settings", "a": "status"},
+        {"q": "timedatectl: Set current time", "a": "set-time TIME"},
+        {"q": "timedatectl: Set timezone", "a": "set-timezone ZONE"},
+        {"q": "timedatectl: List all timezones", "a": "list-timezone"},
+        {"q": "timedatectl: Set RTC to local time", "a": "set-local-rtc [0|1]"},
+        {"q": "timedatectl: Enable/disable NTP", "a": "set-ntp [0|1]"}
+      ]
+    }
+  ]
+}
