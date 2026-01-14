@@ -53,6 +53,8 @@
         .task-item.failed { border-color: #ef4444 !important; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        .perspective-1000 { perspective: 1000px; }
+        .fc-card-inner { transition: transform 0.5s ease; }
     </style>
 </head>
 <body class="bg-background-dark text-white font-display min-h-screen flex flex-col overflow-x-hidden">
@@ -143,7 +145,7 @@
                         <p class="text-gray-400 text-sm">Track progress and identify weak areas</p>
                     </div>
                 </button>
-                <a href="/flashcards.html" class="group relative flex flex-col h-64 p-8 rounded-2xl bg-surface-dark border border-white/5 hover:border-yellow-500/50 transition-all duration-300 hover:shadow-[0_0_40px_rgba(234,179,8,0.1)] hover:-translate-y-1 text-left overflow-hidden">
+                <button onclick="showView('flashcards')" class="group relative flex flex-col h-64 p-8 rounded-2xl bg-surface-dark border border-white/5 hover:border-yellow-500/50 transition-all duration-300 hover:shadow-[0_0_40px_rgba(234,179,8,0.1)] hover:-translate-y-1 text-left overflow-hidden">
                     <div class="size-12 rounded-lg bg-white/5 text-yellow-500 group-hover:bg-yellow-500 group-hover:text-black flex items-center justify-center mb-6 transition-all">
                         <span class="material-symbols-outlined text-2xl">school</span>
                     </div>
@@ -151,7 +153,7 @@
                         <h3 class="text-2xl font-bold mb-2">Flashcards</h3>
                         <p class="text-gray-400 text-sm">247 cards from RHCSA Cert Guide</p>
                     </div>
-                </a>
+                </button>
             </div>
 
             <!-- Features -->
@@ -734,6 +736,102 @@
                 </div>
             </div>
         </div>
+
+        <!-- VIEW: Flashcards -->
+        <div id="view-flashcards" class="view flex-col py-8 px-6 max-w-5xl mx-auto w-full animate-fade-in">
+            <button onclick="showView('welcome')" class="self-start flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span> Back
+            </button>
+            
+            <!-- Chapter Selection -->
+            <div id="fc-chapter-select">
+                <div class="text-center mb-8">
+                    <h1 class="text-4xl font-bold mb-2">RHCSA Flashcards</h1>
+                    <p class="text-gray-400">247 cards from Sander van Vugt's RHCSA 9 Cert Guide</p>
+                </div>
+                <div id="fc-chapter-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <button onclick="fcStartAll()" class="px-6 py-3 bg-primary hover:bg-primary-hover rounded-lg font-bold transition-all">
+                        Study All (247 cards)
+                    </button>
+                    <button onclick="fcStartSelected()" id="fc-start-selected-btn" class="hidden px-6 py-3 bg-surface-dark border border-white/10 hover:border-white/20 rounded-lg font-medium transition-all">
+                        Study Selected (<span id="fc-selected-count">0</span> cards)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Flashcard Study Area -->
+            <div id="fc-study-area" class="hidden">
+                <!-- Progress -->
+                <div class="flex items-center justify-between mb-4">
+                    <button onclick="fcBackToChapters()" class="text-gray-400 hover:text-white flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">arrow_back</span> Chapters
+                    </button>
+                    <div class="text-gray-400 text-sm">
+                        <span id="fc-current-num">1</span> / <span id="fc-total-num">0</span>
+                        <span class="ml-4 text-green-500">✓ <span id="fc-known-count">0</span></span>
+                        <span class="ml-2 text-red-500">✗ <span id="fc-unknown-count">0</span></span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="h-1 bg-surface-dark rounded-full mb-8 overflow-hidden">
+                    <div id="fc-progress-bar" class="h-full bg-primary transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <!-- Card -->
+                <div class="fc-card w-full max-w-2xl mx-auto h-72 cursor-pointer mb-8 perspective-1000" onclick="fcFlipCard()" id="fc-card">
+                    <div class="fc-card-inner relative w-full h-full transition-transform duration-500" style="transform-style: preserve-3d;">
+                        <div class="fc-card-front absolute w-full h-full bg-surface-dark rounded-2xl border border-white/10 flex flex-col items-center justify-center p-8" style="backface-visibility: hidden;">
+                            <div class="text-xs text-gray-500 mb-4 uppercase tracking-wider">Question</div>
+                            <div id="fc-question" class="text-xl text-center leading-relaxed"></div>
+                        </div>
+                        <div class="fc-card-back absolute w-full h-full bg-surface-dark rounded-2xl border border-primary/30 flex flex-col items-center justify-center p-8" style="backface-visibility: hidden; transform: rotateY(180deg);">
+                            <div class="text-xs text-primary mb-4 uppercase tracking-wider">Answer</div>
+                            <div id="fc-answer" class="text-xl text-center font-mono text-green-400 leading-relaxed"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex justify-center gap-4 mb-4">
+                    <button onclick="fcMarkCard(false)" class="px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg font-medium flex items-center gap-2 border border-red-500/20 transition-all">
+                        <span class="material-symbols-outlined text-lg">close</span> Again
+                    </button>
+                    <button onclick="fcFlipCard()" class="px-6 py-3 bg-surface-dark hover:bg-white/5 rounded-lg font-medium border border-white/10 transition-all">
+                        Flip <span class="text-gray-500 text-sm">(Space)</span>
+                    </button>
+                    <button onclick="fcMarkCard(true)" class="px-6 py-3 bg-green-500/10 hover:bg-green-500/20 text-green-400 rounded-lg font-medium flex items-center gap-2 border border-green-500/20 transition-all">
+                        <span class="material-symbols-outlined text-lg">check</span> Got it
+                    </button>
+                </div>
+                <div class="text-center text-gray-500 text-xs">
+                    Keyboard: Space = Flip • 1/← = Again • 2/→ = Got it
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div id="fc-results-area" class="hidden text-center py-12">
+                <div class="size-20 mx-auto mb-6 rounded-full bg-green-500/10 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-4xl text-green-500">celebration</span>
+                </div>
+                <h2 class="text-3xl font-bold mb-4">Session Complete!</h2>
+                <div class="text-5xl font-bold mb-2">
+                    <span class="text-green-500" id="fc-final-known">0</span> / <span class="text-gray-400" id="fc-final-total">0</span>
+                </div>
+                <p class="text-gray-400 mb-8">Cards marked as known</p>
+                <div class="flex justify-center gap-4">
+                    <button onclick="fcRestartMissed()" id="fc-restart-missed-btn" class="px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg font-medium border border-red-500/20 transition-all">
+                        Review Missed (<span id="fc-missed-count">0</span>)
+                    </button>
+                    <button onclick="fcBackToChapters()" class="px-6 py-3 bg-surface-dark hover:bg-white/5 rounded-lg font-medium border border-white/10 transition-all">
+                        Back to Chapters
+                    </button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Modals -->
@@ -892,6 +990,7 @@
                 loadConfig();
                 refreshCloudSessionUI();
             }
+            if (viewId === 'flashcards') loadFlashcards();
         }
 
         // Session Persistence
@@ -2566,6 +2665,168 @@
                 unavailable.classList.remove('hidden');
             }
         }
+
+        // =================================================================
+        // Flashcards
+        // =================================================================
+        let fcData = null;
+        let fcCards = [];
+        let fcCurrentIndex = 0;
+        let fcKnown = 0;
+        let fcUnknown = 0;
+        let fcMissedCards = [];
+        let fcSelectedChapters = new Set();
+        let fcIsFlipped = false;
+
+        async function loadFlashcards() {
+            if (fcData) return;
+            try {
+                const resp = await fetch('/flashcards.json');
+                fcData = await resp.json();
+                fcRenderChapters();
+            } catch (e) {
+                console.error('Failed to load flashcards:', e);
+            }
+        }
+
+        function fcRenderChapters() {
+            const grid = document.getElementById('fc-chapter-grid');
+            grid.innerHTML = fcData.chapters.map(ch => `
+                <div class="fc-chapter-card p-4 bg-surface-dark rounded-xl border border-white/5 hover:border-white/20 cursor-pointer transition-all"
+                     data-chapter="${ch.chapter}" onclick="fcToggleChapter(${ch.chapter})">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs text-gray-500">Ch ${ch.chapter}</span>
+                        <span class="text-xs text-gray-500">${ch.cards.length} cards</span>
+                    </div>
+                    <div class="font-medium text-sm">${ch.title}</div>
+                </div>
+            `).join('');
+        }
+
+        function fcToggleChapter(chNum) {
+            const card = document.querySelector(`[data-chapter="${chNum}"]`);
+            if (fcSelectedChapters.has(chNum)) {
+                fcSelectedChapters.delete(chNum);
+                card.classList.remove('border-yellow-500', 'bg-yellow-500/5');
+                card.classList.add('border-white/5');
+            } else {
+                fcSelectedChapters.add(chNum);
+                card.classList.add('border-yellow-500', 'bg-yellow-500/5');
+                card.classList.remove('border-white/5');
+            }
+            fcUpdateSelectedCount();
+        }
+
+        function fcUpdateSelectedCount() {
+            const count = Array.from(fcSelectedChapters).reduce((sum, chNum) => {
+                const ch = fcData.chapters.find(c => c.chapter === chNum);
+                return sum + (ch ? ch.cards.length : 0);
+            }, 0);
+            document.getElementById('fc-selected-count').textContent = count;
+            document.getElementById('fc-start-selected-btn').classList.toggle('hidden', count === 0);
+        }
+
+        function fcStartAll() {
+            fcCards = fcData.chapters.flatMap(ch => 
+                ch.cards.map(c => ({...c, chapter: ch.chapter, title: ch.title}))
+            );
+            fcShuffleAndStart();
+        }
+
+        function fcStartSelected() {
+            fcCards = fcData.chapters
+                .filter(ch => fcSelectedChapters.has(ch.chapter))
+                .flatMap(ch => ch.cards.map(c => ({...c, chapter: ch.chapter, title: ch.title})));
+            fcShuffleAndStart();
+        }
+
+        function fcShuffleAndStart() {
+            for (let i = fcCards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [fcCards[i], fcCards[j]] = [fcCards[j], fcCards[i]];
+            }
+            fcCurrentIndex = 0;
+            fcKnown = 0;
+            fcUnknown = 0;
+            fcMissedCards = [];
+            fcIsFlipped = false;
+            document.getElementById('fc-chapter-select').classList.add('hidden');
+            document.getElementById('fc-study-area').classList.remove('hidden');
+            document.getElementById('fc-results-area').classList.add('hidden');
+            document.getElementById('fc-total-num').textContent = fcCards.length;
+            fcShowCard();
+        }
+
+        function fcShowCard() {
+            if (fcCurrentIndex >= fcCards.length) {
+                fcShowResults();
+                return;
+            }
+            const card = fcCards[fcCurrentIndex];
+            document.getElementById('fc-question').textContent = card.q;
+            document.getElementById('fc-answer').textContent = card.a;
+            document.getElementById('fc-current-num').textContent = fcCurrentIndex + 1;
+            document.getElementById('fc-known-count').textContent = fcKnown;
+            document.getElementById('fc-unknown-count').textContent = fcUnknown;
+            document.getElementById('fc-progress-bar').style.width = 
+                `${((fcCurrentIndex) / fcCards.length) * 100}%`;
+            
+            // Reset flip
+            fcIsFlipped = false;
+            document.querySelector('.fc-card-inner').style.transform = 'rotateY(0deg)';
+        }
+
+        function fcFlipCard() {
+            fcIsFlipped = !fcIsFlipped;
+            document.querySelector('.fc-card-inner').style.transform = 
+                fcIsFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+        }
+
+        function fcMarkCard(isKnown) {
+            if (isKnown) {
+                fcKnown++;
+            } else {
+                fcUnknown++;
+                fcMissedCards.push(fcCards[fcCurrentIndex]);
+            }
+            fcCurrentIndex++;
+            fcShowCard();
+        }
+
+        function fcShowResults() {
+            document.getElementById('fc-study-area').classList.add('hidden');
+            document.getElementById('fc-results-area').classList.remove('hidden');
+            document.getElementById('fc-final-known').textContent = fcKnown;
+            document.getElementById('fc-final-total').textContent = fcCards.length;
+            document.getElementById('fc-missed-count').textContent = fcMissedCards.length;
+            document.getElementById('fc-restart-missed-btn').classList.toggle('hidden', fcMissedCards.length === 0);
+        }
+
+        function fcRestartMissed() {
+            fcCards = [...fcMissedCards];
+            fcShuffleAndStart();
+        }
+
+        function fcBackToChapters() {
+            document.getElementById('fc-chapter-select').classList.remove('hidden');
+            document.getElementById('fc-study-area').classList.add('hidden');
+            document.getElementById('fc-results-area').classList.add('hidden');
+        }
+
+        // Flashcard keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (!document.getElementById('view-flashcards').classList.contains('active')) return;
+            if (document.getElementById('fc-study-area').classList.contains('hidden')) return;
+            
+            if (e.code === 'Space') {
+                e.preventDefault();
+                fcFlipCard();
+            } else if (e.code === 'Digit1' || e.code === 'ArrowLeft') {
+                fcMarkCard(false);
+            } else if (e.code === 'Digit2' || e.code === 'ArrowRight') {
+                fcMarkCard(true);
+            }
+        });
 
         // =================================================================
         // Initialize
