@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: For security reasons, SSH needs to be moved to port 3333. Update the security policy to allow the SSH daemon to listen on this alternate port. The change must be persistent. (Click "Check Task" to verify)
+# Task: For security reasons, SSH needs to be moved to port 3333. Update the security policy to allow the SSH daemon to listen on this alternate port. The change must be persistent.
 # Title: Allow SSH Service on Port 3333
 # Category: security
 # Target: node1

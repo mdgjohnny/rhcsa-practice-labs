@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: The vsftpd FTP server is running and users can log in, but they cannot upload files to /var/ftp/uploads/ despite correct file permissions (777). The issue is SELinux. Diagnose and fix it so FTP users can write to this directory. The fix must persist across reboots. (Click "Check Task" to set up the scenario)
+# Task: The vsftpd FTP server is running and users can log in, but they cannot upload files to /var/ftp/uploads/ despite correct file permissions (777). The issue is SELinux. Diagnose and fix it so FTP users can write to this directory. The fix must persist across reboots.
 # Title: Troubleshoot FTP Upload Access (SELinux)
 # Category: security
 # Target: node1

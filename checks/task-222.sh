@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: The SSH daemon has been configured to listen on port 2222 (check /etc/ssh/sshd_config), but the service fails to start. The configuration syntax is correct. Diagnose and fix the issue so sshd can bind to port 2222. (Click "Check Task" to set up the scenario)
+# Task: The SSH daemon has been configured to listen on port 2222 (check /etc/ssh/sshd_config), but the service fails to start. The configuration syntax is correct. Diagnose and fix the issue so sshd can bind to port 2222.
 # Title: Fix SSH on Alternate Port
 # Category: security
 # Target: node1

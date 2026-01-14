@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Document all TCP ports currently allowed for web services in the security policy. Save the complete list to /root/http-ports.txt. (Click "Check Task" to verify)
+# Task: Document all TCP ports currently allowed for web services in the security policy. Save the complete list to /root/http-ports.txt.
 # Title: Document Allowed HTTP Ports
 # Category: security
 # Target: node1

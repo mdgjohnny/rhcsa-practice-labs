@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: You are configuring an NFS server to export directories with full read-write access to remote clients. A security audit has identified that the SELinux boolean controlling NFS read-write exports is disabled, which will cause write failures for remote NFS clients. Enable the correct boolean persistently. (Click "Check Task" to verify)
+# Task: You are configuring an NFS server to export directories with full read-write access to remote clients. A security audit has identified that the SELinux boolean controlling NFS read-write exports is disabled, which will cause write failures for remote NFS clients. Enable the correct boolean persistently.
 # Title: Configure NFS SELinux Boolean for Read-Write Exports
 # Category: security
 # Target: node1

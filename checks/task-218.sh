@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: A user "webdev" has created content in their ~/public_html directory, and Apache is configured with UserDir enabled. However, accessing http://localhost/~webdev/ returns a 403 Forbidden error. The file permissions are correct (checked with ls -la). Diagnose and fix the SELinux issue. The fix must persist across reboots. (Click "Check Task" to set up the scenario)
+# Task: A user "webdev" has created content in their ~/public_html directory, and Apache is configured with UserDir enabled. However, accessing http://localhost/~webdev/ returns a 403 Forbidden error. The file permissions are correct (checked with ls -la). Diagnose and fix the SELinux issue. The fix must persist across reboots.
 # Title: Troubleshoot Apache UserDir Access (SELinux)
 # Category: security
 # Target: node1

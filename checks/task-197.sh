@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Apache has been configured as a reverse proxy to a backend service on port 8888, but connections are failing. The configuration and backend are correct - this is an SELinux issue. Diagnose the problem and fix it. The fix must persist across reboots. (Click "Check Task" to set up the scenario)
+# Task: Apache has been configured as a reverse proxy to a backend service on port 8888, but connections are failing. The configuration and backend are correct - this is an SELinux issue. Diagnose the problem and fix it. The fix must persist across reboots.
 # Title: Troubleshoot Apache Reverse Proxy (SELinux)
 # Category: security
 # Target: node1

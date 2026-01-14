@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: An internal application requires HTTPS on port 8443 for secure API communication. The security policy must be updated to allow this. Make the change persistent. (Click "Check Task" to verify)
+# Task: An internal application requires HTTPS on port 8443 for secure API communication. The security policy must be updated to allow this. Make the change persistent.
 # Title: Allow HTTPS Service on Port 8443
 # Category: security
 # Target: node1
