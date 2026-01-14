@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Task: Create /groups/dbadmin and /groups/accounting directories. Configure setgid bit and no access for others.
-# Title: Create Shared Directories with SetGID
+# Task: Create /groups/dbadmin and /groups/accounting as collaborative directories. Ensure files created in these directories are automatically owned by the directory's group, and that only group members can access the contents.
+# Title: Create Collaborative Group Directories
 # Category: file-systems
 # Target: node1
 
@@ -20,10 +20,10 @@ check 'stat -c %G /groups/accounting | grep -q accounting' \
     "/groups/accounting is group-owned by accounting" \
     "/groups/accounting is not group-owned by accounting"
 
-check 'stat -c %a /groups/dbadmin | grep -q "^2..0$"' \
+check '[[ $(stat -c %a /groups/dbadmin) =~ ^2[0-7][0-7]0$ ]]' \
     "/groups/dbadmin has setgid and no other access" \
-    "/groups/dbadmin permissions incorrect (need setgid, no others)"
+    "/groups/dbadmin needs setgid bit and no access for others"
 
-check 'stat -c %a /groups/accounting | grep -q "^2..0$"' \
+check '[[ $(stat -c %a /groups/accounting) =~ ^2[0-7][0-7]0$ ]]' \
     "/groups/accounting has setgid and no other access" \
-    "/groups/accounting permissions incorrect (need setgid, no others)"
+    "/groups/accounting needs setgid bit and no access for others"

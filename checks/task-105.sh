@@ -1,21 +1,17 @@
 #!/usr/bin/env bash
-# Task: Create users linda and anna. Configure autofs to auto-mount their home directories via NFS.
+# Task: On node2: Configure autofs to automatically mount user home directories from node1's /users export. Use indirect mapping so that accessing /remote/users/linda mounts node1:/users/linda, and /remote/users/anna mounts node1:/users/anna.
 # Title: Configure Autofs for NFS Home Directories
-# Category: users-groups
-# Target: node1
-
-check 'id linda &>/dev/null' \
-    "User linda exists" \
-    "User linda does not exist"
-
-check 'id anna &>/dev/null' \
-    "User anna exists" \
-    "User anna does not exist"
+# Category: file-systems
+# Target: node2
 
 check 'systemctl is-active autofs &>/dev/null' \
     "Autofs service is running" \
     "Autofs service is not running"
 
-check 'grep -rq "linda\|anna\|/home" /etc/auto.* 2>/dev/null' \
-    "Autofs has home directory configuration" \
-    "Autofs not configured for home directories"
+check 'grep -rqE "linda|anna|\*" /etc/auto.* 2>/dev/null' \
+    "Autofs has user directory configuration" \
+    "Autofs not configured for user directories"
+
+check '[[ -d /remote/users ]] || grep -rq "/remote/users" /etc/auto.master 2>/dev/null' \
+    "Mount point configured" \
+    "Mount point /remote/users not configured"

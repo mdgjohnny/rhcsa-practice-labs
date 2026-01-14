@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task: Export homes for user100, user200, user300 via NFS. Auto-mount under /home1 using autofs.
+# Task: Create users user100, user200, user300 with home directories. Export their home directories via NFS. Configure autofs indirect mapping so that /home1/user100, /home1/user200, /home1/user300 automatically mount the respective NFS shares.
 # Title: NFS Autofs Home Directories
 # Category: file-systems
 # Target: node1
@@ -16,9 +16,13 @@ check 'id user300 &>/dev/null' \
     "User user300 exists" \
     "User user300 does not exist"
 
-check '[[ -d /home1 ]]' \
-    "Directory /home1 exists" \
-    "Directory /home1 does not exist"
+check 'systemctl is-active nfs-server &>/dev/null' \
+    "NFS server is running" \
+    "NFS server is not running"
+
+check 'exportfs -v 2>/dev/null | grep -qE "user100|user200|user300|/home"' \
+    "Home directories are exported via NFS" \
+    "Home directories not exported"
 
 check 'grep -q "/home1" /etc/auto.master 2>/dev/null || grep -qr "/home1" /etc/auto.master.d/ 2>/dev/null' \
     "Autofs configured for /home1" \
