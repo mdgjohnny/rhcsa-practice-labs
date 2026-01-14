@@ -655,25 +655,62 @@
             </button>
             <h1 class="text-4xl font-bold mb-8 text-center">Performance Statistics</h1>
             
-            <!-- Summary Stats -->
-            <div id="stats-summary" class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mb-8">
-                <div class="text-gray-400 text-center py-8">Loading statistics...</div>
+            <!-- Tab Navigation -->
+            <div class="flex gap-2 mb-8 p-1 bg-surface-dark rounded-lg">
+                <button onclick="showStatsTab('practice')" id="stats-tab-practice" class="px-4 py-2 rounded-md text-sm font-medium transition-all bg-primary text-white">Practice Labs</button>
+                <button onclick="showStatsTab('flashcards')" id="stats-tab-flashcards" class="px-4 py-2 rounded-md text-sm font-medium transition-all text-gray-400 hover:text-white">Flashcards</button>
             </div>
             
-            <!-- Category Performance -->
-            <div class="w-full bg-surface-dark rounded-xl border border-white/5 p-6 mb-6">
-                <h2 class="text-xl font-bold mb-4">Performance by Category</h2>
-                <div id="category-stats" class="space-y-4">
-                    <!-- Populated by JS -->
+            <!-- Practice Stats Tab -->
+            <div id="stats-practice-content" class="w-full">
+                <!-- Summary Stats -->
+                <div id="stats-summary" class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mb-8">
+                    <div class="text-gray-400 text-center py-8">Loading statistics...</div>
                 </div>
-                <div id="weak-areas" class="mt-6 pt-6 border-t border-white/5">
-                    <!-- Weak areas populated by JS -->
+                
+                <!-- Category Performance -->
+                <div class="w-full bg-surface-dark rounded-xl border border-white/5 p-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4">Performance by Category</h2>
+                    <div id="category-stats" class="space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div id="weak-areas" class="mt-6 pt-6 border-t border-white/5">
+                        <!-- Weak areas populated by JS -->
+                    </div>
+                </div>
+                
+                <div class="flex gap-4 justify-center">
+                    <button onclick="clearAllResults()" class="px-6 py-3 rounded-lg border border-red-500/50 text-red-400 hover:bg-red-500/10 font-medium transition-all">Clear Practice History</button>
                 </div>
             </div>
             
-            <div class="flex gap-4">
-                <button onclick="showView('welcome')" class="px-6 py-3 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium transition-all">Back to Home</button>
-                <button onclick="clearAllResults()" class="px-6 py-3 rounded-lg border border-red-500/50 text-red-400 hover:bg-red-500/10 font-medium transition-all">Clear History</button>
+            <!-- Flashcard Stats Tab -->
+            <div id="stats-flashcards-content" class="w-full hidden">
+                <!-- Flashcard Summary -->
+                <div id="fc-stats-summary" class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mb-8">
+                    <div class="text-gray-400 text-center py-8">Loading...</div>
+                </div>
+                
+                <!-- Progress by Chapter -->
+                <div class="w-full bg-surface-dark rounded-xl border border-white/5 p-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4">Progress by Chapter</h2>
+                    <div id="fc-chapter-stats" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="w-full bg-surface-dark rounded-xl border border-white/5 p-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4">Recent Activity</h2>
+                    <div id="fc-daily-stats" class="space-y-2">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                
+                <div class="flex gap-4 justify-center">
+                    <button onclick="showView('flashcards')" class="px-6 py-3 rounded-lg bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/30 font-medium transition-all">Study Flashcards</button>
+                    <button onclick="resetFlashcardProgress()" class="px-6 py-3 rounded-lg border border-red-500/50 text-red-400 hover:bg-red-500/10 font-medium transition-all">Reset Progress</button>
+                </div>
             </div>
         </div>
 
@@ -745,20 +782,32 @@
             
             <!-- Chapter Selection -->
             <div id="fc-chapter-select">
-                <div class="text-center mb-8">
+                <div class="text-center mb-6">
                     <h1 class="text-4xl font-bold mb-2">RHCSA Flashcards</h1>
                     <p class="text-gray-400">247 cards from Sander van Vugt's RHCSA 9 Cert Guide</p>
                 </div>
-                <div id="fc-chapter-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+                
+                <!-- Summary Stats -->
+                <div id="fc-summary" class="mb-6">
                     <!-- Populated by JS -->
                 </div>
-                <div class="flex flex-wrap gap-3 justify-center">
-                    <button onclick="fcStartAll()" class="px-6 py-3 bg-primary hover:bg-primary-hover rounded-lg font-bold transition-all">
-                        Study All (247 cards)
+                
+                <!-- Study Mode Buttons -->
+                <div class="flex flex-wrap gap-3 justify-center mb-8">
+                    <button onclick="fcStartDue()" class="px-6 py-3 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/30 rounded-lg font-bold transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined">schedule</span> Study Due Cards
+                    </button>
+                    <button onclick="fcStartAll()" class="px-6 py-3 bg-surface-dark border border-white/10 hover:border-white/20 rounded-lg font-medium transition-all">
+                        Study All
                     </button>
                     <button onclick="fcStartSelected()" id="fc-start-selected-btn" class="hidden px-6 py-3 bg-surface-dark border border-white/10 hover:border-white/20 rounded-lg font-medium transition-all">
-                        Study Selected (<span id="fc-selected-count">0</span> cards)
+                        Study Selected (<span id="fc-selected-count">0</span>)
                     </button>
+                </div>
+                
+                <h2 class="text-lg font-bold mb-4 text-gray-400">Chapters</h2>
+                <div id="fc-chapter-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+                    <!-- Populated by JS -->
                 </div>
             </div>
 
@@ -769,10 +818,11 @@
                     <button onclick="fcBackToChapters()" class="text-gray-400 hover:text-white flex items-center gap-1">
                         <span class="material-symbols-outlined text-sm">arrow_back</span> Chapters
                     </button>
-                    <div class="text-gray-400 text-sm">
-                        <span id="fc-current-num">1</span> / <span id="fc-total-num">0</span>
-                        <span class="ml-4 text-green-500">✓ <span id="fc-known-count">0</span></span>
-                        <span class="ml-2 text-red-500">✗ <span id="fc-unknown-count">0</span></span>
+                    <div class="text-gray-400 text-sm flex items-center gap-4">
+                        <span id="fc-card-state" class="text-xs font-bold"></span>
+                        <span><span id="fc-current-num">1</span> / <span id="fc-total-num">0</span></span>
+                        <span class="text-green-500">✓ <span id="fc-known-count">0</span></span>
+                        <span class="text-red-500">✗ <span id="fc-unknown-count">0</span></span>
                     </div>
                 </div>
 
@@ -2324,6 +2374,24 @@
         }
 
         // Statistics
+        let currentStatsTab = 'practice';
+        
+        function showStatsTab(tab) {
+            currentStatsTab = tab;
+            // Update tab buttons
+            document.getElementById('stats-tab-practice').classList.toggle('bg-primary', tab === 'practice');
+            document.getElementById('stats-tab-practice').classList.toggle('text-white', tab === 'practice');
+            document.getElementById('stats-tab-practice').classList.toggle('text-gray-400', tab !== 'practice');
+            document.getElementById('stats-tab-flashcards').classList.toggle('bg-primary', tab === 'flashcards');
+            document.getElementById('stats-tab-flashcards').classList.toggle('text-white', tab === 'flashcards');
+            document.getElementById('stats-tab-flashcards').classList.toggle('text-gray-400', tab !== 'flashcards');
+            // Show/hide content
+            document.getElementById('stats-practice-content').classList.toggle('hidden', tab !== 'practice');
+            document.getElementById('stats-flashcards-content').classList.toggle('hidden', tab !== 'flashcards');
+            // Load flashcard stats if needed
+            if (tab === 'flashcards') loadFlashcardStats();
+        }
+        
         async function loadStats() {
             try {
                 const res = await fetch('/api/stats');
@@ -2386,6 +2454,100 @@
                 }
             } catch (e) {
                 document.getElementById('stats-summary').innerHTML = '<p class="text-red-400 text-center py-4 col-span-full">Failed to load statistics</p>';
+            }
+        }
+        
+        async function loadFlashcardStats() {
+            try {
+                const [statsRes, dataRes] = await Promise.all([
+                    fetch('/api/flashcards/stats'),
+                    fcData ? Promise.resolve({json: () => fcData}) : fetch('/flashcards.json')
+                ]);
+                const stats = await statsRes.json();
+                if (!fcData) fcData = await dataRes.json();
+                
+                const p = stats.progress || {};
+                const totalCards = 247;
+                
+                // Summary stats
+                document.getElementById('fc-stats-summary').innerHTML = `
+                    <div class="bg-surface-dark rounded-xl border border-white/5 p-6 text-center">
+                        <div class="text-4xl font-bold text-yellow-500 mb-1">${p.due_today || 0}</div>
+                        <div class="text-sm text-gray-400">Due Today</div>
+                    </div>
+                    <div class="bg-surface-dark rounded-xl border border-white/5 p-6 text-center">
+                        <div class="text-4xl font-bold mb-1">${stats.streak || 0}</div>
+                        <div class="text-sm text-gray-400">Day Streak</div>
+                    </div>
+                    <div class="bg-surface-dark rounded-xl border border-white/5 p-6 text-center">
+                        <div class="text-4xl font-bold text-green-500 mb-1">${p.mastered || 0}</div>
+                        <div class="text-sm text-gray-400">Mastered</div>
+                    </div>
+                    <div class="bg-surface-dark rounded-xl border border-white/5 p-6 text-center">
+                        <div class="text-4xl font-bold mb-1">${stats.accuracy || 0}%</div>
+                        <div class="text-sm text-gray-400">Accuracy</div>
+                    </div>
+                `;
+                
+                // Chapter progress
+                const chapterContainer = document.getElementById('fc-chapter-stats');
+                const chapterMap = {};
+                (stats.by_chapter || []).forEach(c => chapterMap[c.chapter] = c);
+                
+                chapterContainer.innerHTML = fcData.chapters.map(ch => {
+                    const chStats = chapterMap[ch.chapter] || { total: 0, mastered: 0 };
+                    const pct = ch.cards.length > 0 ? Math.round((chStats.mastered / ch.cards.length) * 100) : 0;
+                    return `
+                        <div class="flex items-center gap-4">
+                            <div class="w-20 text-xs text-gray-500">Ch ${ch.chapter}</div>
+                            <div class="flex-1">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>${ch.title}</span>
+                                    <span class="text-gray-400">${chStats.mastered}/${ch.cards.length}</span>
+                                </div>
+                                <div class="w-full bg-white/5 rounded-full h-2">
+                                    <div class="h-2 rounded-full bg-green-500 transition-all" style="width: ${pct}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Daily stats
+                const dailyContainer = document.getElementById('fc-daily-stats');
+                const daily = stats.daily_stats || [];
+                if (daily.length) {
+                    dailyContainer.innerHTML = daily.slice(0, 7).map(d => {
+                        const date = new Date(d.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                        const acc = d.cards_studied > 0 ? Math.round((d.correct / d.cards_studied) * 100) : 0;
+                        return `
+                            <div class="flex items-center justify-between py-2 border-b border-white/5">
+                                <span class="text-sm text-gray-400">${date}</span>
+                                <div class="flex items-center gap-4">
+                                    <span class="text-sm">${d.cards_studied} cards</span>
+                                    <span class="text-sm ${acc >= 70 ? 'text-green-500' : acc >= 50 ? 'text-yellow-500' : 'text-red-500'}">${acc}%</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    dailyContainer.innerHTML = '<p class="text-gray-400 text-center py-4">No activity yet</p>';
+                }
+            } catch (e) {
+                console.error('Failed to load flashcard stats:', e);
+                document.getElementById('fc-stats-summary').innerHTML = '<p class="text-red-400 text-center py-4 col-span-full">Failed to load flashcard statistics</p>';
+            }
+        }
+        
+        async function resetFlashcardProgress() {
+            if (!confirm('Are you sure you want to reset all flashcard progress? This cannot be undone.')) return;
+            try {
+                await fetch('/api/flashcards/reset', { method: 'POST' });
+                fcProgress = {};
+                showToast('Flashcard progress reset', 'success');
+                loadFlashcardStats();
+            } catch (e) {
+                showToast('Failed to reset progress', 'error');
             }
         }
 
@@ -2667,9 +2829,10 @@
         }
 
         // =================================================================
-        // Flashcards
+        // Flashcards with Backend Progress Tracking
         // =================================================================
         let fcData = null;
+        let fcProgress = {};  // card_id -> progress from backend
         let fcCards = [];
         let fcCurrentIndex = 0;
         let fcKnown = 0;
@@ -2677,30 +2840,110 @@
         let fcMissedCards = [];
         let fcSelectedChapters = new Set();
         let fcIsFlipped = false;
+        let fcCardStartTime = null;
+        let fcStats = null;
+        let fcStudyMode = 'all';  // 'all', 'due', 'new'
 
         async function loadFlashcards() {
-            if (fcData) return;
             try {
-                const resp = await fetch('/flashcards.json');
-                fcData = await resp.json();
+                // Load card data and progress in parallel
+                const [dataResp, progressResp, statsResp] = await Promise.all([
+                    fetch('/flashcards.json'),
+                    fetch('/api/flashcards/progress'),
+                    fetch('/api/flashcards/stats')
+                ]);
+                fcData = await dataResp.json();
+                const progressList = await progressResp.json();
+                fcStats = await statsResp.json();
+                
+                // Index progress by card_id
+                fcProgress = {};
+                progressList.forEach(p => fcProgress[p.card_id] = p);
+                
                 fcRenderChapters();
             } catch (e) {
                 console.error('Failed to load flashcards:', e);
             }
         }
 
+        function fcGetCardId(card) {
+            return `ch${card.chapter}-${btoa(card.q).slice(0, 16)}`;
+        }
+
         function fcRenderChapters() {
             const grid = document.getElementById('fc-chapter-grid');
-            grid.innerHTML = fcData.chapters.map(ch => `
+            
+            // Calculate per-chapter stats
+            const chapterStats = {};
+            fcData.chapters.forEach(ch => {
+                const cards = ch.cards.map(c => ({...c, chapter: ch.chapter}));
+                let mastered = 0, due = 0, newCards = 0;
+                cards.forEach(card => {
+                    const cardId = fcGetCardId(card);
+                    const prog = fcProgress[cardId];
+                    if (!prog) newCards++;
+                    else if (prog.state === 'mastered') mastered++;
+                    else if (prog.due_date && prog.due_date <= new Date().toISOString().slice(0, 10)) due++;
+                });
+                chapterStats[ch.chapter] = { mastered, due, newCards, total: cards.length };
+            });
+            
+            grid.innerHTML = fcData.chapters.map(ch => {
+                const stats = chapterStats[ch.chapter];
+                const pct = Math.round((stats.mastered / stats.total) * 100);
+                return `
                 <div class="fc-chapter-card p-4 bg-surface-dark rounded-xl border border-white/5 hover:border-white/20 cursor-pointer transition-all"
                      data-chapter="${ch.chapter}" onclick="fcToggleChapter(${ch.chapter})">
                     <div class="flex justify-between items-start mb-2">
                         <span class="text-xs text-gray-500">Ch ${ch.chapter}</span>
-                        <span class="text-xs text-gray-500">${ch.cards.length} cards</span>
+                        <span class="text-xs ${stats.due > 0 ? 'text-yellow-500' : 'text-gray-500'}">
+                            ${stats.due > 0 ? stats.due + ' due' : stats.total + ' cards'}
+                        </span>
                     </div>
-                    <div class="font-medium text-sm">${ch.title}</div>
+                    <div class="font-medium text-sm mb-2">${ch.title}</div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                            <div class="h-full bg-green-500 transition-all" style="width: ${pct}%"></div>
+                        </div>
+                        <span class="text-xs text-gray-500">${pct}%</span>
+                    </div>
                 </div>
-            `).join('');
+            `}).join('');
+            
+            // Show summary stats
+            fcRenderSummary();
+        }
+
+        function fcRenderSummary() {
+            const summary = document.getElementById('fc-summary');
+            if (!summary || !fcStats) return;
+            
+            const p = fcStats.progress || {};
+            const dueToday = p.due_today || 0;
+            const totalCards = 247;
+            const studied = p.total || 0;
+            const mastered = p.mastered || 0;
+            
+            summary.innerHTML = `
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                    <div class="p-4 bg-surface-dark rounded-xl border border-white/5 text-center">
+                        <div class="text-2xl font-bold text-yellow-500">${dueToday}</div>
+                        <div class="text-xs text-gray-500">Due Today</div>
+                    </div>
+                    <div class="p-4 bg-surface-dark rounded-xl border border-white/5 text-center">
+                        <div class="text-2xl font-bold text-blue-500">${studied}</div>
+                        <div class="text-xs text-gray-500">Studied</div>
+                    </div>
+                    <div class="p-4 bg-surface-dark rounded-xl border border-white/5 text-center">
+                        <div class="text-2xl font-bold text-green-500">${mastered}</div>
+                        <div class="text-xs text-gray-500">Mastered</div>
+                    </div>
+                    <div class="p-4 bg-surface-dark rounded-xl border border-white/5 text-center">
+                        <div class="text-2xl font-bold">${fcStats.streak || 0}</div>
+                        <div class="text-xs text-gray-500">Day Streak</div>
+                    </div>
+                </div>
+            `;
         }
 
         function fcToggleChapter(chNum) {
@@ -2727,6 +2970,7 @@
         }
 
         function fcStartAll() {
+            fcStudyMode = 'all';
             fcCards = fcData.chapters.flatMap(ch => 
                 ch.cards.map(c => ({...c, chapter: ch.chapter, title: ch.title}))
             );
@@ -2734,17 +2978,58 @@
         }
 
         function fcStartSelected() {
+            fcStudyMode = 'selected';
             fcCards = fcData.chapters
                 .filter(ch => fcSelectedChapters.has(ch.chapter))
                 .flatMap(ch => ch.cards.map(c => ({...c, chapter: ch.chapter, title: ch.title})));
             fcShuffleAndStart();
         }
 
-        function fcShuffleAndStart() {
-            for (let i = fcCards.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [fcCards[i], fcCards[j]] = [fcCards[j], fcCards[i]];
+        async function fcStartDue() {
+            fcStudyMode = 'due';
+            try {
+                const resp = await fetch('/api/flashcards/due');
+                const dueCards = await resp.json();
+                const dueIds = new Set(dueCards.map(d => d.card_id));
+                
+                fcCards = fcData.chapters.flatMap(ch => 
+                    ch.cards.map(c => ({...c, chapter: ch.chapter, title: ch.title}))
+                ).filter(card => dueIds.has(fcGetCardId(card)));
+                
+                if (fcCards.length === 0) {
+                    showToast('No cards due for review!', 'info');
+                    return;
+                }
+                fcShuffleAndStart();
+            } catch (e) {
+                showToast('Failed to load due cards', 'error');
             }
+        }
+
+        function fcShuffleAndStart() {
+            // Put due cards first, then new cards, then shuffle within groups
+            const today = new Date().toISOString().slice(0, 10);
+            const due = [], newCards = [], other = [];
+            
+            fcCards.forEach(card => {
+                const cardId = fcGetCardId(card);
+                const prog = fcProgress[cardId];
+                if (!prog) newCards.push(card);
+                else if (prog.due_date && prog.due_date <= today) due.push(card);
+                else other.push(card);
+            });
+            
+            // Shuffle each group
+            [due, newCards, other].forEach(arr => {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+            });
+            
+            // Prioritize: due first, then new (limit 20 new per session), then others
+            fcCards = [...due, ...newCards.slice(0, 20), ...other];
+            
             fcCurrentIndex = 0;
             fcKnown = 0;
             fcUnknown = 0;
@@ -2763,6 +3048,9 @@
                 return;
             }
             const card = fcCards[fcCurrentIndex];
+            const cardId = fcGetCardId(card);
+            const prog = fcProgress[cardId];
+            
             document.getElementById('fc-question').textContent = card.q;
             document.getElementById('fc-answer').textContent = card.a;
             document.getElementById('fc-current-num').textContent = fcCurrentIndex + 1;
@@ -2771,8 +3059,18 @@
             document.getElementById('fc-progress-bar').style.width = 
                 `${((fcCurrentIndex) / fcCards.length) * 100}%`;
             
-            // Reset flip
+            // Show card state indicator
+            const stateEl = document.getElementById('fc-card-state');
+            if (stateEl) {
+                if (!prog) stateEl.innerHTML = '<span class="text-blue-500">NEW</span>';
+                else if (prog.state === 'mastered') stateEl.innerHTML = '<span class="text-green-500">MASTERED</span>';
+                else if (prog.state === 'learning') stateEl.innerHTML = '<span class="text-yellow-500">LEARNING</span>';
+                else stateEl.innerHTML = '<span class="text-gray-500">REVIEW</span>';
+            }
+            
+            // Reset flip and start timer
             fcIsFlipped = false;
+            fcCardStartTime = Date.now();
             document.querySelector('.fc-card-inner').style.transform = 'rotateY(0deg)';
         }
 
@@ -2782,24 +3080,54 @@
                 fcIsFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
         }
 
-        function fcMarkCard(isKnown) {
+        async function fcMarkCard(isKnown) {
+            const card = fcCards[fcCurrentIndex];
+            const cardId = fcGetCardId(card);
+            const timeTaken = Date.now() - (fcCardStartTime || Date.now());
+            
+            // Record to backend (rating: 1=Again, 3=Good)
+            const rating = isKnown ? 3 : 1;
+            try {
+                const resp = await fetch('/api/flashcards/review', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        card_id: cardId,
+                        chapter: card.chapter,
+                        rating: rating,
+                        time_taken_ms: timeTaken
+                    })
+                });
+                const result = await resp.json();
+                // Update local progress cache
+                fcProgress[cardId] = result;
+            } catch (e) {
+                console.error('Failed to record review:', e);
+            }
+            
             if (isKnown) {
                 fcKnown++;
             } else {
                 fcUnknown++;
-                fcMissedCards.push(fcCards[fcCurrentIndex]);
+                fcMissedCards.push(card);
             }
             fcCurrentIndex++;
             fcShowCard();
         }
 
-        function fcShowResults() {
+        async function fcShowResults() {
             document.getElementById('fc-study-area').classList.add('hidden');
             document.getElementById('fc-results-area').classList.remove('hidden');
             document.getElementById('fc-final-known').textContent = fcKnown;
-            document.getElementById('fc-final-total').textContent = fcCards.length;
+            document.getElementById('fc-final-total').textContent = fcKnown + fcUnknown;
             document.getElementById('fc-missed-count').textContent = fcMissedCards.length;
             document.getElementById('fc-restart-missed-btn').classList.toggle('hidden', fcMissedCards.length === 0);
+            
+            // Refresh stats
+            try {
+                const resp = await fetch('/api/flashcards/stats');
+                fcStats = await resp.json();
+            } catch (e) {}
         }
 
         function fcRestartMissed() {
@@ -2807,10 +3135,27 @@
             fcShuffleAndStart();
         }
 
-        function fcBackToChapters() {
+        async function fcBackToChapters() {
             document.getElementById('fc-chapter-select').classList.remove('hidden');
             document.getElementById('fc-study-area').classList.add('hidden');
             document.getElementById('fc-results-area').classList.add('hidden');
+            // Refresh stats and chapter display
+            try {
+                const [progressResp, statsResp] = await Promise.all([
+                    fetch('/api/flashcards/progress'),
+                    fetch('/api/flashcards/stats')
+                ]);
+                const progressList = await progressResp.json();
+                fcStats = await statsResp.json();
+                fcProgress = {};
+                progressList.forEach(p => fcProgress[p.card_id] = p);
+                if (fcData) {
+                    fcRenderChapters();
+                    fcRenderSummary();
+                }
+            } catch (e) {
+                console.error('Failed to refresh stats:', e);
+            }
         }
 
         // Flashcard keyboard shortcuts

@@ -66,6 +66,43 @@ def init_db():
             checks TEXT NOT NULL
         )
     ''')
+    # Flashcard progress tracking (Anki-style spaced repetition)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS flashcard_progress (
+            card_id TEXT PRIMARY KEY,
+            chapter INTEGER NOT NULL,
+            state TEXT DEFAULT 'new',
+            ease REAL DEFAULT 2.5,
+            interval INTEGER DEFAULT 0,
+            due_date TEXT,
+            reviews INTEGER DEFAULT 0,
+            lapses INTEGER DEFAULT 0,
+            last_review TEXT,
+            created_at TEXT NOT NULL
+        )
+    ''')
+    # Flashcard review history
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS flashcard_reviews (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            card_id TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            rating INTEGER NOT NULL,
+            time_taken_ms INTEGER
+        )
+    ''')
+    # Daily study stats
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS flashcard_daily_stats (
+            date TEXT PRIMARY KEY,
+            cards_studied INTEGER DEFAULT 0,
+            cards_new INTEGER DEFAULT 0,
+            cards_review INTEGER DEFAULT 0,
+            correct INTEGER DEFAULT 0,
+            incorrect INTEGER DEFAULT 0,
+            time_spent_ms INTEGER DEFAULT 0
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -986,6 +1023,250 @@ def grader_status_v2():
     except Exception as e:
         logger.error(f"grader_status_v2 failed: {e}")
         return jsonify({'error': str(e)}), 500
+
+
+# =============================================================================
+# Flashcard API Endpoints
+# =============================================================================
+
+@app.route('/api/flashcards/progress', methods=['GET'])
+def get_flashcard_progress():
+    """Get all flashcard progress."""
+    with db_connection() as conn:
+        c = conn.cursor()
+        c.execute('SELECT * FROM flashcard_progress')
+        rows = c.fetchall()
+        return jsonify([dict(row) for row in rows])
+
+
+@app.route('/api/flashcards/progress/<card_id>', methods=['GET'])
+def get_card_progress(card_id):
+    """Get progress for a specific card."""
+    with db_connection() as conn:
+        c = conn.cursor()
+        c.execute('SELECT * FROM flashcard_progress WHERE card_id = ?', (card_id,))
+        row = c.fetchone()
+        if row:
+            return jsonify(dict(row))
+        return jsonify(None)
+
+
+@app.route('/api/flashcards/review', methods=['POST'])
+def record_flashcard_review():
+    """Record a flashcard review and update progress using SM-2 algorithm."""
+    data = request.json
+    card_id = data.get('card_id')
+    chapter = data.get('chapter', 0)
+    rating = data.get('rating')  # 1 = Again, 2 = Hard, 3 = Good, 4 = Easy
+    time_taken_ms = data.get('time_taken_ms', 0)
+    
+    if not card_id or rating is None:
+        return jsonify({'error': 'card_id and rating required'}), 400
+    
+    now = datetime.now().isoformat()
+    today = datetime.now().strftime('%Y-%m-%d')
+    
+    with db_connection() as conn:
+        c = conn.cursor()
+        
+        # Get or create card progress
+        c.execute('SELECT * FROM flashcard_progress WHERE card_id = ?', (card_id,))
+        row = c.fetchone()
+        
+        if row:
+            state = row['state']
+            ease = row['ease']
+            interval = row['interval']
+            reviews = row['reviews']
+            lapses = row['lapses']
+        else:
+            state = 'new'
+            ease = 2.5
+            interval = 0
+            reviews = 0
+            lapses = 0
+        
+        # SM-2 algorithm (simplified)
+        reviews += 1
+        is_correct = rating >= 2  # 2+ is passing
+        
+        if rating == 1:  # Again - reset
+            lapses += 1
+            interval = 1
+            ease = max(1.3, ease - 0.2)
+            state = 'learning'
+        elif rating == 2:  # Hard
+            interval = max(1, int(interval * 1.2))
+            ease = max(1.3, ease - 0.15)
+            state = 'reviewing'
+        elif rating == 3:  # Good
+            if interval == 0:
+                interval = 1
+            elif interval == 1:
+                interval = 6
+            else:
+                interval = int(interval * ease)
+            state = 'reviewing' if interval < 21 else 'mastered'
+        else:  # Easy (4)
+            if interval == 0:
+                interval = 4
+            else:
+                interval = int(interval * ease * 1.3)
+            ease = min(3.0, ease + 0.15)
+            state = 'mastered' if interval >= 21 else 'reviewing'
+        
+        # Calculate next due date
+        from datetime import timedelta
+        due_date = (datetime.now() + timedelta(days=interval)).strftime('%Y-%m-%d')
+        
+        # Upsert progress
+        c.execute('''
+            INSERT INTO flashcard_progress 
+                (card_id, chapter, state, ease, interval, due_date, reviews, lapses, last_review, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(card_id) DO UPDATE SET
+                state = excluded.state,
+                ease = excluded.ease,
+                interval = excluded.interval,
+                due_date = excluded.due_date,
+                reviews = excluded.reviews,
+                lapses = excluded.lapses,
+                last_review = excluded.last_review
+        ''', (card_id, chapter, state, ease, interval, due_date, reviews, lapses, now, now))
+        
+        # Record review history
+        c.execute('''
+            INSERT INTO flashcard_reviews (card_id, timestamp, rating, time_taken_ms)
+            VALUES (?, ?, ?, ?)
+        ''', (card_id, now, rating, time_taken_ms))
+        
+        # Update daily stats
+        c.execute('''
+            INSERT INTO flashcard_daily_stats (date, cards_studied, cards_new, cards_review, correct, incorrect, time_spent_ms)
+            VALUES (?, 1, ?, ?, ?, ?, ?)
+            ON CONFLICT(date) DO UPDATE SET
+                cards_studied = cards_studied + 1,
+                cards_new = cards_new + excluded.cards_new,
+                cards_review = cards_review + excluded.cards_review,
+                correct = correct + excluded.correct,
+                incorrect = incorrect + excluded.incorrect,
+                time_spent_ms = time_spent_ms + excluded.time_spent_ms
+        ''', (
+            today,
+            1 if row is None else 0,  # new card
+            0 if row is None else 1,  # review
+            1 if is_correct else 0,
+            0 if is_correct else 1,
+            time_taken_ms
+        ))
+        
+        return jsonify({
+            'card_id': card_id,
+            'state': state,
+            'ease': round(ease, 2),
+            'interval': interval,
+            'due_date': due_date,
+            'reviews': reviews
+        })
+
+
+@app.route('/api/flashcards/stats', methods=['GET'])
+def get_flashcard_stats():
+    """Get flashcard statistics."""
+    with db_connection() as conn:
+        c = conn.cursor()
+        
+        # Overall progress
+        c.execute('''
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN state = 'new' THEN 1 ELSE 0 END) as new_count,
+                SUM(CASE WHEN state = 'learning' THEN 1 ELSE 0 END) as learning,
+                SUM(CASE WHEN state = 'reviewing' THEN 1 ELSE 0 END) as reviewing,
+                SUM(CASE WHEN state = 'mastered' THEN 1 ELSE 0 END) as mastered,
+                SUM(CASE WHEN due_date <= date('now') THEN 1 ELSE 0 END) as due_today
+            FROM flashcard_progress
+        ''')
+        progress = dict(c.fetchone())
+        
+        # Progress by chapter
+        c.execute('''
+            SELECT chapter,
+                COUNT(*) as total,
+                SUM(CASE WHEN state = 'mastered' THEN 1 ELSE 0 END) as mastered,
+                SUM(CASE WHEN due_date <= date('now') THEN 1 ELSE 0 END) as due
+            FROM flashcard_progress
+            GROUP BY chapter
+            ORDER BY chapter
+        ''')
+        by_chapter = [dict(row) for row in c.fetchall()]
+        
+        # Recent daily stats (last 30 days)
+        c.execute('''
+            SELECT * FROM flashcard_daily_stats
+            WHERE date >= date('now', '-30 days')
+            ORDER BY date DESC
+            LIMIT 30
+        ''')
+        daily_stats = [dict(row) for row in c.fetchall()]
+        
+        # Calculate streak
+        c.execute('''
+            SELECT date FROM flashcard_daily_stats
+            WHERE cards_studied > 0
+            ORDER BY date DESC
+        ''')
+        dates = [row['date'] for row in c.fetchall()]
+        streak = 0
+        today = datetime.now().strftime('%Y-%m-%d')
+        check_date = today
+        for d in dates:
+            if d == check_date:
+                streak += 1
+                check_date = (datetime.strptime(check_date, '%Y-%m-%d') - timedelta(days=1)).strftime('%Y-%m-%d')
+            elif d < check_date:
+                break
+        
+        # Total reviews
+        c.execute('SELECT COUNT(*) as total, SUM(CASE WHEN rating >= 2 THEN 1 ELSE 0 END) as correct FROM flashcard_reviews')
+        review_stats = dict(c.fetchone())
+        
+        return jsonify({
+            'progress': progress,
+            'by_chapter': by_chapter,
+            'daily_stats': daily_stats,
+            'streak': streak,
+            'total_reviews': review_stats['total'] or 0,
+            'accuracy': round((review_stats['correct'] or 0) / max(1, review_stats['total'] or 1) * 100, 1)
+        })
+
+
+@app.route('/api/flashcards/due', methods=['GET'])
+def get_due_cards():
+    """Get cards due for review today."""
+    with db_connection() as conn:
+        c = conn.cursor()
+        c.execute('''
+            SELECT card_id, chapter, state, interval, due_date
+            FROM flashcard_progress
+            WHERE due_date <= date('now')
+            ORDER BY due_date ASC, interval ASC
+        ''')
+        return jsonify([dict(row) for row in c.fetchall()])
+
+
+@app.route('/api/flashcards/reset', methods=['POST'])
+def reset_flashcard_progress():
+    """Reset all flashcard progress."""
+    with db_connection() as conn:
+        c = conn.cursor()
+        c.execute('DELETE FROM flashcard_progress')
+        c.execute('DELETE FROM flashcard_reviews')
+        c.execute('DELETE FROM flashcard_daily_stats')
+        return jsonify({'status': 'ok', 'message': 'Flashcard progress reset'})
+
+
+from datetime import timedelta  # Import at module level for the review function
 
 
 if __name__ == '__main__':
