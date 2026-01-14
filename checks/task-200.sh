@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
-# Task: Create a new firewall zone called "custom" that allows only SSH and HTTPS services. Assign the primary interface to this zone permanently.
+# Task: Create a new firewall zone named "custom" and configure it to allow only SSH and HTTPS services.
 # Title: Create Custom Firewall Zone
 # Category: security
 # Target: node1
 
 check 'firewall-cmd --get-zones 2>/dev/null | grep -q "custom"' \
     "Firewall zone 'custom' exists" \
-    "Zone 'custom' not found"
+    "Zone 'custom' not found (hint: firewall-cmd --new-zone)"
 
-check 'firewall-cmd --zone=custom --list-services 2>/dev/null | grep -qE "ssh.*https|https.*ssh"' \
-    "Zone allows SSH and HTTPS" \
-    "Zone doesn't have correct services"
+check 'firewall-cmd --permanent --zone=custom --list-services 2>/dev/null | grep -q "ssh"' \
+    "Zone allows SSH service" \
+    "SSH service not in zone"
+
+check 'firewall-cmd --permanent --zone=custom --list-services 2>/dev/null | grep -q "https"' \
+    "Zone allows HTTPS service" \
+    "HTTPS service not in zone"

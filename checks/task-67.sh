@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Task: Add the http service to the external firewalld zone persistently.
-# Title: Add Firewall Service
+# Task: The server needs to serve web traffic on an interface assigned to the external zone. Enable the HTTP service in this zone permanently.
+# Title: Enable HTTP in External Zone
 # Category: security
 # Target: node1
 
-check 'firewall-cmd --zone=external --list-services | grep -q "http"' \
-    "http service is in external zone" \
-    "http service is not in external zone"
+check 'firewall-cmd --zone=external --list-services 2>/dev/null | grep -q "http"' \
+    "HTTP service is enabled in external zone" \
+    "HTTP service is not enabled in external zone"
 
-check 'firewall-cmd --permanent --zone=external --list-services | grep -q "http"' \
-    "http service is persistent in external zone" \
-    "http service is not persistent"
+check 'firewall-cmd --permanent --zone=external --list-services 2>/dev/null | grep -q "http"' \
+    "Configuration is persistent" \
+    "Rule will not survive reboot (use --permanent)"

@@ -1,17 +1,13 @@
 #!/usr/bin/env bash
-# Task: Add a firewall rich rule to allow TCP connections on port 9000 only from the 10.0.0.0/8 network. Make it permanent.
-# Title: Configure Firewall Rich Rule
+# Task: A web application runs on port 9000. Configure the firewall to allow incoming TCP traffic on this port. The change must persist across reboots.
+# Title: Allow Traffic on Port 9000
 # Category: security
 # Target: node1
 
-check 'firewall-cmd --list-rich-rules 2>/dev/null | grep -q "9000"' \
-    "Rich rule for port 9000 exists" \
-    "No rich rule for port 9000 found"
+check 'firewall-cmd --list-ports 2>/dev/null | grep -q "9000/tcp"' \
+    "Port 9000/TCP is allowed in firewall" \
+    "Port 9000/TCP is not open in firewall"
 
-check 'firewall-cmd --list-rich-rules 2>/dev/null | grep 9000 | grep -q "10.0.0.0"' \
-    "Rule restricts to 10.0.0.0/8 network" \
-    "Rule doesn't restrict to correct network"
-
-check 'firewall-cmd --permanent --list-rich-rules 2>/dev/null | grep -q "9000"' \
+check 'firewall-cmd --permanent --list-ports 2>/dev/null | grep -q "9000/tcp"' \
     "Rule is permanent" \
-    "Rule is not permanent"
+    "Rule will not persist after reboot (use --permanent)"
