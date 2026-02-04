@@ -43,7 +43,6 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__, static_folder='../static', static_url_path='')
 
 BASE_DIR = Path(__file__).parent.parent
-GRADER_SCRIPT = BASE_DIR / 'exam-grader.sh'
 CONFIG_FILE = BASE_DIR / 'config'
 CONFIG_EXAMPLE = BASE_DIR / 'config.example'
 DB_FILE = BASE_DIR / 'results.db'
@@ -129,14 +128,7 @@ def db_connection():
         conn.close()
 
 
-def parse_grader_json(output):
-    """Parse JSON output from grader script, handling formatting quirks."""
-    try:
-        return json.loads(output)
-    except json.JSONDecodeError:
-        # Try cleaning up common formatting issues
-        cleaned = output.replace('\n,', ',').replace(',]', ']').replace(',}', '}')
-        return json.loads(cleaned)
+# NOTE: parse_grader_json() removed - was only used by deleted v1 endpoints
 
 
 def get_grading_env():
@@ -217,34 +209,7 @@ def favicon():
     return send_from_directory(app.static_folder, 'favicon.svg')
 
 
-@app.route('/api/tasks', methods=['GET'])
-def list_tasks():
-    """List all available tasks."""
-    logger.debug("list_tasks called")
-    try:
-        result = subprocess.run(
-            [str(GRADER_SCRIPT), '--list-tasks', '--json'],
-            capture_output=True,
-            text=True,
-            cwd=str(BASE_DIR),
-            timeout=TIMEOUT_LIST_TASKS
-        )
-    except subprocess.TimeoutExpired:
-        logger.error("list_tasks timed out")
-        return jsonify({'error': 'Request timed out'}), 504
-
-    if result.returncode != 0:
-        logger.error(f"list_tasks failed: {result.stderr}")
-        return jsonify({'error': result.stderr}), 500
-
-    try:
-        tasks = parse_grader_json(result.stdout)
-    except json.JSONDecodeError as e:
-        logger.error(f"Failed to parse task list: {e}")
-        return jsonify({'error': 'Failed to parse task list'}), 500
-
-    logger.debug(f"Returning {len(tasks)} tasks")
-    return jsonify(tasks)
+# NOTE: /api/tasks (v1) removed - use /api/v2/tasks instead
 
 
 @app.route('/api/config', methods=['GET'])
@@ -362,41 +327,79 @@ ROOT_PASSWORD="{root_password}"
 
 @app.route('/api/test-connection', methods=['POST'])
 def test_connection():
-    """Test SSH connectivity to nodes."""
-    try:
-        result = subprocess.run(
-            [str(GRADER_SCRIPT), '--check-ssh'],
-            capture_output=True,
-            text=True,
-            cwd=str(BASE_DIR),
-            timeout=TIMEOUT_SSH_CHECK
-        )
-    except subprocess.TimeoutExpired:
-        return jsonify({
-            'node1': False,
-            'node2': False,
-            'ok': False,
-            'error': 'SSH check timed out'
-        }), 504
-
-    try:
-        ssh_results = json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return jsonify({
-            'node1': False,
-            'node2': False,
-            'ok': False,
-            'error': 'Failed to parse SSH check output'
-        }), 500
-
-    node1_ok = next((n['ok'] for n in ssh_results if n['node'] == 'node1'), False)
-    node2_ok = next((n['ok'] for n in ssh_results if n['node'] == 'node2'), False)
-
+    """Test SSH connectivity to nodes using Python SSH."""
+    import paramiko
+    import socket
+    
+    results = []
+    
+    # Load config
+    config = {}
+    if CONFIG_FILE.exists():
+        with open(CONFIG_FILE) as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith('#') or '=' not in line:
+                    continue
+                key, value = line.split('=', 1)
+                config[key.strip().lower()] = value.strip().strip('"\'')
+    
+    # Get node IPs from config or static VMs
+    node1_ip = config.get('node1_ip', '')
+    node2_ip = config.get('node2_ip', '')
+    password = config.get('root_password', '')
+    
+    # Check static_vms.json as fallback
+    if not node1_ip:
+        static_vms_path = BASE_DIR / 'static_vms.json'
+        if static_vms_path.exists():
+            try:
+                with open(static_vms_path) as f:
+                    static_config = json.load(f)
+                node1_ip = static_config.get('node1_ip', '')
+                node2_ip = static_config.get('node2_ip', '')
+                password = static_config.get('ssh_password', password)
+            except (json.JSONDecodeError, KeyError):
+                pass
+    
+    def test_ssh(host: str, node_name: str) -> dict:
+        """Test SSH connection to a single host."""
+        if not host:
+            return {'node': node_name, 'ok': False, 'error': 'IP not configured'}
+        
+        try:
+            client = paramiko.SSHClient()
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            client.connect(
+                hostname=host,
+                username='root',
+                password=password,
+                timeout=10,
+                allow_agent=False,
+                look_for_keys=False
+            )
+            # Test command execution
+            stdin, stdout, stderr = client.exec_command('hostname', timeout=5)
+            hostname = stdout.read().decode().strip()
+            client.close()
+            return {'node': node_name, 'ok': True, 'hostname': hostname, 'ip': host}
+        except paramiko.AuthenticationException:
+            return {'node': node_name, 'ok': False, 'error': 'Authentication failed', 'ip': host}
+        except (paramiko.SSHException, socket.error, socket.timeout) as e:
+            return {'node': node_name, 'ok': False, 'error': str(e), 'ip': host}
+        except Exception as e:
+            return {'node': node_name, 'ok': False, 'error': f'Unexpected error: {e}', 'ip': host}
+    
+    # Test both nodes
+    node1_result = test_ssh(node1_ip, 'node1')
+    node2_result = test_ssh(node2_ip, 'node2')
+    results = [node1_result, node2_result]
+    
     return jsonify({
-        'node1': node1_ok,
-        'node2': node2_ok,
-        'ok': node1_ok and node2_ok,
-        'details': ssh_results
+        'node1': node1_result['ok'],
+        'node2': node2_result['ok'],
+        'ok': node1_result['ok'] and node2_result['ok'],
+        'details': results
     })
 
 
@@ -477,219 +480,20 @@ def reboot_vm():
     })
 
 
-@app.route('/api/healthcheck', methods=['GET'])
-def healthcheck():
-    """Comprehensive system health check."""
-    try:
-        result = subprocess.run(
-            [str(GRADER_SCRIPT), '--dry-run', '--json'],
-            capture_output=True,
-            text=True,
-            cwd=str(BASE_DIR),
-            timeout=TIMEOUT_LIST_TASKS
-        )
-    except subprocess.TimeoutExpired:
-        return jsonify({'ok': False, 'error': 'Health check timed out'}), 504
-
-    try:
-        health = json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return jsonify({
-            'ok': False,
-            'error': 'Failed to parse healthcheck output',
-            'raw': result.stdout
-        }), 500
-
-    return jsonify(health)
+# NOTE: /api/healthcheck removed - was using deprecated shell script
+# NOTE: /api/run removed - use /api/v2/grade instead
 
 
-@app.route('/api/run', methods=['POST'])
-def run_grader():
-    """Run the exam grader."""
-    data = request.json or {}
-    mode = data.get('mode', 'practice')
-    tasks = data.get('tasks', [])
-
-    logger.info(f"run_grader called: mode={mode}, tasks={tasks}")
-
-    # Validate tasks
-    if not tasks or len(tasks) == 0:
-        logger.warning("run_grader: No tasks provided")
-        return jsonify({
-            'error': 'No tasks selected',
-            'message': 'Please select at least one task to grade.'
-        }), 400
-
-    # Extract task numbers - handles both "task-01" and "01" formats
-    task_nums = []
-    for t in tasks:
-        num = t.replace('task-', '') if isinstance(t, str) and t.startswith('task-') else str(t)
-        task_nums.append(num)
-
-    # Build command (Flask must be run with sudo for SSH access to VMs)
-    cmd = [str(GRADER_SCRIPT), '--skip-reboot', '--json', f"--tasks={','.join(task_nums)}"]
-    logger.debug(f"Running grader command: {' '.join(cmd)}")
-
-    # Run the grader with timeout, using cloud session IPs if available
-    grading_env = get_grading_env()
-    try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            cwd=str(BASE_DIR),
-            timeout=TIMEOUT_GRADER,
-            env=grading_env
-        )
-    except subprocess.TimeoutExpired:
-        logger.error(f"Grader timed out after {TIMEOUT_GRADER}s")
-        return jsonify({
-            'error': 'Grading timed out',
-            'message': f'Grading took longer than {TIMEOUT_GRADER} seconds. Try fewer tasks.'
-        }), 504
-    finally:
-        # Clean up temp SSH key file if created
-        if 'SSH_KEY_FILE' in grading_env and os.path.exists(grading_env['SSH_KEY_FILE']):
-            os.unlink(grading_env['SSH_KEY_FILE'])
-
-    logger.debug(f"Grader returncode: {result.returncode}")
-    if result.stderr:
-        logger.debug(f"Grader stderr: {result.stderr[:500]}")
-
-    if result.returncode != 0:
-        error_msg = result.stderr.strip() if result.stderr else 'Grader process failed'
-        logger.error(f"Grader failed: {error_msg}")
-        logger.error(f"Grader stdout: {result.stdout[:500] if result.stdout else 'empty'}")
-
-        # Check for common errors and provide helpful messages
-        if 'must be run as root' in (result.stdout or ''):
-            error_msg = 'Flask must be run with sudo: sudo python app.py'
-
-        return jsonify({
-            'error': 'Grader failed',
-            'message': error_msg,
-            'details': result.stdout[:500] if result.stdout else None
-        }), 500
-
-    try:
-        grader_result = json.loads(result.stdout)
-        logger.info(f"Grader success: score={grader_result.get('score', 'N/A')}/{grader_result.get('total', 'N/A')}")
-    except json.JSONDecodeError as e:
-        logger.error(f"JSON parse error: {e}")
-        logger.error(f"Raw output: {result.stdout[:500]}")
-        return jsonify({
-            'error': 'Invalid grader output',
-            'message': f'Failed to parse grader response: {str(e)}',
-            'raw': result.stdout[:1000]
-        }), 500
-
-    return jsonify(grader_result)
+# NOTE: /api/run and /api/grade-task/<task_id> (v1) removed
+# Use /api/v2/grade and /api/v2/grade/<task_id> instead
 
 
-@app.route('/api/grade-task/<task_id>', methods=['POST'])
-def grade_single_task(task_id):
-    """Grade a single task and return the result."""
-    # Get optional target VM override
-    target = request.args.get('target', None)
-    if target and target not in ('node1', 'node2', 'both'):
-        return jsonify({'error': 'Invalid target', 'message': 'Target must be node1, node2, or both'}), 400
+# Removed dead code that called non-existent exam-grader.sh:
+# - run_grader() - ~80 lines
+# - grade_single_task() v1 - starting below
 
-    logger.info(f"grade_single_task called: task_id={task_id}, target={target}")
-
-    # Extract task number
-    task_num = task_id.replace('task-', '') if task_id.startswith('task-') else task_id
-
-    # Build command for single task
-    cmd = [str(GRADER_SCRIPT), '--skip-reboot', '--json', f"--tasks={task_num}"]
-    if target:
-        cmd.append(f"--target={target}")
-    logger.debug(f"Running single task grader: {' '.join(cmd)}")
-
-    # Run with cloud session IPs if available
-    grading_env = get_grading_env()
-    try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            cwd=str(BASE_DIR),
-            timeout=TIMEOUT_SINGLE_TASK,
-            env=grading_env
-        )
-    except subprocess.TimeoutExpired:
-        logger.error(f"Single task grader timed out after {TIMEOUT_SINGLE_TASK}s")
-        return jsonify({
-            'error': 'Grading timed out',
-            'message': f'Task grading took longer than {TIMEOUT_SINGLE_TASK} seconds.',
-            'task_id': task_id
-        }), 504
-    finally:
-        # Clean up temp SSH key file if created
-        if 'SSH_KEY_FILE' in grading_env and os.path.exists(grading_env['SSH_KEY_FILE']):
-            os.unlink(grading_env['SSH_KEY_FILE'])
-
-    logger.debug(f"Single task grader returncode: {result.returncode}")
-    logger.debug(f"Single task grader stdout: {result.stdout[:500] if result.stdout else 'empty'}")
-    logger.debug(f"Single task grader stderr: {result.stderr[:500] if result.stderr else 'empty'}")
-
-    if result.returncode != 0:
-        error_msg = result.stderr.strip() if result.stderr else 'Grader process failed'
-        logger.error(f"Single task grader failed: {error_msg}")
-
-        # Check for common errors
-        if 'must be run as root' in (result.stdout or ''):
-            error_msg = 'Flask must be run with sudo: sudo python app.py'
-
-        return jsonify({
-            'error': 'Grader failed',
-            'message': error_msg,
-            'task_id': task_id
-        }), 500
-
-    try:
-        grader_result = json.loads(result.stdout)
-
-        # Extract all checks for this task (tasks can have multiple checks)
-        task_checks = [c for c in grader_result.get('checks', [])
-                       if c.get('task') == task_id or c.get('task') == f"task-{task_num}"]
-
-        if task_checks:
-            # Aggregate results
-            total_points = sum(c.get('points', 0) for c in task_checks if c.get('passed'))
-            max_points = sum(c.get('points', 0) for c in task_checks)
-            all_passed = all(c.get('passed', False) for c in task_checks)
-            passed_count = sum(1 for c in task_checks if c.get('passed'))
-            total_count = len(task_checks)
-
-            # Build detailed message
-            check_details = [f"{'✓' if c.get('passed') else '✗'} {c.get('check', 'Check')}"
-                             for c in task_checks]
-
-            logger.info(f"Task {task_id}: {passed_count}/{total_count} checks passed, {total_points}/{max_points} points")
-            return jsonify({
-                'task_id': task_id,
-                'passed': all_passed,
-                'points': total_points,
-                'max_points': max_points,
-                'checks_passed': passed_count,
-                'checks_total': total_count,
-                'details': check_details,
-                'message': f"{passed_count}/{total_count} checks passed"
-            })
-        else:
-            return jsonify({
-                'task_id': task_id,
-                'passed': False,
-                'message': 'Task not found in grader output'
-            })
-
-    except json.JSONDecodeError as e:
-        logger.error(f"JSON parse error for single task: {e}")
-        return jsonify({
-            'error': 'Invalid grader output',
-            'message': str(e),
-            'task_id': task_id
-        }), 500
+# NOTE: The v1 grade_single_task follows - also to be removed
+# Keeping structure comment for git history
 
 
 @app.route('/api/results', methods=['POST'])
@@ -806,19 +610,14 @@ def get_stats():
             category_totals[cat]['earned'] += stats.get('earned', 0)
             category_totals[cat]['possible'] += stats.get('possible', 0)
 
-    # Get all available categories from tasks
+    # Get all available categories from tasks using Python grader
     all_categories = set()
     try:
-        result = subprocess.run(
-            [str(GRADER_SCRIPT), '--list-tasks', '--json'],
-            capture_output=True,
-            text=True,
-            cwd=str(BASE_DIR),
-            timeout=TIMEOUT_LIST_TASKS
-        )
-        tasks = json.loads(result.stdout)
+        service = get_grader_service()
+        tasks = service.list_tasks()
         all_categories = {t['category'] for t in tasks if t.get('category')}
-    except (subprocess.TimeoutExpired, json.JSONDecodeError, KeyError):
+    except Exception as e:
+        logger.warning(f"Could not load task categories for stats: {e}")
         pass
 
     # Calculate percentages for all categories
@@ -855,53 +654,12 @@ def get_stats():
 
 
 
-
-@app.route('/api/random-tasks', methods=['GET'])
-def random_tasks():
-    """Get random task selection for exam mode."""
-    count = request.args.get('count', 15, type=int)
-    count = max(1, min(50, count))  # Allow 1-50 tasks for challenge mode
-
-    logger.info(f"random_tasks called: count={count}")
-
-    # Get all tasks
-    try:
-        result = subprocess.run(
-            [str(GRADER_SCRIPT), '--list-tasks', '--json'],
-            capture_output=True,
-            text=True,
-            cwd=str(BASE_DIR),
-            timeout=TIMEOUT_LIST_TASKS
-        )
-    except subprocess.TimeoutExpired:
-        logger.error("random_tasks: list-tasks timed out")
-        return jsonify({'error': 'Request timed out'}), 504
-
-    logger.debug(f"list-tasks returncode: {result.returncode}")
-    if result.returncode != 0:
-        logger.error(f"list-tasks failed: {result.stderr}")
-        return jsonify({'error': 'Failed to list tasks', 'message': result.stderr}), 500
-
-    try:
-        tasks = parse_grader_json(result.stdout)
-    except json.JSONDecodeError as e:
-        logger.error(f"Failed to parse task list: {e}")
-        return jsonify({'error': 'Failed to parse tasks', 'message': str(e)}), 500
-
-    logger.debug(f"Found {len(tasks)} tasks")
-
-    # Exclude task-ssh (it's a prereq check)
-    tasks = [t for t in tasks if t['id'] != 'task-ssh']
-
-    # Select random tasks
-    selected = random.sample(tasks, min(count, len(tasks)))
-    logger.info(f"Selected {len(selected)} random tasks for exam")
-
-    return jsonify(selected)
+# NOTE: /api/random-tasks removed - was using deprecated shell script
+# Random task selection is now done client-side using /api/v2/tasks
 
 
 # =============================================================================
-# New Grader API (v2) - Uses Python grader module instead of shell script
+# Grader API (v2) - Uses Python grader module
 # =============================================================================
 
 try:
