@@ -52,3 +52,5 @@ stitch-pages/
 *.tar.gz
 patches/
 static_vms.json
+task-review-notes.json
+*.tar.gz

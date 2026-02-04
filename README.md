@@ -134,3 +134,8 @@ MIT License - see [LICENSE](LICENSE) for details.
 Inspired by [SadServers](https://sadservers.com/) - a great resource for Linux troubleshooting practice.
 
 Flashcards based on Sander van Vugt's RHCSA 9 Cert Guide.
+
+## Known Limitations
+
+- **Container tasks on 1GB VMs**: Cloud free-tier VMs (1GB RAM) may OOM when running podman. Use local VMs with 2GB+ RAM for container tasks, or use Vagrant which allocates 2GB by default.
+- **OCI Cloud Setup**: Requires Oracle Cloud Infrastructure account and API keys. See `infra/README.md` for setup.

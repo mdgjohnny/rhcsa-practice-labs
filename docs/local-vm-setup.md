@@ -43,8 +43,8 @@ Create `static_vms.json`:
 ```json
 {
   "session_id": "local-session",
-  "rhcsa1_ip": "192.168.99.11",
-  "rhcsa2_ip": "192.168.99.12",
+  "node1_ip": "192.168.99.11",
+  "node2_ip": "192.168.99.12",
   "ssh_user": "root",
   "ssh_password": "vagrant"
 }
@@ -106,8 +106,8 @@ If you have existing VMs or prefer manual setup.
    ```json
    {
      "session_id": "manual-vms",
-     "rhcsa1_ip": "YOUR_VM1_IP",
-     "rhcsa2_ip": "YOUR_VM2_IP",
+     "node1_ip": "YOUR_VM1_IP",
+     "node2_ip": "YOUR_VM2_IP",
      "ssh_user": "root",
      "ssh_password": "YOUR_PASSWORD"
    }
@@ -118,8 +118,8 @@ If you have existing VMs or prefer manual setup.
    ```json
    {
      "session_id": "manual-vms",
-     "rhcsa1_ip": "YOUR_VM1_IP",
-     "rhcsa2_ip": "YOUR_VM2_IP",
+     "node1_ip": "YOUR_VM1_IP",
+     "node2_ip": "YOUR_VM2_IP",
      "ssh_user": "root",
      "ssh_key_path": "/path/to/your/key"
    }
