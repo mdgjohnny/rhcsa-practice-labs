@@ -54,3 +54,4 @@ patches/
 static_vms.json
 task-review-notes.json
 *.tar.gz
+ARCHITECTURE_REMEDIATION_PLAN.md

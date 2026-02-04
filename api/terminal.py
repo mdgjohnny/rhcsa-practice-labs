@@ -9,6 +9,7 @@ Uses threading instead of eventlet (eventlet is deprecated).
 import logging
 import os
 import select
+import socket
 import threading
 import time
 from io import StringIO
@@ -17,6 +18,8 @@ from typing import Optional, TYPE_CHECKING
 import paramiko
 from flask import request
 from flask_socketio import SocketIO, emit, disconnect
+
+from exceptions import SSHConnectionError, SSHAuthenticationError
 
 if TYPE_CHECKING:
     from oci_manager import SessionManager
@@ -79,9 +82,16 @@ class TerminalSession:
                 key_file = StringIO(self.private_key)
                 try:
                     pkey = paramiko.RSAKey.from_private_key(key_file)
-                except:
+                except paramiko.SSHException:
+                    # RSA key parsing failed, try Ed25519
                     key_file.seek(0)
-                    pkey = paramiko.Ed25519Key.from_private_key(key_file)
+                    try:
+                        pkey = paramiko.Ed25519Key.from_private_key(key_file)
+                    except paramiko.SSHException as e:
+                        raise SSHAuthenticationError(
+                            f"Failed to parse SSH private key: {e}",
+                            auth_method="private_key"
+                        ) from e
                 
                 self.ssh_client.connect(
                     hostname=self.host,
@@ -189,15 +199,15 @@ class TerminalSession:
         if self.channel:
             try:
                 self.channel.close()
-            except:
-                pass
+            except (paramiko.SSHException, socket.error, OSError) as e:
+                logger.debug(f"Error closing channel: {e}")
             self.channel = None
 
         if self.ssh_client:
             try:
                 self.ssh_client.close()
-            except:
-                pass
+            except (paramiko.SSHException, socket.error, OSError) as e:
+                logger.debug(f"Error closing SSH client: {e}")
             self.ssh_client = None
 
         logger.info(f"Terminal session {self.sid} closed")

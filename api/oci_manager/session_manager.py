@@ -31,6 +31,20 @@ from typing import Optional, List, Callable
 
 import paramiko
 
+# Import exceptions - handle both package and direct execution modes
+import sys
+from pathlib import Path
+_api_dir = Path(__file__).parent.parent
+if str(_api_dir) not in sys.path:
+    sys.path.insert(0, str(_api_dir))
+
+from exceptions import (
+    SSHConnectionError,
+    SSHAuthenticationError,
+    SessionError,
+    SessionProvisioningError,
+    ConfigurationError,
+)
 from .terraform_wrapper import TerraformWrapper, WorkspaceManager
 
 logger = logging.getLogger(__name__)
@@ -104,8 +118,9 @@ class KeyEncryption:
         try:
             with open('/etc/machine-id', 'r') as f:
                 return f.read().strip()
-        except:
-            # Fallback to hostname + a static salt
+        except (OSError, IOError) as e:
+            # Fallback to hostname + a static salt (e.g., on macOS or containers)
+            logger.debug(f"Could not read /etc/machine-id: {e}, using hostname fallback")
             return f"{socket.gethostname()}-rhcsa-practice-salt"
     
     def encrypt(self, plaintext: str) -> str:
@@ -397,9 +412,16 @@ class SessionManager:
                 key_file = StringIO(private_key)
                 try:
                     pkey = paramiko.RSAKey.from_private_key(key_file)
-                except:
+                except paramiko.SSHException:
+                    # RSA key parsing failed, try Ed25519
                     key_file.seek(0)
-                    pkey = paramiko.Ed25519Key.from_private_key(key_file)
+                    try:
+                        pkey = paramiko.Ed25519Key.from_private_key(key_file)
+                    except paramiko.SSHException as e:
+                        raise SSHAuthenticationError(
+                            f"Failed to parse SSH private key: {e}",
+                            auth_method="private_key"
+                        ) from e
                 
                 ssh.connect(
                     hostname=host,
@@ -726,9 +748,16 @@ class SessionManager:
                 key_file = StringIO(session.ssh_private_key)
                 try:
                     pkey = paramiko.RSAKey.from_private_key(key_file)
-                except:
+                except paramiko.SSHException:
+                    # RSA key parsing failed, try Ed25519
                     key_file.seek(0)
-                    pkey = paramiko.Ed25519Key.from_private_key(key_file)
+                    try:
+                        pkey = paramiko.Ed25519Key.from_private_key(key_file)
+                    except paramiko.SSHException as e:
+                        raise SSHAuthenticationError(
+                            f"Failed to parse SSH private key for session {session.session_id}: {e}",
+                            auth_method="private_key"
+                        ) from e
                 
                 ssh.connect(
                     hostname=session.node1_ip,
