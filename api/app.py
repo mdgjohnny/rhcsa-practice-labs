@@ -15,8 +15,10 @@ import sys
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Generator
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, Response, jsonify, request, send_from_directory
+from werkzeug.wrappers import Response as WerkzeugResponse
 
 # Environment configuration
 DEBUG = os.environ.get('FLASK_DEBUG', 'false').lower() in ('true', '1', 'yes')
@@ -48,7 +50,7 @@ CONFIG_EXAMPLE = BASE_DIR / 'config.example'
 DB_FILE = BASE_DIR / 'results.db'
 
 
-def init_db():
+def init_db() -> None:
     """Initialize SQLite database for storing results."""
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
@@ -106,7 +108,7 @@ def init_db():
     conn.close()
 
 
-def get_db():
+def get_db() -> sqlite3.Connection:
     """Get database connection."""
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
@@ -114,7 +116,7 @@ def get_db():
 
 
 @contextmanager
-def db_connection():
+def db_connection() -> Generator[sqlite3.Connection, None, None]:
     """Context manager for database connections."""
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
@@ -131,7 +133,7 @@ def db_connection():
 # NOTE: parse_grader_json() removed - was only used by deleted v1 endpoints
 
 
-def get_grading_env():
+def get_grading_env() -> dict[str, str]:
     """
     Get environment variables for grading, including cloud session IPs if available.
     This allows the grader to connect to cloud VMs when a session is active.
@@ -198,14 +200,16 @@ init_db()
 
 
 @app.route('/')
-def index():
+def index() -> Response:
     """Serve the main page."""
+    assert app.static_folder is not None
     return send_from_directory(app.static_folder, 'index.html')
 
 
 @app.route('/favicon.svg')
-def favicon():
+def favicon() -> Response:
     """Serve favicon."""
+    assert app.static_folder is not None
     return send_from_directory(app.static_folder, 'favicon.svg')
 
 
@@ -213,7 +217,7 @@ def favicon():
 
 
 @app.route('/api/config', methods=['GET'])
-def get_config():
+def get_config() -> Response:
     """Get current configuration."""
     config = {
         'node1': 'rhcsa1',
@@ -247,7 +251,7 @@ def get_config():
     return jsonify(config)
 
 
-def sanitize_config_value(value):
+def sanitize_config_value(value: Any) -> str:
     """Sanitize config values to prevent injection."""
     if not value:
         return ''
@@ -259,7 +263,7 @@ def sanitize_config_value(value):
     return result.strip()
 
 
-def validate_ip(ip):
+def validate_ip(ip: str | None) -> bool:
     """Validate IP address format."""
     if not ip:
         return True  # Empty is ok
@@ -270,7 +274,7 @@ def validate_ip(ip):
     return all(0 <= int(p) <= 255 for p in parts)
 
 
-def validate_hostname(name):
+def validate_hostname(name: str | None) -> bool:
     """Validate hostname format."""
     if not name:
         return False
@@ -280,7 +284,7 @@ def validate_hostname(name):
 
 
 @app.route('/api/config', methods=['POST'])
-def save_config():
+def save_config() -> tuple[Response, int] | Response:
     """Save configuration."""
     data = request.json or {}
 
@@ -326,7 +330,7 @@ ROOT_PASSWORD="{root_password}"
 
 
 @app.route('/api/test-connection', methods=['POST'])
-def test_connection():
+def test_connection() -> tuple[Response, int] | Response:
     """Test SSH connectivity to nodes using Python SSH."""
     import paramiko
     import socket
@@ -404,7 +408,7 @@ def test_connection():
 
 
 @app.route('/api/reboot-vm', methods=['POST'])
-def reboot_vm():
+def reboot_vm() -> tuple[Response, int] | Response:
     """Reboot a specific VM and wait for it to come back online."""
     import time
 
@@ -497,7 +501,7 @@ def reboot_vm():
 
 
 @app.route('/api/results', methods=['POST'])
-def save_result():
+def save_result() -> Response:
     """Save exam/practice result to database."""
     data = request.json
 
@@ -522,7 +526,7 @@ def save_result():
 
 
 @app.route('/api/results', methods=['GET'])
-def get_results():
+def get_results() -> Response:
     """Get stored results with optional pagination."""
     # Pagination parameters
     limit = request.args.get('limit', 20, type=int)
@@ -565,7 +569,7 @@ def get_results():
 
 
 @app.route('/api/results/<int:result_id>', methods=['DELETE'])
-def delete_result(result_id):
+def delete_result(result_id: int) -> tuple[Response, int] | Response:
     """Delete a specific result by ID."""
     logger.info(f"Deleting result id={result_id}")
     with db_connection() as conn:
@@ -577,7 +581,7 @@ def delete_result(result_id):
 
 
 @app.route('/api/results', methods=['DELETE'])
-def clear_all_results():
+def clear_all_results() -> Response:
     """Clear all stored results."""
     logger.info("Clearing all results")
     with db_connection() as conn:
@@ -588,7 +592,7 @@ def clear_all_results():
 
 
 @app.route('/api/stats', methods=['GET'])
-def get_stats():
+def get_stats() -> Response:
     """Get aggregated statistics."""
     with db_connection() as conn:
         c = conn.cursor()
@@ -675,7 +679,7 @@ except ImportError:
 
 
 @app.route('/api/v2/tasks', methods=['GET'])
-def list_tasks_v2():
+def list_tasks_v2() -> tuple[Response, int] | Response:
     """List all available tasks using the new grader."""
     if not NEW_GRADER_AVAILABLE:
         return jsonify({'error': 'New grader not available'}), 501
@@ -700,7 +704,7 @@ def list_tasks_v2():
 
 
 @app.route('/api/v2/tasks/<task_id>', methods=['GET'])
-def get_task_v2(task_id):
+def get_task_v2(task_id: str) -> tuple[Response, int] | Response:
     """Get a single task with full details including check script."""
     if not NEW_GRADER_AVAILABLE:
         return jsonify({'error': 'New grader not available'}), 501
@@ -725,7 +729,7 @@ def get_task_v2(task_id):
 
 
 @app.route('/api/v2/grade/<task_id>', methods=['POST'])
-def grade_task_v2(task_id):
+def grade_task_v2(task_id: str) -> tuple[Response, int] | Response:
     """Grade a single task using the new grader."""
     if not NEW_GRADER_AVAILABLE:
         return jsonify({'error': 'New grader not available'}), 501
@@ -745,7 +749,7 @@ def grade_task_v2(task_id):
 
 
 @app.route('/api/v2/grade', methods=['POST'])
-def grade_tasks_v2():
+def grade_tasks_v2() -> tuple[Response, int] | Response:
     """Grade multiple tasks using the new grader."""
     if not NEW_GRADER_AVAILABLE:
         return jsonify({'error': 'New grader not available'}), 501
@@ -768,7 +772,7 @@ def grade_tasks_v2():
 
 
 @app.route('/api/v2/status', methods=['GET'])
-def grader_status_v2():
+def grader_status_v2() -> tuple[Response, int] | Response:
     """Get grader status and session info."""
     if not NEW_GRADER_AVAILABLE:
         return jsonify({'error': 'New grader not available'}), 501
@@ -788,7 +792,7 @@ def grader_status_v2():
 # =============================================================================
 
 @app.route('/api/flashcards/progress', methods=['GET'])
-def get_flashcard_progress():
+def get_flashcard_progress() -> Response:
     """Get all flashcard progress."""
     with db_connection() as conn:
         c = conn.cursor()
@@ -798,7 +802,7 @@ def get_flashcard_progress():
 
 
 @app.route('/api/flashcards/progress/<card_id>', methods=['GET'])
-def get_card_progress(card_id):
+def get_card_progress(card_id: str) -> Response:
     """Get progress for a specific card."""
     with db_connection() as conn:
         c = conn.cursor()
@@ -810,7 +814,7 @@ def get_card_progress(card_id):
 
 
 @app.route('/api/flashcards/review', methods=['POST'])
-def record_flashcard_review():
+def record_flashcard_review() -> tuple[Response, int] | Response:
     """Record a flashcard review and update progress using SM-2 algorithm."""
     data = request.json
     card_id = data.get('card_id')
@@ -929,7 +933,7 @@ def record_flashcard_review():
 
 
 @app.route('/api/flashcards/stats', methods=['GET'])
-def get_flashcard_stats():
+def get_flashcard_stats() -> Response:
     """Get flashcard statistics."""
     with db_connection() as conn:
         c = conn.cursor()
@@ -1000,7 +1004,7 @@ def get_flashcard_stats():
 
 
 @app.route('/api/flashcards/due', methods=['GET'])
-def get_due_cards():
+def get_due_cards() -> Response:
     """Get cards due for review today."""
     with db_connection() as conn:
         c = conn.cursor()
@@ -1014,7 +1018,7 @@ def get_due_cards():
 
 
 @app.route('/api/flashcards/reset', methods=['POST'])
-def reset_flashcard_progress():
+def reset_flashcard_progress() -> Response:
     """Reset all flashcard progress."""
     with db_connection() as conn:
         c = conn.cursor()
