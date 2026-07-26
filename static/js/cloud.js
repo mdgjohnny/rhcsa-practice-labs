@@ -75,7 +75,23 @@ function renderCloudSessionUI(session) {
             </button>
         `;
     } else if (session.state === 'ready' || session.state === 'active') {
+        // Local static VMs (Vagrant/libvirt) don't have a cost-control timeout,
+        // so there's nothing to count down or extend against. Show a plain
+        // "Local VM" status instead of the cloud time-remaining/extend UI.
         const timeRemaining = Math.max(0, Math.floor(session.time_remaining_seconds / 60));
+        const statusCell = session.is_static
+            ? `
+                <div>
+                    <p class="text-gray-500">Type</p>
+                    <p class="text-white">Local VM</p>
+                </div>
+            `
+            : `
+                <div>
+                    <p class="text-gray-500">Time Remaining</p>
+                    <p class="text-white">${timeRemaining} minutes</p>
+                </div>
+            `;
         infoEl.innerHTML = `
             <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
@@ -90,16 +106,18 @@ function renderCloudSessionUI(session) {
                     <p class="text-gray-500">Status</p>
                     <p class="text-emerald-400">● Ready</p>
                 </div>
-                <div>
-                    <p class="text-gray-500">Time Remaining</p>
-                    <p class="text-white">${timeRemaining} minutes</p>
-                </div>
+                ${statusCell}
             </div>
         `;
-        ctrlEl.innerHTML = `
+        // The "Extend +30min" button is meaningless for local static VMs
+        // (nothing to extend against) - only render it for cloud sessions.
+        const extendBtn = session.is_static
+            ? ''
+            : `
             <button onclick="extendCloudSession()" class="px-5 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all flex items-center gap-2">
                 <span class="material-symbols-outlined text-lg">more_time</span> Extend +30min
-            </button>
+            </button>`;
+        ctrlEl.innerHTML = `${extendBtn}
             <button onclick="destroyCloudSession()" class="px-5 py-2.5 rounded-lg border border-red-500/50 text-red-400 hover:bg-red-500/10 text-sm transition-all flex items-center gap-2">
                 <span class="material-symbols-outlined text-lg">delete</span> Destroy Session
             </button>

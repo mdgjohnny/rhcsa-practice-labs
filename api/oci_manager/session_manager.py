@@ -77,6 +77,7 @@ class SessionInfo:
     ssh_password: Optional[str] = None  # For password-based auth (local VMs)
     ssh_user: Optional[str] = None  # SSH username (default: opc for OCI, root for local)
     error: Optional[str] = None
+    is_static: bool = False  # True for local static VMs (no cost-control expiry)
 
     def to_dict(self) -> dict:
         """Convert to dictionary."""
@@ -90,6 +91,7 @@ class SessionInfo:
             "node1_private_ip": self.node1_private_ip,
             "node2_private_ip": self.node2_private_ip,
             "time_remaining_seconds": max(0, (self.expires_at - datetime.utcnow()).total_seconds()),
+            "is_static": self.is_static,
             "error": self.error,
         }
 
@@ -366,15 +368,25 @@ class SessionManager:
             raise RuntimeError("VCN capacity exceeded. Please wait for existing sessions to complete.")
         
         session_id = f"sess-{uuid.uuid4().hex[:12]}"
-        timeout = timeout_minutes or self.timeout_minutes
         now = datetime.utcnow()
-        expires_at = now + timedelta(minutes=timeout)
+
+        if self.static_vms:
+            # Local static VMs (Vagrant/libvirt) are not billed per-hour cloud
+            # resources, so there is no cost-control reason to auto-expire them.
+            # Give them an effectively unlimited timeout so the expiry warning /
+            # cleanup worker never fire mid practice-session. The client-supplied
+            # timeout_minutes is intentionally ignored for this path.
+            expires_at = now + timedelta(days=3650)  # ~10 years == "no practical expiry"
+        else:
+            timeout = timeout_minutes or self.timeout_minutes
+            expires_at = now + timedelta(minutes=timeout)
 
         session = SessionInfo(
             session_id=session_id,
             state=SessionState.PENDING,
             created_at=now,
             expires_at=expires_at,
+            is_static=bool(self.static_vms),
         )
 
         # Save to database
@@ -671,6 +683,7 @@ class SessionManager:
             ssh_password=row["ssh_password"] if "ssh_password" in row.keys() else None,
             ssh_user=row["ssh_user"] if "ssh_user" in row.keys() else None,
             error=row["error"],
+            is_static=bool(self.static_vms),
         )
 
     def list_sessions(self, include_terminated: bool = False) -> List[SessionInfo]:
@@ -713,8 +726,9 @@ class SessionManager:
                 ssh_password=row["ssh_password"] if "ssh_password" in row.keys() else None,
                 ssh_user=row["ssh_user"] if "ssh_user" in row.keys() else None,
                 error=row["error"],
+                is_static=bool(self.static_vms),
             ))
-        
+
         return sessions
 
     def get_active_session(self) -> Optional[SessionInfo]:

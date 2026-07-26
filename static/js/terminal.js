@@ -208,6 +208,11 @@ async function checkCloudSession() {
 }
 
 function checkSessionExpiry(session) {
+    // Local static VMs (Vagrant/libvirt) aren't billed cloud resources and
+    // never expire, so there's no cost-control countdown or termination to
+    // warn about. Skip the entire cloud-expiry flow for them.
+    if (session.is_static) return;
+
     const timeRemaining = session.time_remaining_seconds;
     
     // Warning at 10 minutes
