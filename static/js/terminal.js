@@ -65,7 +65,13 @@ function termUpdateStatus(status, color = 'gray') {
     }
 }
 
-function termConnectNode(node) {
+async function termConnectNode(node) {
+    // Don't trust a possibly-stale cached cloudSession (e.g. set once on page
+    // load, or never set if a session was created out-of-band via the API
+    // rather than through this tab). Re-check with the server first.
+    if (!cloudSession || !['ready', 'active'].includes(cloudSession.state)) {
+        await checkCloudSession();
+    }
     if (!cloudSession || !['ready', 'active'].includes(cloudSession.state)) {
         showToast('warning', 'No Cloud Session', 'Provision VMs first from Settings');
         return;
@@ -105,6 +111,15 @@ function termConnectNode(node) {
             cols: terminal ? terminal.cols : 80,
             rows: terminal ? terminal.rows : 24
         });
+    });
+
+    termSocket.on('connect_error', (err) => {
+        console.error('Socket connect_error:', err);
+        termUpdateStatus('Connection failed', 'red');
+        if (terminal) {
+            terminal.write(`\r\n\x1b[31mError: Failed to connect to terminal server (${err && err.message ? err.message : err}).\x1b[0m\r\n`);
+            terminal.write(`\r\n\x1b[33mTip: This can happen if the server is unreachable or rejected the connection (e.g. CORS). Check that you're accessing the app from an allowed origin and that the server is running, then click refresh.\x1b[0m\r\n`);
+        }
     });
 
     termSocket.on('terminal_ready', (data) => {
@@ -253,6 +268,64 @@ function stopSessionMonitor() {
         sessionMonitorTimer = null;
     }
     expiryWarningShown = false;
+}
+
+// Provision (create + provision, in sequence) a session directly from the
+// terminal panel, without navigating to Settings. Self-contained rather than
+// reusing createCloudSession()/provisionCloudSession() from cloud.js, since
+// those fire-and-forget their internal refreshCloudSessionUI() call and
+// aren't safe to chain synchronously.
+async function provisionInlineFromTerminal() {
+    const btn = document.getElementById('inline-provision-btn');
+    const label = document.getElementById('inline-provision-btn-label');
+    if (btn) btn.disabled = true;
+
+    try {
+        // Reuse an existing pending/ready session if one's already there
+        // instead of always creating a new one.
+        await checkCloudSession();
+
+        if (!cloudSession) {
+            if (label) label.textContent = 'Creating session...';
+            const createResp = await fetch('/api/sessions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            });
+            const created = await createResp.json();
+            if (!createResp.ok) {
+                showToast('error', 'Failed to create session', created.error || '');
+                return;
+            }
+            cloudSession = created;
+        }
+
+        if (cloudSession.state === 'pending') {
+            if (label) label.textContent = 'Provisioning...';
+            showToast('info', 'Provisioning VM...', 'This is usually quick for local VMs');
+            const provResp = await fetch(`/api/sessions/${cloudSession.session_id}/provision`, { method: 'POST' });
+            const provisioned = await provResp.json();
+            if (!provResp.ok || provisioned.error) {
+                showToast('error', 'Provisioning failed', provisioned.error || '');
+                return;
+            }
+            cloudSession = provisioned;
+        }
+
+        await checkCloudSession();
+
+        if (cloudSession && ['ready', 'active'].includes(cloudSession.state)) {
+            showToast('success', 'VM Ready', 'Connecting...');
+            termConnectNode(termCurrentNode || 'node1');
+        } else {
+            showToast('warning', 'Not ready yet', `Session state: ${cloudSession?.state || 'unknown'}`);
+        }
+    } catch (e) {
+        showToast('error', 'Error', e.message);
+    } finally {
+        if (btn) btn.disabled = false;
+        if (label) label.textContent = 'Provision VM Now';
+    }
 }
 
 function updateTerminalUI() {

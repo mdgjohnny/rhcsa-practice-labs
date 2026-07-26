@@ -18,7 +18,13 @@ function startPractice() {
         showToast('warning', 'No tasks selected', 'Please select at least one task');
         return;
     }
-    selectedTasks = allTasks.filter(t => taskIds.includes(t.id));
+    const catOrder = sortByExamOrder([...new Set(allTasks.map(t => t.category).filter(Boolean))]);
+    selectedTasks = allTasks.filter(t => taskIds.includes(t.id)).sort((a, b) => {
+        const ca = catOrder.indexOf(a.category);
+        const cb = catOrder.indexOf(b.category);
+        if (ca !== cb) return ca - cb;
+        return (a.id || '').localeCompare(b.id || '', undefined, { numeric: true });
+    });
     taskResults.clear();
     currentTaskIndex = 0;
     document.getElementById('breadcrumb-mode').textContent = 'Practice';
@@ -137,27 +143,21 @@ function stopTimer() {
 }
 
 // Task List & Detail
-function renderTaskList() {
-    const container = document.getElementById('task-list');
-    const gradedCount = Array.from(taskResults.values()).filter(r => r?.graded).length;
-    
-    // Update progress bar
-    const progressBar = document.getElementById('task-progress-bar');
-    const progressText = document.getElementById('task-progress-text');
-    if (progressBar) progressBar.style.width = `${(gradedCount / selectedTasks.length) * 100}%`;
-    if (progressText) progressText.textContent = `${gradedCount} of ${selectedTasks.length}`;
-    
-    // Get filters
+
+// Returns { task, index } entries from selectedTasks that pass the sidebar
+// search box and category dropdown filters. `index` is the task's position
+// in the raw, unfiltered selectedTasks array. Shared by renderTaskList() and
+// the Next/Prev navigation functions so they agree on what's "visible".
+function getVisibleTaskEntries() {
     const searchInput = document.getElementById('sidebar-task-search');
     const searchTerm = searchInput?.value?.toLowerCase() || '';
     const categorySelect = document.getElementById('sidebar-category-filter');
     const categoryFilter = categorySelect?.value || '';
-    
-    // Filter tasks
-    const filteredTasks = selectedTasks.map((task, i) => ({ task, index: i })).filter(({ task, index }) => {
+
+    return selectedTasks.map((task, i) => ({ task, index: i })).filter(({ task, index }) => {
         // Category filter
         if (categoryFilter && task.category !== categoryFilter) return false;
-        
+
         // Search filter
         if (searchTerm) {
             const desc = (task.description || task.id).toLowerCase();
@@ -166,10 +166,24 @@ function renderTaskList() {
                 return false;
             }
         }
-        
+
         return true;
     });
-    
+}
+
+function renderTaskList() {
+    const container = document.getElementById('task-list');
+    const gradedCount = Array.from(taskResults.values()).filter(r => r?.graded).length;
+
+    // Update progress bar
+    const progressBar = document.getElementById('task-progress-bar');
+    const progressText = document.getElementById('task-progress-text');
+    if (progressBar) progressBar.style.width = `${(gradedCount / selectedTasks.length) * 100}%`;
+    if (progressText) progressText.textContent = `${gradedCount} of ${selectedTasks.length}`;
+
+    // Filter tasks
+    const filteredTasks = getVisibleTaskEntries();
+
     if (filteredTasks.length === 0) {
         container.innerHTML = '<p class="text-gray-500 text-sm text-center py-4">No matching tasks</p>';
         return;
@@ -226,19 +240,23 @@ function renderTaskList() {
 function updateTaskDots() {
     const dotsContainer = document.getElementById('task-dots');
     if (!dotsContainer) return;
-    
-    // Only show up to 7 dots
+
+    // Reflect the filtered/visible set, same as Next/Prev navigation, so the
+    // dots and position counter stay consistent with what the user can
+    // actually navigate to while a sidebar filter is active.
+    const visible = getVisibleTaskEntries();
     const maxDots = 7;
-    const totalTasks = selectedTasks.length;
-    
+    const totalTasks = visible.length;
+    const visiblePos = visible.findIndex(({ index }) => index === currentTaskIndex);
+
     if (totalTasks <= maxDots) {
-        dotsContainer.innerHTML = selectedTasks.map((_, i) => {
-            const isActive = i === currentTaskIndex;
-            return `<button onclick="selectTask(${i})" class="size-2 rounded-full ${isActive ? 'bg-primary' : 'bg-surface-dark border border-border-dark hover:bg-primary/50'} transition-colors"></button>`;
+        dotsContainer.innerHTML = visible.map(({ index }, i) => {
+            const isActive = index === currentTaskIndex;
+            return `<button onclick="selectTask(${index})" class="size-2 rounded-full ${isActive ? 'bg-primary' : 'bg-surface-dark border border-border-dark hover:bg-primary/50'} transition-colors"></button>`;
         }).join('');
     } else {
         // Show abbreviated dots with current position indicator
-        dotsContainer.innerHTML = `<span class="text-xs text-gray-400 font-mono">${currentTaskIndex + 1} / ${totalTasks}</span>`;
+        dotsContainer.innerHTML = `<span class="text-xs text-gray-400 font-mono">${visiblePos + 1} / ${totalTasks}</span>`;
     }
 }
 
@@ -444,19 +462,45 @@ function showTaskDetail(taskId) {
 }
 
 function navigateTask(direction) {
-    const newIndex = currentTaskIndex + direction;
-    if (newIndex >= 0 && newIndex < selectedTasks.length) {
-        selectTask(newIndex);
+    const visible = getVisibleTaskEntries();
+    const visiblePos = visible.findIndex(({ index }) => index === currentTaskIndex);
+
+    if (visiblePos === -1) {
+        // Active task isn't in the currently filtered set (e.g. user filtered
+        // to a category the active task isn't in). Fall back to walking the
+        // raw, unfiltered list so Next/Prev still does something sensible
+        // instead of silently no-oping.
+        const newIndex = currentTaskIndex + direction;
+        if (newIndex >= 0 && newIndex < selectedTasks.length) {
+            selectTask(newIndex);
+        }
+        return;
+    }
+
+    const newVisiblePos = visiblePos + direction;
+    if (newVisiblePos >= 0 && newVisiblePos < visible.length) {
+        selectTask(visible[newVisiblePos].index);
     }
 }
 
 function updateTaskNavigation() {
     const prevBtn = document.getElementById('prev-task-btn');
     const nextBtn = document.getElementById('next-task-btn');
-    
-    if (prevBtn) prevBtn.disabled = currentTaskIndex === 0;
-    if (nextBtn) nextBtn.disabled = currentTaskIndex === selectedTasks.length - 1;
-    
+
+    const visible = getVisibleTaskEntries();
+    const visiblePos = visible.findIndex(({ index }) => index === currentTaskIndex);
+
+    if (visiblePos === -1) {
+        // Active task isn't in the filtered set; mirror navigateTask's
+        // fallback bounds (raw selectedTasks) so the buttons aren't
+        // incorrectly disabled/enabled relative to what Next/Prev will do.
+        if (prevBtn) prevBtn.disabled = currentTaskIndex === 0;
+        if (nextBtn) nextBtn.disabled = currentTaskIndex === selectedTasks.length - 1;
+    } else {
+        if (prevBtn) prevBtn.disabled = visiblePos === 0;
+        if (nextBtn) nextBtn.disabled = visiblePos === visible.length - 1;
+    }
+
     // Update dots
     updateTaskDots();
 }

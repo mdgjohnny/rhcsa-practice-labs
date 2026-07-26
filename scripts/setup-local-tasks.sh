@@ -60,6 +60,14 @@ else
 fi
 
 # Install required packages
+# NOTE: openssh/openssh-server/openssh-clients are included here deliberately.
+# httpd/mod_ssl pull in a newer openssl-libs as a dependency; if openssh isn't
+# upgraded in the same transaction, the box's pre-installed openssh-server
+# (built against the older openssl) mismatches the new libs at runtime and
+# sshd silently resets every incoming connection mid-handshake even though
+# systemctl still reports it "active" (systemd only tracks the master
+# process, not per-connection handling). This took down SSH entirely on
+# fresh provisions before this fix.
 log "Installing required packages..."
 dnf install -y \
     policycoreutils-python-utils \
@@ -68,10 +76,17 @@ dnf install -y \
     httpd mod_ssl \
     vsftpd \
     nfs-utils \
+    openssh openssh-server openssh-clients \
     tar gzip bzip2 xz \
     vim nano \
     curl wget \
     &>/dev/null || warn "Some packages may have failed to install"
+
+# Belt-and-suspenders: force openssh to match whatever openssl-libs version
+# the install above just resolved, then restart sshd so the fix takes effect
+# immediately rather than only on next reboot.
+dnf install -y openssh openssh-server openssh-clients &>/dev/null || true
+systemctl restart sshd 2>/dev/null || true
 
 ###############################################################################
 # PHASE 2: PRACTICE DISK SETUP
@@ -241,7 +256,11 @@ VSFTPD
     log "Setting up SSH alternate port scenario..."
     
     if ! grep -q '^Port 2222' /etc/ssh/sshd_config; then
-        sed -i '/^#*Port 22/a Port 2222' /etc/ssh/sshd_config
+        # Must keep port 22 active too, or sshd has no working port to bind at all
+        # once SELinux blocks 2222 (the intended broken scenario) - this took down
+        # SSH entirely on fresh provisions before this fix.
+        sed -i 's/^#Port 22$/Port 22/' /etc/ssh/sshd_config
+        sed -i '/^Port 22$/a Port 2222' /etc/ssh/sshd_config
     fi
     # Note: sshd won't bind to 2222 until student fixes SELinux
 

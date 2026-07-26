@@ -133,12 +133,25 @@ class RemoteExecutor(Executor):
     
     def _build_ssh_command(self) -> list:
         """Build the base SSH command."""
-        cmd = ['ssh'] + SSH_OPTS
-        
         key_file = self._get_key_file()
+
+        # BatchMode=yes disables password prompts entirely, which breaks
+        # sshpass-based password auth. Only use it when authenticating
+        # with a key.
+        if key_file:
+            opts = SSH_OPTS
+        else:
+            opts = []
+            for opt in SSH_OPTS:
+                if opt == 'BatchMode=yes':
+                    opts.pop()  # drop the preceding '-o'
+                    continue
+                opts.append(opt)
+        cmd = ['ssh'] + opts
+
         if key_file:
             cmd.extend(['-i', key_file])
-        
+
         cmd.append(f'{self.user}@{self.host}')
         return cmd
     

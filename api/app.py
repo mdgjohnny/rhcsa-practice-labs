@@ -1034,4 +1034,4 @@ from datetime import timedelta  # Import at module level for the review function
 if __name__ == '__main__':
     logger.info(f"Starting RHCSA Practice Labs API (debug={DEBUG}, log_level={LOG_LEVEL})")
     logger.info(f"New grader available: {NEW_GRADER_AVAILABLE}")
-    app.run(host='0.0.0.0', port=8080, debug=DEBUG)
+    app.run(host=os.environ.get('RHCSA_HOST', '127.0.0.1'), port=8080, debug=DEBUG)

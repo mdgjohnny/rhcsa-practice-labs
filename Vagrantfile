@@ -53,7 +53,7 @@ Vagrant.configure("2") do |config|
 
   # Node 1 - Primary practice node (most tasks)
   config.vm.define :node1, primary: true do |node1|
-    node1.vm.box = "rockylinux/9"
+    node1.vm.box = "generic/rocky9"
     node1.vm.hostname = "rhcsa1"
     node1.vm.network :private_network, ip: "192.168.99.11"
     node1.vm.provision "root_ssh", type: "shell", inline: $set_root_password
@@ -62,7 +62,7 @@ Vagrant.configure("2") do |config|
 
   # Node 2 - Secondary node for multi-node tasks (NFS client, etc.)
   config.vm.define :node2 do |node2|
-    node2.vm.box = "rockylinux/9"
+    node2.vm.box = "generic/rocky9"
     node2.vm.hostname = "rhcsa2"
     node2.vm.network :private_network, ip: "192.168.99.12"
     node2.vm.provision "root_ssh", type: "shell", inline: $set_root_password

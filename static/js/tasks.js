@@ -188,8 +188,39 @@ function getSelectedTaskIds() {
     return Array.from(document.querySelectorAll('.task-checkbox:checked')).map(cb => cb.value);
 }
 
+// Canonical RHCSA exam objective progression. Categories not listed here
+// (e.g. unrecognized/custom ones) sort to the end, alphabetically among themselves.
+const RHCSA_CATEGORY_ORDER = [
+    'essential-tools',
+    'operate-systems',
+    'local-storage',
+    'file-systems',
+    'deploy-maintain',
+    'networking',
+    'users',
+    'security',
+    'selinux',
+    'services',
+    'containers',
+];
+
+function sortByExamOrder(categories) {
+    return [...categories].sort((a, b) => {
+        const ia = RHCSA_CATEGORY_ORDER.indexOf(a);
+        const ib = RHCSA_CATEGORY_ORDER.indexOf(b);
+        const ra = ia === -1 ? RHCSA_CATEGORY_ORDER.length : ia;
+        const rb = ib === -1 ? RHCSA_CATEGORY_ORDER.length : ib;
+        return ra !== rb ? ra - rb : a.localeCompare(b);
+    });
+}
+
 // Category Grid
 function populateCategoryGrid() {
+    // Every fresh visit to this screen starts from a clean slate. Without this,
+    // a category toggled on a previous visit (and never explicitly started or
+    // untoggled) stays selected in the background with no visual indication,
+    // silently leaking its tasks into the next practice session.
+    selectedCategories.clear();
     if (!allTasks.length) {
         loadTasks().then(renderCategoryGrid);
     } else {
@@ -199,12 +230,13 @@ function populateCategoryGrid() {
 
 function renderCategoryGrid() {
     const grid = document.getElementById('category-grid');
-    const categories = [...new Set(allTasks.map(t => t.category).filter(Boolean))].sort();
-    
+    const categories = sortByExamOrder([...new Set(allTasks.map(t => t.category).filter(Boolean))]);
+
     if (!categories.length) {
         grid.innerHTML = '<p class="text-gray-400 text-center py-8 col-span-full">No categories found</p>';
         return;
     }
+    updateCategorySelectionUI();
     
     const categoryMeta = {
         'essential-tools': { icon: 'construction', desc: 'File handling, grep, regex, pipelines, and IO redirection.' },
@@ -225,13 +257,14 @@ function renderCategoryGrid() {
         const count = allTasks.filter(t => t.category === cat).length;
         const key = Object.keys(categoryMeta).find(k => cat.toLowerCase().includes(k)) || 'default';
         const meta = categoryMeta[key] || categoryMeta.default;
+        const isSelected = selectedCategories.has(cat);
         return `
-            <div onclick="toggleCategorySelection('${cat}', this)" 
+            <div onclick="toggleCategorySelection('${cat}', this)"
                  data-category="${cat}"
-                 class="category-card group flex flex-col text-left h-full rounded-lg border-2 border-white/10 bg-[#1b1b1b] p-6 hover:border-primary/50 transition-all duration-300 relative overflow-hidden cursor-pointer">
+                 class="category-card group flex flex-col text-left h-full rounded-lg border-2 ${isSelected ? 'border-primary bg-primary/5' : 'border-white/10'} bg-[#1b1b1b] p-6 hover:border-primary/50 transition-all duration-300 relative overflow-hidden cursor-pointer">
                 <div class="absolute top-3 right-3">
-                    <div class="category-check w-6 h-6 rounded-full border-2 border-gray-600 flex items-center justify-center transition-all">
-                        <span class="material-symbols-outlined text-white text-sm opacity-0">check</span>
+                    <div class="category-check w-6 h-6 rounded-full border-2 ${isSelected ? 'bg-primary border-primary' : 'border-gray-600'} flex items-center justify-center transition-all">
+                        <span class="material-symbols-outlined text-white text-sm ${isSelected ? '' : 'opacity-0'}">check</span>
                     </div>
                 </div>
                 <div class="mb-5 flex justify-between items-start">
@@ -273,6 +306,30 @@ function toggleCategorySelection(category, element) {
     updateCategorySelectionUI();
 }
 
+function startAllTasksExamOrder() {
+    if (!allTasks.length) {
+        showToast('warning', 'Tasks not loaded yet');
+        return;
+    }
+    const catOrder = sortByExamOrder([...new Set(allTasks.map(t => t.category).filter(Boolean))]);
+    selectedTasks = [...allTasks].sort((a, b) => {
+        const ca = catOrder.indexOf(a.category);
+        const cb = catOrder.indexOf(b.category);
+        if (ca !== cb) return ca - cb;
+        return (a.id || '').localeCompare(b.id || '', undefined, { numeric: true });
+    });
+    currentMode = 'practice';
+    taskResults.clear();
+    currentTaskIndex = 0;
+    document.getElementById('breadcrumb-mode').textContent = 'Practice: All (Exam Order)';
+    populateSidebarCategoryFilter();
+    renderTaskList();
+    showTaskDetail(selectedTasks[0].id);
+    updateTaskNavigation();
+    showView('exam-running');
+    saveSession();
+}
+
 function updateCategorySelectionUI() {
     const count = selectedCategories.size;
     const countEl = document.getElementById('category-selection-count');
@@ -286,7 +343,10 @@ function startSelectedCategoriesPractice() {
         showToast('warning', 'Select at least one category');
         return;
     }
-    selectedTasks = allTasks.filter(t => selectedCategories.has(t.category));
+    const catOrder = sortByExamOrder([...selectedCategories]);
+    selectedTasks = allTasks
+        .filter(t => selectedCategories.has(t.category))
+        .sort((a, b) => catOrder.indexOf(a.category) - catOrder.indexOf(b.category));
     if (!selectedTasks.length) {
         showToast('warning', 'No tasks in selected categories');
         return;

@@ -35,7 +35,7 @@ def _get_int(key: str, default: int) -> int:
 @dataclass
 class ServerConfig:
     """HTTP server configuration."""
-    host: str = field(default_factory=lambda: os.getenv('RHCSA_HOST', '0.0.0.0'))
+    host: str = field(default_factory=lambda: os.getenv('RHCSA_HOST', '127.0.0.1'))
     port: int = field(default_factory=lambda: _get_int('RHCSA_PORT', 8080))
     debug: bool = field(default_factory=lambda: _get_bool('RHCSA_DEBUG', False))
     secret_key: str = field(

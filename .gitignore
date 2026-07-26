@@ -1,23 +1,17 @@
-# Logs
 *.log
 
-# Local configuration (contains passwords)
 config
 *.bak
 
-# Database
 results.db
 sessions.db
 
-# Python
 .venv/
 __pycache__/
 *.pyc
 
-# Agent Artifacts
 CLAUDE.md
 
-# Terraform
 infra/terraform.tfvars
 infra/.terraform/
 infra/.terraform.lock.hcl
@@ -26,33 +20,28 @@ infra/*.tfstate.backup
 infra/tfplan
 infra/session_key.pem
 
-# Session workspaces
 workspaces/
 
-# SSH keys
+.vagrant/
+
+data/
+
 *.pem
 !*.example.pem
 
-# Internal docs
-HANDOVER.md
-SETUP.md
-SRE_DEVOPS_LEARNING_ROADMAP.md
+.env
+.env.*
+!.env.example
 
-# Old scripts
-exam-grader.sh
+*.md
+!README.md
 
-# Server config
 gunicorn.conf.py
 rhcsa-labs.service
 
-# Design mockups
 stitch-pages/
 
-# Patches/temp
 *.tar.gz
 patches/
 static_vms.json
 task-review-notes.json
-*.tar.gz
-ARCHITECTURE_REMEDIATION_PLAN.md
-HANDOVER_PHASE3.md

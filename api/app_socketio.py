@@ -44,7 +44,10 @@ limiter = Limiter(
 # Initialize Socket.IO with threading async mode (no eventlet needed)
 socketio = SocketIO(
     app,
-    cors_allowed_origins="*",
+    cors_allowed_origins=os.environ.get(
+        'RHCSA_CORS_ORIGIN',
+        'http://localhost:8080,http://127.0.0.1:8080'
+    ).split(','),
     async_mode="threading",
     logger=DEBUG,
     engineio_logger=DEBUG,
@@ -312,7 +315,7 @@ if __name__ == '__main__':
     
     socketio.run(
         app,
-        host='0.0.0.0',
+        host=os.environ.get('RHCSA_HOST', '127.0.0.1'),
         port=8080,
         debug=DEBUG,
         use_reloader=False,
