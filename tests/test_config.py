@@ -19,7 +19,7 @@ class TestServerConfig:
         
         from api.config import config
         
-        assert config.server.host == '0.0.0.0'
+        assert config.server.host == '127.0.0.1'
         assert config.server.port == 8080
         assert config.server.debug is False
     

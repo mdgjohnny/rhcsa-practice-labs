@@ -12,13 +12,14 @@ Vagrant automatically provisions and configures VMs with all practice scenarios.
 # Install Vagrant and libvirt (Linux)
 sudo dnf install vagrant libvirt qemu-kvm virt-manager
 
-# Or with VirtualBox (any OS)
-# Download from virtualbox.org and vagrantup.com
-
-# Install Vagrant plugins
+# Install Vagrant plugins (Linux)
 vagrant plugin install vagrant-libvirt
 vagrant plugin install vagrant-disksize
 ```
+
+> **On macOS?** libvirt is Linux-only. See the [macOS setup](#macos-setup)
+> section below to pick the right provider for your Mac's chip. The
+> `vagrant-disksize` plugin is still required regardless of platform.
 
 ### Start VMs
 
@@ -67,6 +68,102 @@ vagrant up         # Start VMs
 vagrant destroy    # Delete VMs completely
 vagrant provision  # Re-run setup scripts
 ```
+
+### macOS Setup
+
+The `generic/rocky9` box publishes prebuilt images for multiple providers, so
+the box itself is not a blocker on macOS. But libvirt is Linux-only, so on a
+Mac you must use a different provider — and **which provider works depends on
+your Mac's chip.**
+
+**First, confirm your chip.** Apple menu → About This Mac. Look for either
+"Apple M1/M2/M3/M4" (Apple Silicon / ARM) or "Intel". This determines which
+provider will actually work — the guidance below is split accordingly.
+
+#### Apple Silicon Mac (M1/M2/M3/M4) — the common case today
+
+**VirtualBox will NOT work here.** It is a type-2 hypervisor with no
+instruction-set translation, so it cannot run x86_64 guest VMs on an ARM host.
+Do not waste time installing it. Your options, in priority order:
+
+**Option A — QEMU (free, slower).** This is the free path and it preserves the
+normal Vagrantfile-driven workflow (no GUI, no manual VM setup). The
+`generic/rocky9` box publishes a dedicated `qemu`/amd64 image, and the
+`vagrant-qemu` plugin drives it:
+
+```bash
+brew install qemu
+vagrant plugin install vagrant-qemu
+vagrant plugin install vagrant-disksize
+vagrant up --provider=qemu
+```
+
+Honest caveat: the box is an x86_64 (amd64) guest and your Mac is arm64, so
+QEMU has to fully software-emulate the CPU (TCG) — there is no hardware
+acceleration across differing architectures. It works, but expect it to feel
+noticeably slower than the native KVM path on Linux or the commercial
+Parallels/VMware paths. (No specific benchmark here — just plan for "usable but
+not snappy.") The Vagrantfile already ships a `:qemu` provider block with the
+`arch`/`machine`/`cpu`/`net_device` settings required to run the x86_64 guest
+on an arm64 host, so no extra config is needed.
+
+**Option B — Parallels Desktop or VMware Fusion (commercial, faster).** If the
+emulation speed is a problem and licensing/policy allows, these commercial
+hypervisors are faster:
+
+- **Parallels Desktop:**
+
+  ```bash
+  vagrant plugin install vagrant-parallels
+  vagrant plugin install vagrant-disksize
+  vagrant up --provider=parallels
+  ```
+
+- **VMware Fusion:** requires the separately-licensed `vagrant-vmware-utility`
+  helper in addition to the plugin.
+
+  ```bash
+  vagrant plugin install vagrant-vmware-desktop
+  vagrant plugin install vagrant-disksize
+  # Also install the vagrant-vmware-utility (see HashiCorp's docs), then:
+  vagrant up --provider=vmware_desktop
+  ```
+
+  > The Vagrantfile does not ship a `vmware_desktop` provider block, so the VM
+  > will boot with VMware's default memory/CPU rather than the intended
+  > 2048MB / 2 CPU. Add one if you need the guaranteed allocation.
+
+#### Intel Mac — use VirtualBox (simplest path)
+
+```bash
+# Install VirtualBox (free) from https://www.virtualbox.org and Vagrant from
+# https://www.vagrantup.com, then:
+vagrant plugin install vagrant-disksize
+vagrant up --provider=virtualbox
+```
+
+> **Licensing (Apple Silicon providers):** Parallels Desktop and VMware Fusion
+> are commercial products.
+> Their licensing terms (including any free/personal-use tiers) change over
+> time — check the current terms on the vendors' sites before you install, and
+> **confirm your employer's software-installation policy before putting either
+> on a work laptop.**
+
+**Host `rsync` requirement (all Macs).** The Vagrantfile uses an `rsync`-type
+synced folder, which needs the `rsync` binary on the host. macOS ships one by
+default, so this normally just works; only a minimal/custom shell environment
+would need `rsync` installed manually.
+
+### Notes for reusing config on a new machine
+
+- **`static_vms.json` and `config` are gitignored** (they hold a plaintext
+  practice password) and will not transfer via `git clone`. Recreate
+  `static_vms.json` on the new machine using the JSON format shown in the
+  [Configure App for Local VMs](#configure-app-for-local-vms) section above.
+- **Stale SSH host keys:** if you reuse the same private-network IPs
+  (192.168.99.11 / .12) on a fresh machine, old `known_hosts` entries will
+  trigger a host-key-changed warning. Clear them with
+  `ssh-keygen -R 192.168.99.11` (and `.12`).
 
 ---
 

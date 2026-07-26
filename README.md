@@ -45,7 +45,13 @@ A **SadServers-style** practice environment for the **Red Hat Certified System A
 git clone https://github.com/mdgjohnny/rhcsa-practice-labs.git
 cd rhcsa-practice-labs
 
-# Start VMs (requires Vagrant + libvirt or VirtualBox)
+# Start VMs. Linux uses libvirt by default.
+# On macOS, pick a provider based on your Mac's chip:
+#   Intel Mac:          vagrant up --provider=virtualbox
+#   Apple Silicon Mac:  vagrant up --provider=qemu        (free, slower)
+#                       vagrant up --provider=parallels   (commercial, faster)
+#                       VirtualBox won't work on Apple Silicon.
+# See docs/local-vm-setup.md#macos-setup for details.
 vagrant up
 
 # Install Python dependencies
@@ -100,7 +106,9 @@ curl -sSL https://raw.githubusercontent.com/mdgjohnny/rhcsa-practice-labs/main/s
 ## Requirements
 
 - Python 3.10+
-- For local VMs: Vagrant with libvirt or VirtualBox
+- For local VMs: Vagrant with a supported provider — libvirt (Linux),
+  VirtualBox (Intel Mac), or QEMU (free) / Parallels / VMware Fusion on
+  Apple Silicon Mac. See [macOS setup](docs/local-vm-setup.md#macos-setup).
 - Supported guest OS: Rocky Linux 9, AlmaLinux 9, Oracle Linux 8/9, RHEL 8/9
 
 ## Documentation
