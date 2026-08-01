@@ -2,7 +2,7 @@
 # Task: Use the logger command to send a message "RHCSA practice task completed" to the system log. Then find that message using grep (e.g., in /var/log/messages or via journalctl) and save the matching log line to /root/customlogmessage.
 # Title: Log Custom Message with Logger
 # Category: operate-systems
-# Target: node2
+# Target: node1
 
 check 'grep -qF "RHCSA practice task completed" /var/log/messages 2>/dev/null || journalctl 2>/dev/null | grep -qF "RHCSA practice task completed"' \
     "Message found in system log (was logger actually used?)" \
